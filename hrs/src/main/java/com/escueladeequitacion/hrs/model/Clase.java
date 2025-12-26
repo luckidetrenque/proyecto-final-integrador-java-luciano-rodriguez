@@ -5,6 +5,7 @@ import java.time.LocalTime;
 
 import com.escueladeequitacion.hrs.enums.Especialidades;
 import com.escueladeequitacion.hrs.enums.Estado;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -43,14 +44,17 @@ public class Clase {
     private String observaciones;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "instructor_id", nullable = false)
     private Instructor instructor;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "alumno_id", nullable = false)
     private Alumno alumno;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "caballo_id", nullable = false)
     private Caballo caballo;
 

@@ -6,7 +6,7 @@ import java.time.LocalTime;
 import com.escueladeequitacion.hrs.enums.Especialidades;
 import com.escueladeequitacion.hrs.enums.Estado;
 
-import jakarta.validation.constraints.FutureOrPresent;
+// import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
@@ -15,10 +15,10 @@ public class ClaseDto {
 
     private Especialidades especialidades;
     @NotNull(message = "El día no puede estar vacío")
-    @FutureOrPresent(message = "El día debe ser en el futuro")
+    // @FutureOrPresent(message = "El día debe ser en el futuro")
     private LocalDate dia;
     @NotNull(message = "La hora no puede estar vacía")
-    @FutureOrPresent(message = "La hora debe ser en el futuro")
+    // @FutureOrPresent(message = "La hora debe ser en el futuro")
     private LocalTime hora;
     @NotNull(message = "El estado de la clase no puede estar vacío, debe ser Programada, En curso, Completada o Cancelada")
     private Estado estado;

@@ -14,6 +14,7 @@ import com.escueladeequitacion.hrs.utility.Constantes;
 import jakarta.validation.Valid;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -50,8 +51,8 @@ public class ClaseController {
 
         // Endpoint GET para buscar una clase por ID
     @GetMapping(Constantes.RESOURCE_CLASES + "/{id}")
-    public ResponseEntity<?> obtenerAlumnoPorId(@PathVariable("id") Long id) {
-        if (!alumnoService.existeAlumnoPorId(id)) {
+    public ResponseEntity<?> obtenerClasePorId(@PathVariable("id") Long id) {
+        if (!claseService.existeClasePorId(id)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new Mensaje("La clase con ID " + id + " no existe en la base de datos"));
         }
@@ -61,16 +62,18 @@ public class ClaseController {
     }
 
     // Endpoint GET para buscar una clase por fecha
-    @GetMapping(Constantes.RESOURCE_CLASES + "/dia/{dia}")
-    public ResponseEntity<?> obtenerClasePorDia(@PathVariable("dia") LocalDate dia) {
-        if (!claseService.existeClasePorDia(dia)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new Mensaje("La clase con día " + dia + " no existe en la base de datos"));
-        }
-
-        Clase clase = claseService.buscarClasePorDia(dia).get(0);
-        return ResponseEntity.status(HttpStatus.OK).body(clase);
+@GetMapping(Constantes.RESOURCE_CLASES + "/dia/{dia}")
+public ResponseEntity<?> obtenerClasePorDia(@PathVariable("dia") LocalDate dia) {
+    List<Clase> clases = claseService.buscarClasePorDia(dia);
+    
+    if (clases.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new Mensaje("La clase con día " + dia + " no existe en la base de datos"));
     }
+    
+    return ResponseEntity.ok(clases.get(0));
+}
+    
 
     // Endpoint DELETE para eliminar un clase por ID
     @DeleteMapping(Constantes.RESOURCE_CLASES  + "/{id}")
@@ -109,6 +112,20 @@ public class ClaseController {
                             if (!alumnoService.estadoAlumno(claseDto.getAlumnoId())) {
                         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new Mensaje("El alumno no está activo"));
+        }
+
+        // Validar que el dia de la clase sea válido
+        LocalDate hoy = LocalDate.now();
+        if (!claseDto.getDia().isEqual(hoy) && !claseDto.getDia().isAfter(hoy)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new Mensaje("El día de la clase debe ser hoy o posterior"));
+        } else if (claseDto.getDia().isEqual(hoy)) {
+            // Si es hoy solamente se puede crear una clase con  60 minutos de anticipacion
+             LocalTime ahora = LocalTime.now();
+             if (claseDto.getHora().isBefore(ahora.plusMinutes(60))) {
+                            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new Mensaje("La clase se debe asignar con 60 minutos de anticipacion"));
+             }
         }
 
         // que no exista una clase ya asignada con los mismos datos
