@@ -1,5 +1,7 @@
 package com.escueladeequitacion.hrs.service;
 
+import com.escueladeequitacion.hrs.exception.ConflictException;
+import com.escueladeequitacion.hrs.exception.ResourceNotFoundException;
 import com.escueladeequitacion.hrs.model.Alumno;
 import com.escueladeequitacion.hrs.repository.AlumnoRepository;
 
@@ -27,7 +29,9 @@ public class AlumnoServiceImpl implements AlumnoService {
 
     @Override
     public Optional<Alumno> buscarAlumnoPorId(Long id) {
-        return alumnoRepository.findById(id);
+        return Optional.ofNullable(
+                alumnoRepository.findById(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("Alumno", "ID", id)));
     };
 
     @Override
@@ -55,18 +59,17 @@ public class AlumnoServiceImpl implements AlumnoService {
         return alumnoRepository.findByActivo(activo);
     }
 
-        @Override
+    @Override
     public List<Alumno> buscarAlumnoConCaballo(Boolean propietario) {
         return alumnoRepository.findByPropietario(propietario);
     }
 
+    @Override
+    public List<Alumno> buscarPorFechaInscripcion(LocalDate fechaInscripcion) {
+        return alumnoRepository.findByFechaInscripcion(fechaInscripcion);
+    };
 
     @Override
-        public List<Alumno> buscarPorFechaInscripcion(LocalDate fechaInscripcion) {
-            return alumnoRepository.findByFechaInscripcion(fechaInscripcion);
-        };
-
-            @Override
     public List<Alumno> buscarPorFechaNacimiento(LocalDate fechaNacimiento) {
         return alumnoRepository.findByFechaNacimiento(fechaNacimiento);
     };
@@ -94,11 +97,23 @@ public class AlumnoServiceImpl implements AlumnoService {
 
     @Override
     public void guardarAlumno(Alumno alumno) {
+        // Validar DNI duplicado
+        if (alumno.getId() == null && alumnoRepository.existsByDni(alumno.getDni())) {
+            throw new ConflictException("Alumno", "DNI", alumno.getDni());
+        }
+
         alumnoRepository.save(alumno);
     };
 
     @Override
     public void actualizarAlumno(Long id, Alumno alumno) {
+        // Si es actualización, verificar que el DNI no esté usado por otro alumno
+        if (alumno.getId() != null) {
+            Optional<Alumno> existente = alumnoRepository.findByDni(alumno.getDni());
+            if (existente.isPresent() && !existente.get().getId().equals(alumno.getId())) {
+                throw new ConflictException("Alumno", "DNI", alumno.getDni());
+            }
+        }
         alumno.setId(id);
         alumnoRepository.save(alumno);
     };

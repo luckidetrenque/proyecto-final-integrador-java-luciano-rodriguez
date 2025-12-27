@@ -1,5 +1,6 @@
 package com.escueladeequitacion.hrs.service;
 
+import com.escueladeequitacion.hrs.exception.ConflictException;
 import com.escueladeequitacion.hrs.model.Instructor;
 import com.escueladeequitacion.hrs.repository.InstructorRepository;
 
@@ -55,7 +56,7 @@ public class InstructorServiceImpl implements InstructorService {
         return instructorRepository.findByActivo(activo);
     }
 
-                @Override
+    @Override
     public List<Instructor> buscarPorFechaNacimiento(LocalDate fechaNacimiento) {
         return instructorRepository.findByFechaNacimiento(fechaNacimiento);
     };
@@ -77,19 +78,31 @@ public class InstructorServiceImpl implements InstructorService {
 
     @Override
     public Boolean estadoInstructor(Long id) {
-        Optional<Instructor> alumno = instructorRepository.findById(id);
-        return alumno.map(Instructor::isActivo).orElse(false);
+        Optional<Instructor> instructor = instructorRepository.findById(id);
+        return instructor.map(Instructor::isActivo).orElse(false);
     }
 
     @Override
-    public void guardarInstructor(Instructor alumno) {
-        instructorRepository.save(alumno);
-    };
+    public void guardarInstructor(Instructor instructor) {
+        // Validar DNI duplicado
+        if (instructor.getId() == null && instructorRepository.existsByDni(instructor.getDni())) {
+            throw new ConflictException("Instructor", "DNI", instructor.getDni());
+        }
+
+        instructorRepository.save(instructor);
+    }
 
     @Override
-    public void actualizarInstructor(Long id, Instructor alumno) {
-        alumno.setId(id);
-        instructorRepository.save(alumno);
+    public void actualizarInstructor(Long id, Instructor instructor) {
+        // Si es actualización, verificar que el DNI no esté usado por otro instructor
+        if (instructor.getId() != null) {
+            Optional<Instructor> existente = instructorRepository.findByDni(instructor.getDni());
+            if (existente.isPresent() && !existente.get().getId().equals(instructor.getId())) {
+                throw new ConflictException("Instructor", "DNI", instructor.getDni());
+            }
+        }
+        instructor.setId(id);
+        instructorRepository.save(instructor);
     };
 
     @Override
@@ -99,11 +112,11 @@ public class InstructorServiceImpl implements InstructorService {
 
     @Override
     public void eliminarInstructorTemporalmente(Long id) {
-        Optional<Instructor> alumnoOpt = instructorRepository.findById(id);
-        if (alumnoOpt.isPresent()) {
-            Instructor alumno = alumnoOpt.get();
-            alumno.setActivo(false);
-            instructorRepository.save(alumno);
+        Optional<Instructor> instructorOpt = instructorRepository.findById(id);
+        if (instructorOpt.isPresent()) {
+            Instructor instructor = instructorOpt.get();
+            instructor.setActivo(false);
+            instructorRepository.save(instructor);
         }
     }
 }

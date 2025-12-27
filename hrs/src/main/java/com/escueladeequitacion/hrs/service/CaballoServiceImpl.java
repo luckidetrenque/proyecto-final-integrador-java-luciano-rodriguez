@@ -1,6 +1,7 @@
 package com.escueladeequitacion.hrs.service;
 
 import com.escueladeequitacion.hrs.enums.TipoCaballo;
+import com.escueladeequitacion.hrs.exception.ConflictException;
 import com.escueladeequitacion.hrs.model.Caballo;
 import com.escueladeequitacion.hrs.repository.CaballoRepository;
 
@@ -62,11 +63,25 @@ public class CaballoServiceImpl implements CaballoService {
 
     @Override
     public void guardarCaballo(Caballo caballo) {
+        // Validar nombre duplicado
+        if (caballo.getId() == null && caballoRepository.existsByNombre(caballo.getNombre())) {
+            throw new ConflictException("Caballo", "nombre", caballo.getNombre());
+        }
+
         caballoRepository.save(caballo);
-    };
+    }
 
     @Override
     public void actualizarCaballo(Long id, Caballo caballo) {
+        // Si es actualización, verificar que el nombre no esté usado por otro caballo
+        if (caballo.getId() != null) {
+            List<Caballo> existentes = caballoRepository.findByNombreIgnoreCase(caballo.getNombre());
+            for (Caballo existente : existentes) {
+                if (!existente.getId().equals(caballo.getId())) {
+                    throw new ConflictException("Caballo", "nombre", caballo.getNombre());
+                }
+            }
+        }
         caballo.setId(id);
         caballoRepository.save(caballo);
     };

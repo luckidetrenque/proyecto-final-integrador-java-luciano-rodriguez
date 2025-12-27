@@ -1,5 +1,6 @@
 package com.escueladeequitacion.hrs.service;
 
+import com.escueladeequitacion.hrs.dto.ClaseResponseDto;
 import com.escueladeequitacion.hrs.enums.Especialidades;
 import com.escueladeequitacion.hrs.enums.Estado;
 import com.escueladeequitacion.hrs.model.Clase;
@@ -47,7 +48,8 @@ public interface ClaseService {
 
     public Boolean existeClasePorCaballo(Long caballo_id);
 
-    // Método para verificar el estado ("Programada", "En curso", "Completada", "Cancelada") de una clase por su ID
+    // Método para verificar el estado ("Programada", "En curso", "Completada",
+    // "Cancelada") de una clase por su ID
     // public Estado estadoClase(Estado estado);
 
     // Método para guardar una nueva clase
@@ -61,4 +63,47 @@ public interface ClaseService {
 
     public void eliminarClaseTemporalmente(Long id);
 
+    // ============================================================
+    // MÉTODOS NUEVOS - Retornan DTOs con datos relacionados
+    // ============================================================
+
+    /**
+     * Lista todas las clases con detalles de instructor, alumno y caballo.
+     * 
+     * @return Lista de ClaseResponseDto
+     */
+    public List<ClaseResponseDto> listarClasesConDetalles();
+
+    /**
+     * Busca una clase por ID con todos sus detalles.
+     * 
+     * @param id - ID de la clase
+     * @return Optional con ClaseResponseDto
+     */
+    public Optional<ClaseResponseDto> buscarClasePorIdConDetalles(Long id);
+
+    /**
+     * Busca clases por día con detalles.
+     */
+    public List<ClaseResponseDto> buscarClasePorDiaConDetalles(LocalDate dia);
+
+    /**
+     * Busca clases por instructor con detalles.
+     */
+    public List<ClaseResponseDto> buscarClasePorInstructorConDetalles(Long instructorId);
+
+    /**
+     * Busca clases por alumno con detalles.
+     */
+    public List<ClaseResponseDto> buscarClasePorAlumnoConDetalles(Long alumnoId);
+
+    /**
+     * Busca clases por caballo con detalles.
+     */
+    public List<ClaseResponseDto> buscarClasePorCaballoConDetalles(Long caballoId);
+
+    /**
+     * Busca clases por estado con detalles.
+     */
+    public List<ClaseResponseDto> buscarClasePorEstadoConDetalles(Estado estado);
 }

@@ -16,17 +16,18 @@ public interface CaballoService {
     public Optional<Caballo> buscarCaballoPorId(Long id);
 
     public List<Caballo> buscarCaballoPorNombre(String nombre);
-    
+
     public List<Caballo> buscarCaballoPorEstado(Boolean disponible);
 
     public List<Caballo> buscarCaballoPorTipo(TipoCaballo tipoCaballo);
-    
+
     // Métodos para verificar la existencia de caballos por diferentes criterios
     public Boolean existeCaballoPorId(Long id);
 
     public Boolean existeCaballoPorNombre(String nombre);
 
-    // Método para verificar el estado (disponible/no disponible) de un caballo por su ID
+    // Método para verificar el estado (disponible/no disponible) de un caballo por
+    // su ID
     public Boolean estadoCaballo(Long id);
 
     // Método para guardar un nuevo caballo
