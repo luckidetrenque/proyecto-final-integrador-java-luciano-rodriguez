@@ -41,7 +41,8 @@ public class Instructor extends Persona {
     }
 
     // Constructor con parámetros
-    public Instructor(Integer dni, String nombre, String apellido, LocalDate fechaNacimiento, Integer telefono, String email,
+    public Instructor(Integer dni, String nombre, String apellido, LocalDate fechaNacimiento, Integer telefono,
+            String email,
             Boolean activo) {
         super(dni, nombre, apellido, fechaNacimiento, telefono, email);
         this.activo = activo;
@@ -69,7 +70,7 @@ public class Instructor extends Persona {
         clases.add(clase);
         clase.setInstructor(this);
     }
-    
+
     public void removerClase(Clase clase) {
         clases.remove(clase);
         clase.setInstructor(null);

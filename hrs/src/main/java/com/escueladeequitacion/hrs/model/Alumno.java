@@ -40,7 +40,7 @@ public class Alumno extends Persona {
     @OneToMany(mappedBy = "alumno", cascade = CascadeType.ALL, orphanRemoval = false)
     @JsonIgnore
     private List<Clase> clases = new ArrayList<>();
-    
+
     // Constructor vacío
     public Alumno() {
         super();
@@ -103,7 +103,7 @@ public class Alumno extends Persona {
         clases.add(clase);
         clase.setAlumno(this);
     }
-    
+
     public void removerClase(Clase clase) {
         clases.remove(clase);
         clase.setAlumno(null);
@@ -117,7 +117,6 @@ public class Alumno extends Persona {
 
     @Override
     public double calcularPago() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'calcularPago'");
     };
 

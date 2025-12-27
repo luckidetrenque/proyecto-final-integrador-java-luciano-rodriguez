@@ -89,7 +89,7 @@ public class Caballo {
         clases.add(clase);
         clase.setCaballo(this);
     }
-    
+
     public void removerClase(Clase clase) {
         clases.remove(clase);
         clase.setCaballo(null);
