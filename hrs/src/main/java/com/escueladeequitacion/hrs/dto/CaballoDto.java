@@ -28,7 +28,6 @@ public class CaballoDto {
         this.tipoCaballo = tipoCaballo;
     }
 
-
     public String getNombre() {
         return nombre;
     }

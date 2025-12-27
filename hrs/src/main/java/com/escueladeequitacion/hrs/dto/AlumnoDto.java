@@ -57,7 +57,7 @@ public class AlumnoDto extends PersonaDto {
         this.activo = activo;
     }
 
-        public Boolean isPropietario() {
+    public Boolean isPropietario() {
         return propietario;
     }
 
