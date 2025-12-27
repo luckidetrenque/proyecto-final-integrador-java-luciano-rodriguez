@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 import java.time.LocalDate;
 
-
 // Repositorio para la entidad Alumno
 @Repository
 public interface AlumnoRepository extends JpaRepository<Alumno, Long> {

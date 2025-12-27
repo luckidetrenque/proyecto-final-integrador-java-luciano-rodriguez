@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import com.escueladeequitacion.hrs.enums.TipoCaballo;
 
-
 // Repositorio para la entidad Caballo
 @Repository
 public interface CaballoRepository extends JpaRepository<Caballo, Long> {

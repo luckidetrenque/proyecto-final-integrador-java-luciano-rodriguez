@@ -24,9 +24,10 @@ public interface InstructorRepository extends JpaRepository<Instructor, Long> {
 
     public List<Instructor> findByActivo(@Param("activo") Boolean activo);
 
-        public List<Instructor> findByFechaNacimiento(LocalDate fechaNacimiento);
-    
-// Métodos para verificar la existencia de un instructor por diferentes criterios
+    public List<Instructor> findByFechaNacimiento(LocalDate fechaNacimiento);
+
+    // Métodos para verificar la existencia de un instructor por diferentes
+    // criterios
     public Boolean existsByDni(Integer dni);
 
     public Boolean existsByNombreAndApellidoIgnoreCase(String nombre, String apellido);
