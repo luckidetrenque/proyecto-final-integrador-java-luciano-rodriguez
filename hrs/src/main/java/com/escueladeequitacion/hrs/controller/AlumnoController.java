@@ -40,10 +40,6 @@ public class AlumnoController {
     // Endpoint GET para buscar un alumno por ID
     @GetMapping(Constantes.RESOURCE_ALUMNOS + "/{id}")
     public ResponseEntity<?> obtenerAlumnoPorId(@PathVariable("id") Long id) {
-        if (!alumnoService.existeAlumnoPorId(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new Mensaje("El alumno con ID " + id + " no existe en la base de datos"));
-        }
 
         Alumno alumno = alumnoService.buscarAlumnoPorId(id).get();
         return ResponseEntity.status(HttpStatus.OK).body(alumno);
@@ -64,25 +60,29 @@ public class AlumnoController {
     // Endpoint POST para crear un nuevo alumno
     @PostMapping(Constantes.RESOURCE_ALUMNOS)
     public ResponseEntity<?> crearAlumno(@Valid @RequestBody AlumnoDto alumnoDto) {
-        if (alumnoService.existeAlumnoPorDni(alumnoDto.getDni())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(new Mensaje("Ya existe un alumno con el DNI "
-                    + alumnoDto.getDni() + " en la base de datos"));
-        }
 
         int cantidadClases = alumnoDto.getCantidadClases();
         if (!Arrays.asList(Constantes.CANTIDAD_CLASES).contains(cantidadClases)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new Mensaje("La cantidad de clases debe ser 4, 8, 12 o 16."));
+            throw new IllegalArgumentException("La cantidad de clases debe ser 4, 8, 12 o 16");
         }
-        Alumno alumno = new Alumno(alumnoDto.getDni(), alumnoDto.getNombre(), alumnoDto.getApellido(),
-                alumnoDto.getFechaNacimiento(), alumnoDto.getTelefono(), alumnoDto.getEmail(),
+
+        Alumno alumno = new Alumno(
+                alumnoDto.getDni(),
+                alumnoDto.getNombre(),
+                alumnoDto.getApellido(),
+                alumnoDto.getFechaNacimiento(),
+                alumnoDto.getTelefono(),
+                alumnoDto.getEmail(),
                 alumnoDto.getFechaInscripcion(),
                 alumnoDto.getCantidadClases(),
                 alumnoDto.isActivo(),
                 alumnoDto.isPropietario());
+
         alumnoService.guardarAlumno(alumno);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new Mensaje(
-                "Alumno " + alumnoDto.getNombre() + " " + alumnoDto.getApellido() + " creado correctamente"));
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new Mensaje(
+                        "Alumno " + alumnoDto.getNombre() + " " + alumnoDto.getApellido() + " creado correctamente"));
     }
 
     // Endpoint PUT para actualizar un alumno por ID
@@ -91,11 +91,6 @@ public class AlumnoController {
         if (!alumnoService.existeAlumnoPorId(id)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new Mensaje("El alumno con ID " + id + " no existe en la base de datos"));
-        }
-
-        if (!alumnoService.existeAlumnoPorDni(alumnoDto.getDni())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new Mensaje("El alumno con DNI " + alumnoDto.getDni() + " no existe en la base de datos"));
         }
 
         Alumno alumno = alumnoService.buscarAlumnoPorId(id).get();
@@ -189,7 +184,7 @@ public class AlumnoController {
 
         }
 
-                if (propietario != null && !propietario) {
+        if (propietario != null && !propietario) {
             alumnos = alumnoService.buscarAlumnoConCaballo(false);
 
         }
@@ -212,12 +207,14 @@ public class AlumnoController {
         alumnos = alumnoService.listarAlumnos();
 
         Map<String, Object> respuesta = new LinkedHashMap<>();
-        respuesta.put("mensaje", "No existen alumnos con los filtros de búsqueda ingresados, se retorna el listado completo.");
+        respuesta.put("mensaje",
+                "No existen alumnos con los filtros de búsqueda ingresados, se retorna el listado completo.");
         respuesta.put("alumnos", alumnos);
-        
+
         return ResponseEntity.status(HttpStatus.OK).body(respuesta);
         // return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-        //         .body(new Mensaje("No existen alumnos con los filtros de búsqueda ingresados"));
+        // .body(new Mensaje("No existen alumnos con los filtros de búsqueda
+        // ingresados"));
     }
 
 }

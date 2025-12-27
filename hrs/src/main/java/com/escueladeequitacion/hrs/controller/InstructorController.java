@@ -21,7 +21,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping(Constantes.API_VERSION)
-@CrossOrigin(origins = { Constantes.ORIGINS})
+@CrossOrigin(origins = { Constantes.ORIGINS })
 
 // Controlador REST para gestionar los instructores
 public class InstructorController {
@@ -68,17 +68,20 @@ public class InstructorController {
                     + instructorDto.getDni() + " en la base de datos"));
         }
 
-        Instructor instructor = new Instructor(instructorDto.getDni(), instructorDto.getNombre(), instructorDto.getApellido(),
+        Instructor instructor = new Instructor(instructorDto.getDni(), instructorDto.getNombre(),
+                instructorDto.getApellido(),
                 instructorDto.getFechaNacimiento(), instructorDto.getTelefono(), instructorDto.getEmail(),
                 instructorDto.isActivo());
         instructorService.guardarInstructor(instructor);
         return ResponseEntity.status(HttpStatus.CREATED).body(new Mensaje(
-                "Instructor " + instructorDto.getNombre() + " " + instructorDto.getApellido() + " creado correctamente"));
+                "Instructor " + instructorDto.getNombre() + " " + instructorDto.getApellido()
+                        + " creado correctamente"));
     }
 
     // Endpoint PUT para actualizar un instructor por ID
     @PutMapping(Constantes.RESOURCE_INSTRUCTORES + "/{id}")
-    public ResponseEntity<?> actualizarInstructor(@PathVariable("id") Long id, @Valid @RequestBody InstructorDto instructorDto) {
+    public ResponseEntity<?> actualizarInstructor(@PathVariable("id") Long id,
+            @Valid @RequestBody InstructorDto instructorDto) {
         if (!instructorService.existeInstructorPorId(id)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new Mensaje("El instructor con ID " + id + " no existe en la base de datos"));
@@ -86,7 +89,8 @@ public class InstructorController {
 
         if (!instructorService.existeInstructorPorDni(instructorDto.getDni())) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new Mensaje("El instructor con DNI " + instructorDto.getDni() + " no existe en la base de datos"));
+                    .body(new Mensaje(
+                            "El instructor con DNI " + instructorDto.getDni() + " no existe en la base de datos"));
         }
 
         Instructor instructor = instructorService.buscarInstructorPorId(id).get();
@@ -141,7 +145,7 @@ public class InstructorController {
             @RequestParam(required = false) String nombre,
             @RequestParam(required = false) String apellido,
             @RequestParam(required = false) Boolean activo,
-         @RequestParam(required = false) LocalDate fechaNacimiento) {
+            @RequestParam(required = false) LocalDate fechaNacimiento) {
 
         List<Instructor> instructores = new ArrayList<>();
 
@@ -170,7 +174,7 @@ public class InstructorController {
 
         }
 
-                if (fechaNacimiento != null) {
+        if (fechaNacimiento != null) {
             instructores = instructorService.buscarPorFechaNacimiento(fechaNacimiento);
 
         }
@@ -183,11 +187,13 @@ public class InstructorController {
         instructores = instructorService.listarInstructores();
 
         Map<String, Object> respuesta = new LinkedHashMap<>();
-        respuesta.put("mensaje", "No existen instructores con los filtros de búsqueda ingresados, se retorna el listado completo.");
+        respuesta.put("mensaje",
+                "No existen instructores con los filtros de búsqueda ingresados, se retorna el listado completo.");
         respuesta.put("instructores", instructores);
-        
+
         return ResponseEntity.status(HttpStatus.OK).body(respuesta);
         // return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-        //         .body(new Mensaje("No existen alumnos con los filtros de búsqueda ingresados"));
+        // .body(new Mensaje("No existen alumnos con los filtros de búsqueda
+        // ingresados"));
     }
 }

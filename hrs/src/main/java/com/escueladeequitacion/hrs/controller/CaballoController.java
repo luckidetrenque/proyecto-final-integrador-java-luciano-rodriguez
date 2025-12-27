@@ -123,7 +123,7 @@ public class CaballoController {
     public ResponseEntity<?> buscarCaballo(
             @RequestParam(required = false) String nombre,
             @RequestParam(required = false) Boolean disponible,
-        @RequestParam(required = false) TipoCaballo tipo) {
+            @RequestParam(required = false) TipoCaballo tipo) {
 
         List<Caballo> caballos = new ArrayList<>();
 
@@ -142,7 +142,7 @@ public class CaballoController {
 
         }
 
-                if (tipo != null) {
+        if (tipo != null) {
             caballos = caballoService.buscarCaballoPorTipo(tipo);
 
         }
@@ -155,11 +155,13 @@ public class CaballoController {
         caballos = caballoService.listarCaballos();
 
         Map<String, Object> respuesta = new LinkedHashMap<>();
-        respuesta.put("mensaje", "No existen caballos con los filtros de búsqueda ingresados, se retorna el listado completo.");
+        respuesta.put("mensaje",
+                "No existen caballos con los filtros de búsqueda ingresados, se retorna el listado completo.");
         respuesta.put("caballos", caballos);
-        
+
         return ResponseEntity.status(HttpStatus.OK).body(respuesta);
         // return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-        //         .body(new Mensaje("No existen alumnos con los filtros de búsqueda ingresados"));
+        // .body(new Mensaje("No existen alumnos con los filtros de búsqueda
+        // ingresados"));
     }
 }
