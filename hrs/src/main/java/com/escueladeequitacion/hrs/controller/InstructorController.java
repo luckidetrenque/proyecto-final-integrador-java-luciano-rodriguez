@@ -48,7 +48,7 @@ public class InstructorController {
         Instructor instructor = instructorService.buscarInstructorPorId(id)
                 .orElseThrow(() -> new com.escueladeequitacion.hrs.exception.ResourceNotFoundException("Instructor",
                         "ID", id));
-        return ResponseEntity.ok(instructor);
+        return ResponseEntity.status(HttpStatus.OK).body(instructor);
     }
 
     // Endpoint GET para buscar un instructor por DNI
@@ -61,7 +61,7 @@ public class InstructorController {
         Instructor instructor = instructorService.buscarInstructorPorDni(dni)
                 .orElseThrow(() -> new com.escueladeequitacion.hrs.exception.ResourceNotFoundException("Instructor",
                         "DNI", dni));
-        return ResponseEntity.ok(instructor);
+        return ResponseEntity.status(HttpStatus.OK).body(instructor);
     }
 
     // Endpoint POST para crear un nuevo instructor
@@ -87,7 +87,7 @@ public class InstructorController {
 
         instructorService.actualizarInstructorDesdeDto(id, instructorDto);
 
-        return ResponseEntity.ok(new Mensaje("Instructor con ID " + id + " actualizado correctamente"));
+        return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Instructor con ID " + id + " actualizado correctamente"));
 
     }
 
@@ -100,7 +100,7 @@ public class InstructorController {
 
         instructorService.eliminarInstructor(id);
 
-        return ResponseEntity.ok(new Mensaje("Instructor con ID " + id + " eliminado correctamente"));
+        return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Instructor con ID " + id + " eliminado correctamente"));
     }
 
     // Endpoint DELETE para eliminar un instructor por ID (Eliminación Lógica)
@@ -111,7 +111,7 @@ public class InstructorController {
     public ResponseEntity<?> eliminarInstructorTemporalmente(@PathVariable Long id) {
         instructorService.eliminarInstructorTemporalmente(id);
 
-        return ResponseEntity.ok(new Mensaje("Instructor con ID " + id + " inactivado correctamente"));
+        return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Instructor con ID " + id + " inactivado correctamente"));
     }
 
     // Endpoint GET para buscar por diferentes filtros
@@ -129,7 +129,7 @@ public class InstructorController {
                 nombre, apellido, activo, fechaNacimiento);
 
         if (!instructores.isEmpty()) {
-            return ResponseEntity.ok(instructores);
+            return ResponseEntity.status(HttpStatus.OK).body(instructores);
         }
 
         instructores = instructorService.listarInstructores();
@@ -138,6 +138,6 @@ public class InstructorController {
                 "No existen instructores con los filtros de búsqueda ingresados, se retorna el listado completo.");
         respuesta.put("instructores", instructores);
 
-        return ResponseEntity.ok(respuesta);
+        return ResponseEntity.status(HttpStatus.OK).body(respuesta);
     }
 }

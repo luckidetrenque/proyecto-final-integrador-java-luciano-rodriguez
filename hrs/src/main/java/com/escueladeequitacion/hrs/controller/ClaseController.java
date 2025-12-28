@@ -4,7 +4,7 @@ import com.escueladeequitacion.hrs.dto.ClaseDto;
 import com.escueladeequitacion.hrs.dto.ClaseResponseDto;
 import com.escueladeequitacion.hrs.enums.Estado;
 import com.escueladeequitacion.hrs.model.Clase;
-// import com.escueladeequitacion.hrs.model.Instructor;
+
 import com.escueladeequitacion.hrs.service.ClaseService;
 import com.escueladeequitacion.hrs.service.AlumnoService;
 import com.escueladeequitacion.hrs.service.InstructorService;
@@ -12,7 +12,6 @@ import com.escueladeequitacion.hrs.service.CaballoService;
 import com.escueladeequitacion.hrs.utility.Mensaje;
 import com.escueladeequitacion.hrs.utility.Constantes;
 
-// import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 
 import java.time.LocalDate;
@@ -80,7 +79,7 @@ public class ClaseController {
                     .body(new Mensaje("La clase con día " + dia + " no existe en la base de datos"));
         }
 
-        return ResponseEntity.ok(clases.get(0));
+        return ResponseEntity.status(HttpStatus.OK).body(clases.get(0));
     }
 
     // Endpoint DELETE para eliminar un clase por ID
@@ -93,7 +92,7 @@ public class ClaseController {
         // El Service valida que existe antes de eliminar
         claseService.eliminarClase(id);
 
-        return ResponseEntity.ok(new Mensaje("Clase con ID " + id + " eliminada correctamente"));
+        return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Clase con ID " + id + " eliminada correctamente"));
     }
 
     // Endpoint POST para crear una nueva clase
@@ -120,7 +119,7 @@ public class ClaseController {
         // El Service maneja todas las validaciones
         claseService.actualizarClaseDesdeDto(id, claseDto);
 
-        return ResponseEntity.ok(new Mensaje("Clase con ID " + id + " actualizada correctamente"));
+        return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Clase con ID " + id + " actualizada correctamente"));
     }
 
     // ============================================================
@@ -134,7 +133,7 @@ public class ClaseController {
     @GetMapping(Constantes.RESOURCE_CLASES + "/detalles")
     public ResponseEntity<List<ClaseResponseDto>> listarClasesConDetalles() {
         List<ClaseResponseDto> clases = claseService.listarClasesConDetalles();
-        return ResponseEntity.ok(clases);
+        return ResponseEntity.status(HttpStatus.OK).body(clases);
     }
 
     /**
@@ -147,7 +146,7 @@ public class ClaseController {
                 .orElseThrow(
                         () -> new com.escueladeequitacion.hrs.exception.ResourceNotFoundException("Clase", "ID", id));
 
-        return ResponseEntity.ok(clase);
+        return ResponseEntity.status(HttpStatus.OK).body(clase);
     }
 
     /**
@@ -157,7 +156,7 @@ public class ClaseController {
     @GetMapping(Constantes.RESOURCE_CLASES + "/dia/{dia}/detalles")
     public ResponseEntity<List<ClaseResponseDto>> obtenerClasesPorDiaConDetalles(@PathVariable LocalDate dia) {
         List<ClaseResponseDto> clases = claseService.buscarClasePorDiaConDetalles(dia);
-        return ResponseEntity.ok(clases);
+        return ResponseEntity.status(HttpStatus.OK).body(clases);
     }
 
     /**
@@ -168,7 +167,7 @@ public class ClaseController {
     public ResponseEntity<List<ClaseResponseDto>> obtenerClasesPorInstructorConDetalles(
             @PathVariable Long instructorId) {
         List<ClaseResponseDto> clases = claseService.buscarClasePorInstructorConDetalles(instructorId);
-        return ResponseEntity.ok(clases);
+        return ResponseEntity.status(HttpStatus.OK).body(clases);
     }
 
     /**
@@ -178,7 +177,7 @@ public class ClaseController {
     @GetMapping(Constantes.RESOURCE_CLASES + "/alumno/{alumnoId}/detalles")
     public ResponseEntity<List<ClaseResponseDto>> obtenerClasesPorAlumnoConDetalles(@PathVariable Long alumnoId) {
         List<ClaseResponseDto> clases = claseService.buscarClasePorAlumnoConDetalles(alumnoId);
-        return ResponseEntity.ok(clases);
+        return ResponseEntity.status(HttpStatus.OK).body(clases);
     }
 
     /**
@@ -188,7 +187,7 @@ public class ClaseController {
     @GetMapping(Constantes.RESOURCE_CLASES + "/caballo/{caballoId}/detalles")
     public ResponseEntity<?> obtenerClasesPorCaballoConDetalles(@PathVariable Long caballoId) {
         List<ClaseResponseDto> clases = claseService.buscarClasePorCaballoConDetalles(caballoId);
-        return ResponseEntity.ok(clases);
+        return ResponseEntity.status(HttpStatus.OK).body(clases);
     }
 
     @GetMapping(Constantes.RESOURCE_CLASES + "/estado/{estado}/detalles")
@@ -199,6 +198,6 @@ public class ClaseController {
         }
 
         List<ClaseResponseDto> clases = claseService.buscarClasePorEstadoConDetalles(estado);
-        return ResponseEntity.ok(clases);
+        return ResponseEntity.status(HttpStatus.OK).body(clases);
     }
 }

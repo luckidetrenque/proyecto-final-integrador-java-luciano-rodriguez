@@ -50,7 +50,7 @@ public class AlumnoController {
         Alumno alumno = alumnoService.buscarAlumnoPorId(id)
                 .orElseThrow(
                         () -> new com.escueladeequitacion.hrs.exception.ResourceNotFoundException("Alumno", "ID", id));
-        return ResponseEntity.ok(alumno);
+        return ResponseEntity.status(HttpStatus.OK).body(alumno);
     }
 
     // Endpoint GET para buscar un alumno por DNI
@@ -64,7 +64,7 @@ public class AlumnoController {
         Alumno alumno = alumnoService.buscarAlumnoPorDni(dni)
                 .orElseThrow(() -> new com.escueladeequitacion.hrs.exception.ResourceNotFoundException("Alumno", "DNI",
                         dni));
-        return ResponseEntity.ok(alumno);
+        return ResponseEntity.status(HttpStatus.OK).body(alumno);
     }
 
     // Endpoint POST para crear un nuevo alumno
@@ -96,7 +96,7 @@ public class AlumnoController {
         // 3. Cantidad de clases válida
         alumnoService.actualizarAlumnoDesdeDto(id, alumnoDto);
 
-        return ResponseEntity.ok(new Mensaje("Alumno con ID " + id + " actualizado correctamente"));
+        return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Alumno con ID " + id + " actualizado correctamente"));
     }
 
     // Endpoint DELETE para eliminar un alumno por ID (Eliminación Física)
@@ -109,7 +109,7 @@ public class AlumnoController {
         // El Service valida que existe antes de eliminar
         alumnoService.eliminarAlumno(id);
 
-        return ResponseEntity.ok(new Mensaje("Alumno con ID " + id + " eliminado correctamente"));
+        return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Alumno con ID " + id + " eliminado correctamente"));
     }
 
     // Endpoint DELETE para eliminar un alumno por ID (Eliminación Lógica)
@@ -124,7 +124,7 @@ public class AlumnoController {
         // 2. Alumno está activo
         alumnoService.eliminarAlumnoTemporalmente(id);
 
-        return ResponseEntity.ok(new Mensaje("Alumno con ID " + id + " inactivado correctamente"));
+        return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Alumno con ID " + id + " inactivado correctamente"));
     }
 
     // Endpoint GET para contar las clases completadas de un alumno
@@ -137,7 +137,7 @@ public class AlumnoController {
         response.put("id", id);
         response.put("clasesCompletadas", count);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     // Endpoint GET para buscar por diferentes filtros
@@ -158,7 +158,7 @@ public class AlumnoController {
                 nombre, apellido, activo, propietario, fechaInscripcion, fechaNacimiento);
 
         if (!alumnos.isEmpty()) {
-            return ResponseEntity.ok(alumnos);
+            return ResponseEntity.status(HttpStatus.OK).body(alumnos);
         }
 
         // Si no hay resultados, devolver todos con mensaje
@@ -168,7 +168,7 @@ public class AlumnoController {
                 "No existen alumnos con los filtros de búsqueda ingresados, se retorna el listado completo.");
         respuesta.put("alumnos", alumnos);
 
-        return ResponseEntity.ok(respuesta);
+        return ResponseEntity.status(HttpStatus.OK).body(respuesta);
     }
 
 }

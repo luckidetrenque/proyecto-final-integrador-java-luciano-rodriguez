@@ -48,7 +48,7 @@ public class CaballoController {
         Caballo caballo = caballoService.buscarCaballoPorId(id)
                 .orElseThrow(
                         () -> new com.escueladeequitacion.hrs.exception.ResourceNotFoundException("Caballo", "ID", id));
-        return ResponseEntity.ok(caballo);
+        return ResponseEntity.status(HttpStatus.OK).body(caballo);
     }
 
     // Endpoint POST para crear un nuevo caballo
@@ -74,7 +74,7 @@ public class CaballoController {
 
         caballoService.actualizarCaballoDesdeDto(id, caballoDto);
 
-        return ResponseEntity.ok(new Mensaje("Caballo con ID " + id + " actualizado correctamente"));
+        return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Caballo con ID " + id + " actualizado correctamente"));
     }
 
     // Endpoint DELETE para eliminar un caballo por ID (Eliminación Física)
@@ -86,7 +86,7 @@ public class CaballoController {
 
         caballoService.eliminarCaballo(id);
 
-        return ResponseEntity.ok(new Mensaje("Caballo con ID " + id + " eliminado correctamente"));
+        return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Caballo con ID " + id + " eliminado correctamente"));
     }
 
     // Endpoint DELETE para eliminar un caballo por nombre (Eliminación Lógica)
@@ -98,7 +98,7 @@ public class CaballoController {
         // El Service maneja todas las validaciones
         caballoService.eliminarcaballoTemporalmente(id);
 
-        return ResponseEntity.ok(new Mensaje("Caballo con ID " + id + " marcado como no disponible"));
+        return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Caballo con ID " + id + " marcado como no disponible"));
     }
 
     // Endpoint GET para buscar por diferentes filtros
@@ -114,7 +114,7 @@ public class CaballoController {
         List<Caballo> caballos = caballoService.buscarCaballosConFiltros(nombre, disponible, tipo);
 
         if (!caballos.isEmpty()) {
-            return ResponseEntity.ok(caballos);
+            return ResponseEntity.status(HttpStatus.OK).body(caballos);
         }
 
         caballos = caballoService.listarCaballos();
@@ -123,6 +123,6 @@ public class CaballoController {
                 "No existen caballos con los filtros de búsqueda ingresados, se retorna el listado completo.");
         respuesta.put("caballos", caballos);
 
-        return ResponseEntity.ok(respuesta);
+        return ResponseEntity.status(HttpStatus.OK).body(respuesta);
     }
 }
