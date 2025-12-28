@@ -8,6 +8,7 @@ public class Constantes {
     public static final String RESOURCE_CABALLOS = "/caballos";
     public static final String RESOURCE_INSTRUCTORES = "/instructores";
     public static final String RESOURCE_CLASES = "/clases";
+    public static final String RESOURCE_CALENDARIO = "/calendario";
 
     // CrossOrigin
     public static final String ORIGINS = "http://localhost:4200";
