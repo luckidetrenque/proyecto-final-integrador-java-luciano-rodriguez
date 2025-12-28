@@ -135,7 +135,7 @@ public interface ClaseRepository extends JpaRepository<Clase, Long> {
      * Cuenta clases por alumno y estado.
      */
     @Query("SELECT COUNT(c) FROM Clase c WHERE c.alumno.id = :alumnoId AND c.estado = :estado")
-    long contarPorAlumnoYEstado(@Param("alumnoId") Long alumnoId, @Param("estado") Estado estado);
+    public long contarPorAlumnoYEstado(@Param("alumnoId") Long alumnoId, @Param("estado") Estado estado);
 
     /**
      * Cuenta clases por instructor y estado.
@@ -147,6 +147,10 @@ public interface ClaseRepository extends JpaRepository<Clase, Long> {
      * Cuenta clases por caballo y estado.
      */
     @Query("SELECT COUNT(c) FROM Clase c WHERE c.caballo.id = :caballoId AND c.estado = :estado")
-    long contarPorCaballoYEstado(@Param("caballoId") Long caballoId, @Param("estado") Estado estado);
+    public long contarPorCaballoYEstado(@Param("caballoId") Long caballoId, @Param("estado") Estado estado);
+
+
+    // Método para copiar las clases de una una semana (martes a sábados)
+    public List<Clase> findByDiaBetween(LocalDate inicio, LocalDate fin);
 
 }

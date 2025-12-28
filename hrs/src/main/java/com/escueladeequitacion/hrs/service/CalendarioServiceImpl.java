@@ -24,17 +24,17 @@ public class CalendarioServiceImpl implements CalendarioService {
     public void copiarSemanaCompleta(LocalDate inicioOri, LocalDate inicioDes) {
         // 1. Definir rango de la semana origen (5 días)
         LocalDate finOri = inicioOri.plusDays(4);
-        List<Clase> clasesExistentes = claseRepository.findByFechaBetween(inicioOri, finOri);
+        List<Clase> clasesExistentes = claseRepository.findByDiaBetween(inicioOri, finOri);
 
         // 2. Calcular cuántos días de diferencia hay entre semanas
         long diferenciaDias = ChronoUnit.DAYS.between(inicioOri, inicioDes);
 
-        // 3. Clonar registros ajustando la nueva fecha
+        // 3. Clonar registros ajustando la nuDia
         List<Clase> nuevasClases = clasesExistentes.stream().map(claseOriginal -> {
             Clase nuevaClase = new Clase();
             // Copia todos los atributos excepto el ID
             BeanUtils.copyProperties(claseOriginal, nuevaClase, "id");
-            // Ajustar a la nueva fecha
+            // Ajustar a la nuDia
             nuevaClase.setDia(claseOriginal.getDia().plusDays(diferenciaDias));
             nuevaClase.setEstado(Estado.PROGRAMADA);
             nuevaClase.setObservaciones("");
