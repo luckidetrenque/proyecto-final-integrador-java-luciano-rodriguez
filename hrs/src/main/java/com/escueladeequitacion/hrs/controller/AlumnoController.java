@@ -48,10 +48,6 @@ public class AlumnoController {
     // Endpoint GET para buscar un alumno por DNI
     @GetMapping(Constantes.RESOURCE_ALUMNOS + "/dni/{dni}")
     public ResponseEntity<?> obtenerAlumnoPorDni(@PathVariable("dni") Integer dni) {
-        if (!alumnoService.existeAlumnoPorDni(dni)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new Mensaje("El alumno con DNI " + dni + " no existe en la base de datos"));
-        }
 
         Alumno alumno = alumnoService.buscarAlumnoPorDni(dni).get();
         return ResponseEntity.status(HttpStatus.OK).body(alumno);
@@ -88,10 +84,6 @@ public class AlumnoController {
     // Endpoint PUT para actualizar un alumno por ID
     @PutMapping(Constantes.RESOURCE_ALUMNOS + "/{id}")
     public ResponseEntity<?> actualizarAlumno(@PathVariable("id") Long id, @Valid @RequestBody AlumnoDto alumnoDto) {
-        if (!alumnoService.existeAlumnoPorId(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new Mensaje("El alumno con ID " + id + " no existe en la base de datos"));
-        }
 
         Alumno alumno = alumnoService.buscarAlumnoPorId(id).get();
         alumno.setDni(alumnoDto.getDni());
@@ -114,10 +106,6 @@ public class AlumnoController {
     // Endpoint DELETE para eliminar un alumno por ID (Eliminación Física)
     @DeleteMapping(Constantes.RESOURCE_ALUMNOS + "/{id}")
     public ResponseEntity<?> eliminarAlumno(@PathVariable Long id) {
-        if (!alumnoService.existeAlumnoPorId(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new Mensaje("El alumno con ID " + id + " no existe en la base de datos"));
-        }
 
         alumnoService.eliminarAlumno(id);
         return ResponseEntity.status(HttpStatus.OK)
@@ -126,23 +114,16 @@ public class AlumnoController {
     }
 
     // Endpoint DELETE para eliminar un alumno por ID (Eliminación Lógica)
-    @DeleteMapping(Constantes.RESOURCE_ALUMNOS + "/{id}/inactivar")
-    public ResponseEntity<?> eliminarAlumnoTemporalmente(@PathVariable Long id) {
-        if (!alumnoService.existeAlumnoPorId(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Mensaje("No existe el alumno con ese ID"));
-        }
-
-        if (!alumnoService.estadoAlumno(id)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new Mensaje("El alumno con ID " + id + " ya está inactivo"));
-        }
-
-        alumnoService.eliminarAlumnoTemporalmente(id);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new Mensaje("Alumno con ID " + id + " eliminado correctamente (forma lógica)"));
-
-    }
-
+@DeleteMapping(Constantes.RESOURCE_ALUMNOS + "/{id}/inactivar")
+public ResponseEntity<?> eliminarAlumnoTemporalmente(@PathVariable Long id) {
+    // Las validaciones ahora están en el Service
+    // GlobalExceptionHandler se encarga de capturar las excepciones
+    alumnoService.eliminarAlumnoTemporalmente(id);
+    
+    return ResponseEntity.status(HttpStatus.OK)
+            .body(new Mensaje("Alumno con ID " + id + " eliminado correctamente (forma lógica)"));
+}
+    // Endpoint GET para buscar por diferentes filtros
     @GetMapping(Constantes.RESOURCE_ALUMNOS + "/buscar")
     public ResponseEntity<?> buscarAlumno(
             @RequestParam(required = false) String nombre,

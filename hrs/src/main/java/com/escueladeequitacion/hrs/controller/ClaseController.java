@@ -2,6 +2,7 @@ package com.escueladeequitacion.hrs.controller;
 
 import com.escueladeequitacion.hrs.dto.ClaseDto;
 import com.escueladeequitacion.hrs.dto.ClaseResponseDto;
+import com.escueladeequitacion.hrs.enums.Estado;
 import com.escueladeequitacion.hrs.model.Clase;
 // import com.escueladeequitacion.hrs.model.Instructor;
 import com.escueladeequitacion.hrs.service.ClaseService;
@@ -53,7 +54,7 @@ public class ClaseController {
     // Endpoint GET para buscar una clase por ID
     @GetMapping(Constantes.RESOURCE_CLASES + "/{id}")
     public ResponseEntity<?> obtenerClasePorId(@PathVariable("id") Long id) {
-   
+
         Clase clase = claseService.buscarClasePorId(id).get();
         return ResponseEntity.status(HttpStatus.OK).body(clase);
     }
@@ -103,7 +104,8 @@ public class ClaseController {
         clase.setAlumno(alumnoOpt.get());
         clase.setCaballo(caballoOpt.get());
 
-        // El Service se encarga de las validaciones y lanza excepciones si hay problemas
+        // El Service se encarga de las validaciones y lanza excepciones si hay
+        // problemas
         claseService.guardarClase(clase);
 
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -231,6 +233,28 @@ public class ClaseController {
         }
 
         List<ClaseResponseDto> clases = claseService.buscarClasePorAlumnoConDetalles(alumnoId);
+        return ResponseEntity.ok(clases);
+    }
+
+        @GetMapping(Constantes.RESOURCE_CLASES + "/caballo/{caballoId}/detalles")
+    public ResponseEntity<?> obtenerClasesPorCaballoConDetalles(@PathVariable Long caballoId) {
+        if (!caballoService.existeCaballoPorId(caballoId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new Mensaje("El caballo con ID " + caballoId + " no existe"));
+        }
+
+        List<ClaseResponseDto> clases = claseService.buscarClasePorCaballoConDetalles(caballoId);
+        return ResponseEntity.ok(clases);
+    }
+
+            @GetMapping(Constantes.RESOURCE_CLASES + "/estado/{estado}/detalles")
+    public ResponseEntity<?> obtenerClasesPorEstadoConDetalles(@PathVariable Estado estado) {
+        if (!claseService.existeClasePorEstado(estado)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new Mensaje("No existen clases " + estado));
+        }
+
+        List<ClaseResponseDto> clases = claseService.buscarClasePorEstadoConDetalles(estado);
         return ResponseEntity.ok(clases);
     }
 }

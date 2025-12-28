@@ -39,27 +39,27 @@ public class ClaseServiceImpl implements ClaseService {
     @Override
     public List<Clase> listarClases() {
         return claseRepository.findAll();
-    }
+    };
 
     @Override
     public Optional<Clase> buscarClasePorId(Long id) {
         return claseRepository.findById(id);
-    }
+    };
 
     @Override
     public List<Clase> buscarClasePorEspecialidad(Especialidades especialidad) {
         return claseRepository.findByEspecialidades(especialidad);
-    }
+    };
 
     @Override
     public List<Clase> buscarClasePorDia(LocalDate dia) {
         return claseRepository.findByDia(dia);
-    }
+    };
 
     @Override
     public List<Clase> buscarClasePorHora(LocalTime hora) {
         return claseRepository.findByHora(hora);
-    }
+    };
 
     @Override
     public List<Clase> buscarClasePorEstado(Estado estado) {
@@ -84,7 +84,7 @@ public class ClaseServiceImpl implements ClaseService {
     @Override
     public Boolean existeClasePorId(Long id) {
         return claseRepository.existsById(id);
-    }
+    };
 
     @Override
     public Boolean existeClasePorEspecialidades(Especialidades especialidades) {
@@ -102,6 +102,11 @@ public class ClaseServiceImpl implements ClaseService {
     };
 
     @Override
+    public Boolean existeClasePorEstado(Estado estado) {
+        return claseRepository.existsByEstado(estado);
+    };
+
+    @Override
     public Boolean existeClasePorInstructor(Long instructor_id) {
         return claseRepository.existsByInstructorId(instructor_id);
     };
@@ -115,6 +120,8 @@ public class ClaseServiceImpl implements ClaseService {
     public Boolean existeClasePorCaballo(Long caballo_id) {
         return claseRepository.existsByCaballoId(caballo_id);
     };
+
+    // BUSCA el método guardarClase y MODIFÍCALO para incluir la validación:
 
     @Override
     public void guardarClase(Clase clase) {
@@ -155,20 +162,83 @@ public class ClaseServiceImpl implements ClaseService {
             }
         }
 
+        // ✅ AGREGAR ESTA VALIDACIÓN DE CONFLICTO DE HORARIO:
+        validarConflictoDeHorario(
+                clase.getDia(),
+                clase.getHora(),
+                clase.getInstructor().getId(),
+                clase.getAlumno().getId(),
+                clase.getCaballo().getId());
+
         // Si todas las validaciones pasan, guardar
         claseRepository.save(clase);
-    }
+    };
+
+    // BUSCA el método actualizarClase y AGRÉGALE la validación:
 
     @Override
     public void actualizarClase(Long id, Clase clase) {
-        clase.setId(id);
-        claseRepository.save(clase);
+        var claseOpt = claseRepository.findById(id);
+        if (claseOpt.isEmpty()) {
+            throw new ResourceNotFoundException("Clase", "ID", id);
+        }
+
+        var claseExistente = claseOpt.get();
+
+        // ⚠️ Solo actualizar si vienen en el DTO (pueden ser null)
+        if (clase.getInstructor() != null) {
+            var instr = instructorService.buscarInstructorPorId(clase.getInstructor().getId());
+            if (instr.isEmpty()) {
+                throw new ResourceNotFoundException("Instructor", "ID", clase.getInstructor().getId());
+            }
+            claseExistente.setInstructor(instr.get());
+        }
+
+        if (clase.getAlumno() != null) {
+            var alum = alumnoService.buscarAlumnoPorId(clase.getAlumno().getId());
+            if (alum.isEmpty()) {
+                throw new ResourceNotFoundException("Alumno", "ID", clase.getAlumno().getId());
+            }
+            claseExistente.setAlumno(alum.get());
+        }
+
+        if (clase.getCaballo() != null) {
+            var cab = caballoService.buscarCaballoPorId(clase.getCaballo().getId());
+            if (cab.isEmpty()) {
+                throw new ResourceNotFoundException("Caballo", "ID", clase.getCaballo().getId());
+            }
+            claseExistente.setCaballo(cab.get());
+        }
+
+        // Actualizar campos simples solo si vienen
+        if (clase.getEspecialidades() != null)
+            claseExistente.setEspecialidades(clase.getEspecialidades());
+        if (clase.getDia() != null)
+            claseExistente.setDia(clase.getDia());
+        if (clase.getHora() != null)
+            claseExistente.setHora(clase.getHora());
+        if (clase.getEstado() != null)
+            claseExistente.setEstado(clase.getEstado());
+        if (clase.getObservaciones() != null)
+            claseExistente.setObservaciones(clase.getObservaciones());
+
+        // Validar conflictos de horario si cambió día u hora
+        if (clase.getDia() != null || clase.getHora() != null) {
+            validarConflictoDeHorario(
+                    claseExistente.getDia(),
+                    claseExistente.getHora(),
+                    claseExistente.getInstructor().getId(),
+                    claseExistente.getAlumno().getId(),
+                    claseExistente.getCaballo().getId());
+        }
+
+        claseRepository.save(claseExistente);
     };
 
     @Override
     public void eliminarClase(Long id) {
         claseRepository.deleteById(id);
-    }
+    };
 
     @Override
     public void eliminarClaseTemporalmente(Long id) {
@@ -178,7 +248,7 @@ public class ClaseServiceImpl implements ClaseService {
             clase.setEstado(Estado.CANCELADA);
             claseRepository.save(clase);
         }
-    }
+    };
 
     // ============================================================
     // IMPLEMENTACIÓN DE MÉTODOS NUEVOS CON DETALLES
@@ -198,7 +268,7 @@ public class ClaseServiceImpl implements ClaseService {
                 .stream()
                 .map(ClaseResponseDto::new) // Constructor reference
                 .collect(Collectors.toList());
-    }
+    };
 
     /**
      * Busca una clase por ID con detalles.
@@ -210,7 +280,7 @@ public class ClaseServiceImpl implements ClaseService {
     public Optional<ClaseResponseDto> buscarClasePorIdConDetalles(Long id) {
         return claseRepository.findByIdWithDetails(id)
                 .map(ClaseResponseDto::new);
-    }
+    };
 
     /**
      * Busca clases por día con detalles.
@@ -221,7 +291,7 @@ public class ClaseServiceImpl implements ClaseService {
                 .stream()
                 .map(ClaseResponseDto::new)
                 .collect(Collectors.toList());
-    }
+    };
 
     /**
      * Busca clases por instructor con detalles.
@@ -233,7 +303,7 @@ public class ClaseServiceImpl implements ClaseService {
                 .stream()
                 .map(ClaseResponseDto::new)
                 .collect(Collectors.toList());
-    }
+    };
 
     /**
      * Busca clases por alumno con detalles.
@@ -245,7 +315,7 @@ public class ClaseServiceImpl implements ClaseService {
                 .stream()
                 .map(ClaseResponseDto::new)
                 .collect(Collectors.toList());
-    }
+    };
 
     /**
      * Busca clases por caballo con detalles.
@@ -256,7 +326,7 @@ public class ClaseServiceImpl implements ClaseService {
                 .stream()
                 .map(ClaseResponseDto::new)
                 .collect(Collectors.toList());
-    }
+    };
 
     /**
      * Busca clases por estado con detalles.
@@ -267,6 +337,29 @@ public class ClaseServiceImpl implements ClaseService {
                 .stream()
                 .map(ClaseResponseDto::new)
                 .collect(Collectors.toList());
-    }
+    };
 
+    /**
+     * Valida que no exista conflicto de horario para instructor, alumno o caballo.
+     * 
+     * @throws BusinessException si hay conflicto de horario
+     */
+    private void validarConflictoDeHorario(LocalDate dia, LocalTime hora, Long instructorId, Long alumnoId,
+            Long caballoId) {
+        List<Clase> clasesEnMismoHorario = claseRepository.findByDiaWithDetails(dia);
+
+        for (Clase clase : clasesEnMismoHorario) {
+            if (clase.getHora().equals(hora)) {
+                if (clase.getInstructor().getId().equals(instructorId)) {
+                    throw new BusinessException("El instructor ya tiene una clase asignada a esa hora");
+                }
+                if (clase.getAlumno().getId().equals(alumnoId)) {
+                    throw new BusinessException("El alumno ya tiene una clase asignada a esa hora");
+                }
+                if (clase.getCaballo().getId().equals(caballoId)) {
+                    throw new BusinessException("El caballo ya está asignado a una clase en esa hora");
+                }
+            }
+        }
+    }
 }

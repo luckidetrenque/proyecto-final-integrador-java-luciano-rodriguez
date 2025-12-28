@@ -20,128 +20,128 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    /**
-     * Maneja errores de validación de DTOs (@Valid).
-     * Se ejecuta cuando fallan las validaciones de @NotNull, @Min, @Email, etc.
-     */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ErrorResponseDto> handleValidationExceptions(
-            MethodArgumentNotValidException ex,
-            HttpServletRequest request) {
+        /**
+         * Maneja errores de validación de DTOs (@Valid).
+         * Se ejecuta cuando fallan las validaciones de @NotNull, @Min, @Email, etc.
+         */
+        @ExceptionHandler(MethodArgumentNotValidException.class)
+        @ResponseStatus(HttpStatus.BAD_REQUEST)
+        public ResponseEntity<ErrorResponseDto> handleValidationExceptions(
+                        MethodArgumentNotValidException ex,
+                        HttpServletRequest request) {
 
-        // Extraer todos los errores de validación
-        Map<String, String> errores = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String nombreCampo = ((FieldError) error).getField();
-            String mensajeError = error.getDefaultMessage();
-            errores.put(nombreCampo, mensajeError);
-        });
+                // Extraer todos los errores de validación
+                Map<String, String> errores = new HashMap<>();
+                ex.getBindingResult().getAllErrors().forEach((error) -> {
+                        String nombreCampo = ((FieldError) error).getField();
+                        String mensajeError = error.getDefaultMessage();
+                        errores.put(nombreCampo, mensajeError);
+                });
 
-        // Crear respuesta estructurada
-        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
-                HttpStatus.BAD_REQUEST.value(),
-                "Bad Request",
-                "Error de validación en los datos enviados",
-                request.getRequestURI());
-        errorResponseDto.setErrores(errores);
+                // Crear respuesta estructurada
+                ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "Bad Request",
+                                "Error de validación en los datos enviados",
+                                request.getRequestURI());
+                errorResponseDto.setErrores(errores);
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDto);
-    }
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDto);
+        }
 
-    /**
-     * Maneja ResourceNotFoundException (recurso no encontrado).
-     * Se lanza cuando un ID no existe en la base de datos.
-     */
-    @ExceptionHandler(ResourceNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<ErrorResponseDto> handleResourceNotFoundException(
-            ResourceNotFoundException ex,
-            HttpServletRequest request) {
+        /**
+         * Maneja ResourceNotFoundException (recurso no encontrado).
+         * Se lanza cuando un ID no existe en la base de datos.
+         */
+        @ExceptionHandler(ResourceNotFoundException.class)
+        @ResponseStatus(HttpStatus.NOT_FOUND)
+        public ResponseEntity<ErrorResponseDto> handleResourceNotFoundException(
+                        ResourceNotFoundException ex,
+                        HttpServletRequest request) {
 
-        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
-                HttpStatus.NOT_FOUND.value(),
-                "Not Found",
-                ex.getMessage(),
-                request.getRequestURI());
+                ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+                                HttpStatus.NOT_FOUND.value(),
+                                "Not Found",
+                                ex.getMessage(),
+                                request.getRequestURI());
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponseDto);
-    }
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponseDto);
+        }
 
-    /**
-     * Maneja BusinessException (reglas de negocio violadas).
-     * Ejemplo: instructor inactivo, caballo no disponible, etc.
-     */
-    @ExceptionHandler(BusinessException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ErrorResponseDto> handleBusinessException(
-            BusinessException ex,
-            HttpServletRequest request) {
+        /**
+         * Maneja BusinessException (reglas de negocio violadas).
+         * Ejemplo: instructor inactivo, caballo no disponible, etc.
+         */
+        @ExceptionHandler(BusinessException.class)
+        @ResponseStatus(HttpStatus.BAD_REQUEST)
+        public ResponseEntity<ErrorResponseDto> handleBusinessException(
+                        BusinessException ex,
+                        HttpServletRequest request) {
 
-        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
-                HttpStatus.BAD_REQUEST.value(),
-                "Business Rule Violation",
-                ex.getMessage(),
-                request.getRequestURI());
+                ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "Business Rule Violation",
+                                ex.getMessage(),
+                                request.getRequestURI());
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDto);
-    }
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDto);
+        }
 
-    /**
-     * Maneja ConflictException (recursos duplicados).
-     * Se lanza cuando intentas crear algo que ya existe.
-     * Ejemplo: DNI duplicado, nombre de caballo duplicado, etc.
-     */
-    @ExceptionHandler(ConflictException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ResponseEntity<ErrorResponseDto> handleConflictException(
-            ConflictException ex,
-            HttpServletRequest request) {
+        /**
+         * Maneja ConflictException (recursos duplicados).
+         * Se lanza cuando intentas crear algo que ya existe.
+         * Ejemplo: DNI duplicado, nombre de caballo duplicado, etc.
+         */
+        @ExceptionHandler(ConflictException.class)
+        @ResponseStatus(HttpStatus.CONFLICT)
+        public ResponseEntity<ErrorResponseDto> handleConflictException(
+                        ConflictException ex,
+                        HttpServletRequest request) {
 
-        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
-                HttpStatus.CONFLICT.value(),
-                "Conflict",
-                ex.getMessage(),
-                request.getRequestURI());
+                ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+                                HttpStatus.CONFLICT.value(),
+                                "Conflict",
+                                ex.getMessage(),
+                                request.getRequestURI());
 
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponseDto);
-    }
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponseDto);
+        }
 
-    /**
-     * Maneja IllegalArgumentException (argumentos inválidos).
-     * Ejemplo: cantidad de clases no permitida (debe ser 4, 8, 12 o 16).
-     */
-    @ExceptionHandler(IllegalArgumentException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<ErrorResponseDto> handleIllegalArgumentException(
-            IllegalArgumentException ex,
-            HttpServletRequest request) {
+        /**
+         * Maneja IllegalArgumentException (argumentos inválidos).
+         * Ejemplo: cantidad de clases no permitida (debe ser 4, 8, 12 o 16).
+         */
+        @ExceptionHandler(IllegalArgumentException.class)
+        @ResponseStatus(HttpStatus.BAD_REQUEST)
+        public ResponseEntity<ErrorResponseDto> handleIllegalArgumentException(
+                        IllegalArgumentException ex,
+                        HttpServletRequest request) {
 
-        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
-                HttpStatus.BAD_REQUEST.value(),
-                "Invalid Argument",
-                ex.getMessage(),
-                request.getRequestURI());
+                ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "Invalid Argument",
+                                ex.getMessage(),
+                                request.getRequestURI());
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDto);
-    }
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDto);
+        }
 
-    /**
-     * Maneja excepciones genéricas no capturadas.
-     * Última línea de defensa para errores inesperados.
-     */
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<ErrorResponseDto> handleGlobalException(
-            Exception ex,
-            HttpServletRequest request) {
+        /**
+         * Maneja excepciones genéricas no capturadas.
+         * Última línea de defensa para errores inesperados.
+         */
+        @ExceptionHandler(Exception.class)
+        @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+        public ResponseEntity<ErrorResponseDto> handleGlobalException(
+                        Exception ex,
+                        HttpServletRequest request) {
 
-        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Internal Server Error",
-                "Ocurrió un error inesperado en el servidor: " + ex.getMessage(),
-                request.getRequestURI());
+                ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+                                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                                "Internal Server Error",
+                                "Ocurrió un error inesperado en el servidor: " + ex.getMessage(),
+                                request.getRequestURI());
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponseDto);
-    }
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponseDto);
+        }
 }

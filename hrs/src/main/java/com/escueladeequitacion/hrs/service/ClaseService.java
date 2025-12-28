@@ -42,6 +42,8 @@ public interface ClaseService {
 
     public Boolean existeClasePorHora(LocalTime hora);
 
+    public Boolean existeClasePorEstado(Estado estado);
+
     public Boolean existeClasePorInstructor(Long instructor_id);
 
     public Boolean existeClasePorAlumno(Long alumno_id);

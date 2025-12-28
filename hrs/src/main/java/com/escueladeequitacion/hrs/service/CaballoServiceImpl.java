@@ -1,7 +1,9 @@
 package com.escueladeequitacion.hrs.service;
 
 import com.escueladeequitacion.hrs.enums.TipoCaballo;
+import com.escueladeequitacion.hrs.exception.BusinessException;
 import com.escueladeequitacion.hrs.exception.ConflictException;
+import com.escueladeequitacion.hrs.exception.ResourceNotFoundException;
 import com.escueladeequitacion.hrs.model.Caballo;
 import com.escueladeequitacion.hrs.repository.CaballoRepository;
 
@@ -59,13 +61,15 @@ public class CaballoServiceImpl implements CaballoService {
     public Boolean estadoCaballo(Long id) {
         Optional<Caballo> caballo = caballoRepository.findById(id);
         return caballo.map(Caballo::isDisponible).orElse(false);
-    }
+    };
 
     @Override
     public void guardarCaballo(Caballo caballo) {
-        // Validar nombre duplicado
-        if (caballo.getId() == null && caballoRepository.existsByNombre(caballo.getNombre())) {
-            throw new ConflictException("Caballo", "nombre", caballo.getNombre());
+        // Validar nombre duplicado solo al CREAR (cuando id es null)
+        if (caballo.getId() == null) {
+            if (caballoRepository.existsByNombre(caballo.getNombre())) {
+                throw new ConflictException("Caballo", "nombre", caballo.getNombre());
+            }
         }
 
         caballoRepository.save(caballo);
@@ -73,31 +77,58 @@ public class CaballoServiceImpl implements CaballoService {
 
     @Override
     public void actualizarCaballo(Long id, Caballo caballo) {
-        // Si es actualización, verificar que el nombre no esté usado por otro caballo
-        if (caballo.getId() != null) {
-            List<Caballo> existentes = caballoRepository.findByNombreIgnoreCase(caballo.getNombre());
-            for (Caballo existente : existentes) {
-                if (!existente.getId().equals(caballo.getId())) {
-                    throw new ConflictException("Caballo", "nombre", caballo.getNombre());
-                }
+        // 1. Verificar que el caballo existe
+        Caballo caballoExistente = obtenerCaballoOLanzarExcepcion(id);
+
+        // 2. Si el nombre cambió, verificar que el nuevo nombre no esté en uso
+        if (!caballoExistente.getNombre().equalsIgnoreCase(caballo.getNombre())) {
+            if (caballoRepository.existsByNombre(caballo.getNombre())) {
+                throw new ConflictException("Ya existe otro caballo con el nombre " + caballo.getNombre());
             }
         }
-        caballo.setId(id);
-        caballoRepository.save(caballo);
+
+        // 3. Actualizar los campos
+        actualizarCamposDesdeDto(caballoExistente, caballo);
+
+        // 4. Guardar
+        caballoRepository.save(caballoExistente);
     };
 
     @Override
     public void eliminarCaballo(Long id) {
+        obtenerCaballoOLanzarExcepcion(id);
         caballoRepository.deleteById(id);
+    };
+
+@Override
+public void eliminarCaballoTemporalmente(Long id) {
+    // 1. Verificar que existe
+Caballo caballo = obtenerCaballoOLanzarExcepcion(id);
+    
+    // 2. Verificar que está disponible
+    if (!caballo.isDisponible()) {
+        throw new BusinessException("El caballo con ID " + id + " ya no está disponible");
+    }
+    
+    // 3. Marcar como no disponible
+    caballo.setDisponible(false);
+    caballoRepository.save(caballo);
+}
+    /**
+     * Método auxiliar para validar que un caballo existe
+     */
+    private Caballo obtenerCaballoOLanzarExcepcion(Long id) {
+        return caballoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Caballo", "ID", id));
     }
 
-    @Override
-    public void eliminarCaballoTemporalmente(Long id) {
-        Optional<Caballo> caballoOpt = caballoRepository.findById(id);
-        if (caballoOpt.isPresent()) {
-            Caballo caballo = caballoOpt.get();
-            caballo.setDisponible(false);
-            caballoRepository.save(caballo);
-        }
+    /**
+     * Método auxiliar para mapear DTO a entidad existente.
+     * Evita duplicar código de actualización de campos.
+     */
+    private void actualizarCamposDesdeDto(Caballo caballoExistente, Caballo caballoNuevo) {
+        caballoExistente.setNombre(caballoNuevo.getNombre());
+        caballoExistente.setDisponible(caballoNuevo.isDisponible());
+        caballoExistente.setTipoCaballo(caballoNuevo.getTipoCaballo());
     }
 }

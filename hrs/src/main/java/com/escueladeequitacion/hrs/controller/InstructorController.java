@@ -39,10 +39,6 @@ public class InstructorController {
     // Endpoint GET para buscar un instructor por ID
     @GetMapping(Constantes.RESOURCE_INSTRUCTORES + "/{id}")
     public ResponseEntity<?> obtenerInstructorPorId(@PathVariable("id") Long id) {
-        if (!instructorService.existeInstructorPorId(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new Mensaje("El instructor con ID " + id + " no existe en la base de datos"));
-        }
 
         Instructor instructor = instructorService.buscarInstructorPorId(id).get();
         return ResponseEntity.status(HttpStatus.OK).body(instructor);
@@ -51,10 +47,6 @@ public class InstructorController {
     // Endpoint GET para buscar un instructor por DNI
     @GetMapping(Constantes.RESOURCE_INSTRUCTORES + "/dni/{dni}")
     public ResponseEntity<?> obtenerInstructorPorDni(@PathVariable("dni") Integer dni) {
-        if (!instructorService.existeInstructorPorDni(dni)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new Mensaje("El instructor con DNI " + dni + " no existe en la base de datos"));
-        }
 
         Instructor instructor = instructorService.buscarInstructorPorDni(dni).get();
         return ResponseEntity.status(HttpStatus.OK).body(instructor);
@@ -63,10 +55,6 @@ public class InstructorController {
     // Endpoint POST para crear un nuevo instructor
     @PostMapping(Constantes.RESOURCE_INSTRUCTORES)
     public ResponseEntity<?> crearInstructor(@Valid @RequestBody InstructorDto instructorDto) {
-        if (instructorService.existeInstructorPorDni(instructorDto.getDni())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(new Mensaje("Ya existe un instructor con el DNI "
-                    + instructorDto.getDni() + " en la base de datos"));
-        }
 
         Instructor instructor = new Instructor(instructorDto.getDni(), instructorDto.getNombre(),
                 instructorDto.getApellido(),
@@ -82,16 +70,6 @@ public class InstructorController {
     @PutMapping(Constantes.RESOURCE_INSTRUCTORES + "/{id}")
     public ResponseEntity<?> actualizarInstructor(@PathVariable("id") Long id,
             @Valid @RequestBody InstructorDto instructorDto) {
-        if (!instructorService.existeInstructorPorId(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new Mensaje("El instructor con ID " + id + " no existe en la base de datos"));
-        }
-
-        if (!instructorService.existeInstructorPorDni(instructorDto.getDni())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new Mensaje(
-                            "El instructor con DNI " + instructorDto.getDni() + " no existe en la base de datos"));
-        }
 
         Instructor instructor = instructorService.buscarInstructorPorId(id).get();
         instructor.setDni(instructorDto.getDni());
@@ -111,10 +89,6 @@ public class InstructorController {
     // Endpoint DELETE para eliminar un instructor por ID (Eliminación Física)
     @DeleteMapping(Constantes.RESOURCE_INSTRUCTORES + "/{id}")
     public ResponseEntity<?> eliminarInstructor(@PathVariable Long id) {
-        if (!instructorService.existeInstructorPorId(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new Mensaje("El instructor con ID " + id + " no existe en la base de datos"));
-        }
 
         instructorService.eliminarInstructor(id);
         return ResponseEntity.status(HttpStatus.OK)
@@ -123,23 +97,16 @@ public class InstructorController {
     }
 
     // Endpoint DELETE para eliminar un instructor por ID (Eliminación Lógica)
-    @DeleteMapping(Constantes.RESOURCE_INSTRUCTORES + "/{id}/inactivar")
-    public ResponseEntity<?> eliminarInstructorTemporalmente(@PathVariable Long id) {
-        if (!instructorService.existeInstructorPorId(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Mensaje("No existe el instructor con ese ID"));
-        }
+@DeleteMapping(Constantes.RESOURCE_INSTRUCTORES + "/{id}/inactivar")
+public ResponseEntity<?> eliminarInstructorTemporalmente(@PathVariable Long id) {
+    // El Service maneja todas las validaciones
+    instructorService.eliminarInstructorTemporalmente(id);
+    
+    return ResponseEntity.status(HttpStatus.OK)
+            .body(new Mensaje("Instructor con ID " + id + " eliminado correctamente (forma lógica)"));
+}
 
-        if (!instructorService.estadoInstructor(id)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new Mensaje("El instructor con ID " + id + " ya está inactivo"));
-        }
-
-        instructorService.eliminarInstructorTemporalmente(id);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new Mensaje("Instructor con ID " + id + " eliminado correctamente (forma lógica)"));
-
-    }
-
+// Endpoint GET para buscar por diferentes filtros
     @GetMapping(Constantes.RESOURCE_INSTRUCTORES + "/buscar")
     public ResponseEntity<?> buscarInstructor(
             @RequestParam(required = false) String nombre,

@@ -39,6 +39,8 @@ public interface ClaseRepository extends JpaRepository<Clase, Long> {
 
         public boolean existsByHora(LocalTime hora);
 
+        public boolean existsByEstado(Estado estado);
+
         public boolean existsByInstructorId(Long instructor_id);
 
         public boolean existsByAlumnoId(Long alumno_id);

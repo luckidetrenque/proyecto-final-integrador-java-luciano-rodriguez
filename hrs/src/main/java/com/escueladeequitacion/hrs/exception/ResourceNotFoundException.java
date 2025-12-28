@@ -1,7 +1,8 @@
 package com.escueladeequitacion.hrs.exception;
 
 /**
- * Excepción personalizada para cuando un recurso no se encuentra en la base de datos.
+ * Excepción personalizada para cuando un recurso no se encuentra en la base de
+ * datos.
  * Ejemplo: "El alumno con ID 5 no existe"
  */
 public class ResourceNotFoundException extends RuntimeException {

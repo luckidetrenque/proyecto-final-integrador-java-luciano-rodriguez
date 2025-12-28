@@ -1,5 +1,6 @@
 package com.escueladeequitacion.hrs.service;
 
+import com.escueladeequitacion.hrs.exception.BusinessException;
 import com.escueladeequitacion.hrs.exception.ConflictException;
 import com.escueladeequitacion.hrs.exception.ResourceNotFoundException;
 import com.escueladeequitacion.hrs.model.Alumno;
@@ -29,9 +30,7 @@ public class AlumnoServiceImpl implements AlumnoService {
 
     @Override
     public Optional<Alumno> buscarAlumnoPorId(Long id) {
-        return Optional.ofNullable(
-                alumnoRepository.findById(id)
-                        .orElseThrow(() -> new ResourceNotFoundException("Alumno", "ID", id)));
+        return alumnoRepository.findById(id);
     };
 
     @Override
@@ -42,12 +41,12 @@ public class AlumnoServiceImpl implements AlumnoService {
     @Override
     public List<Alumno> buscarAlumnoPorNombre(String nombre) {
         return alumnoRepository.findByNombreIgnoreCase(nombre);
-    }
+    };
 
     @Override
     public List<Alumno> buscarAlumnoPorApellido(String apellido) {
         return alumnoRepository.findByApellidoIgnoreCase(apellido);
-    }
+    };
 
     @Override
     public List<Alumno> buscarAlumnoPorNombreYApellido(String nombre, String apellido) {
@@ -57,12 +56,12 @@ public class AlumnoServiceImpl implements AlumnoService {
     @Override
     public List<Alumno> buscarAlumnoPorEstado(Boolean activo) {
         return alumnoRepository.findByActivo(activo);
-    }
+    };
 
     @Override
     public List<Alumno> buscarAlumnoConCaballo(Boolean propietario) {
         return alumnoRepository.findByPropietario(propietario);
-    }
+    };
 
     @Override
     public List<Alumno> buscarPorFechaInscripcion(LocalDate fechaInscripcion) {
@@ -93,13 +92,15 @@ public class AlumnoServiceImpl implements AlumnoService {
     public Boolean estadoAlumno(Long id) {
         Optional<Alumno> alumno = alumnoRepository.findById(id);
         return alumno.map(Alumno::isActivo).orElse(false);
-    }
+    };
 
     @Override
     public void guardarAlumno(Alumno alumno) {
-        // Validar DNI duplicado
-        if (alumno.getId() == null && alumnoRepository.existsByDni(alumno.getDni())) {
-            throw new ConflictException("Alumno", "DNI", alumno.getDni());
+        // Validar DNI duplicado solo al CREAR (cuando id es null)
+        if (alumno.getId() == null) {
+            if (alumnoRepository.existsByDni(alumno.getDni())) {
+                throw new ConflictException("Alumno", "DNI", alumno.getDni());
+            }
         }
 
         alumnoRepository.save(alumno);
@@ -107,29 +108,70 @@ public class AlumnoServiceImpl implements AlumnoService {
 
     @Override
     public void actualizarAlumno(Long id, Alumno alumno) {
-        // Si es actualización, verificar que el DNI no esté usado por otro alumno
-        if (alumno.getId() != null) {
-            Optional<Alumno> existente = alumnoRepository.findByDni(alumno.getDni());
-            if (existente.isPresent() && !existente.get().getId().equals(alumno.getId())) {
-                throw new ConflictException("Alumno", "DNI", alumno.getDni());
+        // 1. Verificar que el alumno que se quiere actualizar existe
+        // Usar el método auxiliar en lugar de validar manualmente
+        Alumno alumnoExistente = obtenerAlumnoOLanzarExcepcion(id);
+
+        // 2. Si el DNI cambió, verificar que el nuevo DNI no esté en uso por OTRO
+        // alumno
+        if (!alumnoExistente.getDni().equals(alumno.getDni())) {
+            Optional<Alumno> alumnoConNuevoDni = alumnoRepository.findByDni(alumno.getDni());
+            if (alumnoConNuevoDni.isPresent()) {
+                throw new ConflictException("Ya existe otro alumno con el DNI " + alumno.getDni());
             }
         }
-        alumno.setId(id);
-        alumnoRepository.save(alumno);
+
+        // 3. Actualizar campos usando método auxiliar
+        actualizarCamposDesdeDto(alumnoExistente, alumno);
+
+        // 4. Guardar los cambios
+        alumnoRepository.save(alumnoExistente);
     };
 
     @Override
     public void eliminarAlumno(Long id) {
+        obtenerAlumnoOLanzarExcepcion(id);
         alumnoRepository.deleteById(id);
     };
 
-    @Override
-    public void eliminarAlumnoTemporalmente(Long id) {
-        Optional<Alumno> alumnoOpt = alumnoRepository.findById(id);
-        if (alumnoOpt.isPresent()) {
-            Alumno alumno = alumnoOpt.get();
-            alumno.setActivo(false);
-            alumnoRepository.save(alumno);
-        }
+
+@Override
+public void eliminarAlumnoTemporalmente(Long id) {
+    // 1. Verificar que existe (lanza ResourceNotFoundException si no existe)
+    Alumno alumno = obtenerAlumnoOLanzarExcepcion(id);
+    
+    // 2. Verificar que está activo (lanza BusinessException si ya está inactivo)
+    if (!alumno.isActivo()) {
+        throw new BusinessException("El alumno con ID " + id + " ya está inactivo");
+    }
+    
+    // 3. Inactivar
+    alumno.setActivo(false);
+    alumnoRepository.save(alumno);
+};
+
+    /**
+     * Método auxiliar para validar que un alumno existe
+     */
+    private Alumno obtenerAlumnoOLanzarExcepcion(Long id) {
+        return alumnoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Alumno", "ID", id));
+    };
+
+    /**
+     * Método auxiliar para mapear DTO a entidad existente.
+     * Evita duplicar código de actualización de campos.
+     */
+    private void actualizarCamposDesdeDto(Alumno alumnoExistente, Alumno alumnoNuevo) {
+        alumnoExistente.setDni(alumnoNuevo.getDni());
+        alumnoExistente.setNombre(alumnoNuevo.getNombre());
+        alumnoExistente.setApellido(alumnoNuevo.getApellido());
+        alumnoExistente.setFechaNacimiento(alumnoNuevo.getFechaNacimiento());
+        alumnoExistente.setTelefono(alumnoNuevo.getTelefono());
+        alumnoExistente.setEmail(alumnoNuevo.getEmail());
+        alumnoExistente.setFechaInscripcion(alumnoNuevo.getFechaInscripcion());
+        alumnoExistente.setCantidadClases(alumnoNuevo.getCantidadClases());
+        alumnoExistente.setActivo(alumnoNuevo.isActivo());
+        alumnoExistente.setPropietario(alumnoNuevo.isPropietario());
     }
 }

@@ -1,6 +1,8 @@
 package com.escueladeequitacion.hrs.service;
 
+import com.escueladeequitacion.hrs.exception.BusinessException;
 import com.escueladeequitacion.hrs.exception.ConflictException;
+import com.escueladeequitacion.hrs.exception.ResourceNotFoundException;
 import com.escueladeequitacion.hrs.model.Instructor;
 import com.escueladeequitacion.hrs.repository.InstructorRepository;
 
@@ -39,12 +41,12 @@ public class InstructorServiceImpl implements InstructorService {
     @Override
     public List<Instructor> buscarInstructorPorNombre(String nombre) {
         return instructorRepository.findByNombreIgnoreCase(nombre);
-    }
+    };
 
     @Override
     public List<Instructor> buscarInstructorPorApellido(String apellido) {
         return instructorRepository.findByApellidoIgnoreCase(apellido);
-    }
+    };
 
     @Override
     public List<Instructor> buscarInstructorPorNombreYApellido(String nombre, String apellido) {
@@ -54,7 +56,7 @@ public class InstructorServiceImpl implements InstructorService {
     @Override
     public List<Instructor> buscarInstructorsPorEstado(Boolean activo) {
         return instructorRepository.findByActivo(activo);
-    }
+    };
 
     @Override
     public List<Instructor> buscarPorFechaNacimiento(LocalDate fechaNacimiento) {
@@ -80,43 +82,80 @@ public class InstructorServiceImpl implements InstructorService {
     public Boolean estadoInstructor(Long id) {
         Optional<Instructor> instructor = instructorRepository.findById(id);
         return instructor.map(Instructor::isActivo).orElse(false);
-    }
+    };
 
     @Override
     public void guardarInstructor(Instructor instructor) {
-        // Validar DNI duplicado
-        if (instructor.getId() == null && instructorRepository.existsByDni(instructor.getDni())) {
-            throw new ConflictException("Instructor", "DNI", instructor.getDni());
-        }
-
-        instructorRepository.save(instructor);
-    }
-
-    @Override
-    public void actualizarInstructor(Long id, Instructor instructor) {
-        // Si es actualización, verificar que el DNI no esté usado por otro instructor
-        if (instructor.getId() != null) {
-            Optional<Instructor> existente = instructorRepository.findByDni(instructor.getDni());
-            if (existente.isPresent() && !existente.get().getId().equals(instructor.getId())) {
+        // Validar DNI duplicado solo al CREAR (cuando id es null)
+        if (instructor.getId() == null) {
+            if (instructorRepository.existsByDni(instructor.getDni())) {
                 throw new ConflictException("Instructor", "DNI", instructor.getDni());
             }
         }
-        instructor.setId(id);
+
         instructorRepository.save(instructor);
     };
 
     @Override
+    public void actualizarInstructor(Long id, Instructor instructor) {
+        // 1. Verificar que el instructor existe
+        Instructor instructorExistente = obtenerInstructorOLanzarExcepcion(id);
+
+        // 2. Si el DNI cambió, verificar que el nuevo DNI no esté en uso
+        if (!instructorExistente.getDni().equals(instructor.getDni())) {
+            Optional<Instructor> instructorConNuevoDni = instructorRepository.findByDni(instructor.getDni());
+            if (instructorConNuevoDni.isPresent()) {
+                throw new ConflictException("Ya existe otro instructor con el DNI " + instructor.getDni());
+            }
+        }
+
+        // 3. Actualizar los campos
+        actualizarCamposDesdeDto(instructorExistente, instructor);
+
+        // 4. Guardar
+        instructorRepository.save(instructorExistente);
+    }
+
+    @Override
     public void eliminarInstructor(Long id) {
+        obtenerInstructorOLanzarExcepcion(id);
         instructorRepository.deleteById(id);
     };
 
-    @Override
-    public void eliminarInstructorTemporalmente(Long id) {
-        Optional<Instructor> instructorOpt = instructorRepository.findById(id);
-        if (instructorOpt.isPresent()) {
-            Instructor instructor = instructorOpt.get();
-            instructor.setActivo(false);
-            instructorRepository.save(instructor);
-        }
+@Override
+public void eliminarInstructorTemporalmente(Long id) {
+    // 1. Verificar que existe
+Instructor instructor = obtenerInstructorOLanzarExcepcion(id);
+    
+    // 2. Verificar que está activo
+    if (!instructor.isActivo()) {
+        throw new BusinessException("El instructor con ID " + id + " ya está inactivo");
+    }
+    
+    // 3. Inactivar
+    instructor.setActivo(false);
+    instructorRepository.save(instructor);
+};
+
+    /**
+     * Método auxiliar para validar que un instructor existe
+     */
+    private Instructor obtenerInstructorOLanzarExcepcion(Long id) {
+        return instructorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Instructor", "ID", id));
+    }
+
+    /**
+     * Método auxiliar para mapear DTO a entidad existente.
+     * Evita duplicar código de actualización de campos.
+     */
+    private void actualizarCamposDesdeDto(Instructor instructorExistente, Instructor instructorNuevo) {
+        instructorExistente.setDni(instructorNuevo.getDni());
+        instructorExistente.setNombre(instructorNuevo.getNombre());
+        instructorExistente.setApellido(instructorNuevo.getApellido());
+        instructorExistente.setFechaNacimiento(instructorNuevo.getFechaNacimiento());
+        instructorExistente.setTelefono(instructorNuevo.getTelefono());
+        instructorExistente.setEmail(instructorNuevo.getEmail());
+        instructorExistente.setActivo(instructorNuevo.isActivo());
     }
 }
