@@ -1,0 +1,32 @@
+package com.escueladeequitacion.hrs.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.escueladeequitacion.hrs.dto.CalendarioDto;
+import com.escueladeequitacion.hrs.service.CalendarioService;
+import com.escueladeequitacion.hrs.utility.Constantes;
+
+@RestController
+@RequestMapping(Constantes.API_VERSION)
+@CrossOrigin(origins = { Constantes.ORIGINS })
+
+// Controlador REST para gestionar el calendario
+public class CalendarioController {
+
+    @Autowired
+    private CalendarioService calendarioService;
+
+    @PostMapping(Constantes.RESOURCE_CALENDARIO+"/copiar-semana")
+    public ResponseEntity<String> copiar(@RequestBody CalendarioDto request) {
+        calendarioService.copiarSemanaCompleta(request.getFechaInicioOrigen(), request.getFechaInicioDestino());
+        return ResponseEntity.ok("Clases copiadas exitosamente a la semana del " + request.getFechaInicioDestino());
+    }
+}
+
+
