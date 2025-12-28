@@ -1,10 +1,13 @@
 package com.escueladeequitacion.hrs.service;
 
+import com.escueladeequitacion.hrs.dto.AlumnoDto;
+import com.escueladeequitacion.hrs.enums.Estado;
 import com.escueladeequitacion.hrs.exception.BusinessException;
 import com.escueladeequitacion.hrs.exception.ConflictException;
 import com.escueladeequitacion.hrs.exception.ResourceNotFoundException;
 import com.escueladeequitacion.hrs.model.Alumno;
 import com.escueladeequitacion.hrs.repository.AlumnoRepository;
+import com.escueladeequitacion.hrs.utility.Constantes;
 
 import jakarta.transaction.Transactional;
 
@@ -12,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -89,6 +94,16 @@ public class AlumnoServiceImpl implements AlumnoService {
     };
 
     @Override
+    public long contarClasesCompletadas(Long alumnoId) {
+        return alumnoRepository.contarClasesPorEstado(alumnoId, Estado.COMPLETADA);
+    }
+
+    @Override
+    public long contarClasesARecuperar(Long alumnoId, List<Estado> estados) {
+        return alumnoRepository.contarClasesPorEstados(alumnoId, List.of(Estado.CANCELADA, Estado.ACA));
+    };
+
+    @Override
     public Boolean estadoAlumno(Long id) {
         Optional<Alumno> alumno = alumnoRepository.findById(id);
         return alumno.map(Alumno::isActivo).orElse(false);
@@ -134,29 +149,141 @@ public class AlumnoServiceImpl implements AlumnoService {
         alumnoRepository.deleteById(id);
     };
 
+    @Override
+    public void eliminarAlumnoTemporalmente(Long id) {
+        // 1. Verificar que existe (lanza ResourceNotFoundException si no existe)
+        Alumno alumno = obtenerAlumnoOLanzarExcepcion(id);
 
-@Override
-public void eliminarAlumnoTemporalmente(Long id) {
-    // 1. Verificar que existe (lanza ResourceNotFoundException si no existe)
-    Alumno alumno = obtenerAlumnoOLanzarExcepcion(id);
-    
-    // 2. Verificar que está activo (lanza BusinessException si ya está inactivo)
-    if (!alumno.isActivo()) {
-        throw new BusinessException("El alumno con ID " + id + " ya está inactivo");
-    }
-    
-    // 3. Inactivar
-    alumno.setActivo(false);
-    alumnoRepository.save(alumno);
-};
+        // 2. Verificar que está activo (lanza BusinessException si ya está inactivo)
+        if (!alumno.isActivo()) {
+            throw new BusinessException("El alumno con ID " + id + " ya está inactivo");
+        }
+
+        // 3. Inactivar
+        alumno.setActivo(false);
+        alumnoRepository.save(alumno);
+    };
 
     /**
-     * Método auxiliar para validar que un alumno existe
+     * Crea un alumno desde un DTO con todas las validaciones.
+     */
+    @Override
+    public Alumno crearAlumnoDesdeDto(AlumnoDto alumnoDto) {
+        // 1. Validar DNI duplicado
+        if (alumnoRepository.existsByDni(alumnoDto.getDni())) {
+            throw new ConflictException("Alumno", "DNI", alumnoDto.getDni());
+        }
+
+        // 2. Validar cantidad de clases
+        int cantidadClases = alumnoDto.getCantidadClases();
+        if (!Arrays.asList(Constantes.CANTIDAD_CLASES).contains(cantidadClases)) {
+            throw new IllegalArgumentException("La cantidad de clases debe ser 4, 8, 12 o 16");
+        }
+
+        // 3. Crear el alumno
+        Alumno alumno = new Alumno(
+                alumnoDto.getDni(),
+                alumnoDto.getNombre(),
+                alumnoDto.getApellido(),
+                alumnoDto.getFechaNacimiento(),
+                alumnoDto.getTelefono(),
+                alumnoDto.getEmail(),
+                alumnoDto.getFechaInscripcion(),
+                alumnoDto.getCantidadClases(),
+                alumnoDto.isActivo(),
+                alumnoDto.isPropietario());
+
+        return alumnoRepository.save(alumno);
+    }
+
+    /**
+     * Actualiza un alumno desde un DTO con validaciones.
+     */
+    @Override
+    public void actualizarAlumnoDesdeDto(Long id, AlumnoDto alumnoDto) {
+        // 1. Obtener alumno existente
+        Alumno alumnoExistente = alumnoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Alumno", "ID", id));
+
+        // 2. Validar DNI duplicado solo si cambió
+        if (!alumnoExistente.getDni().equals(alumnoDto.getDni())) {
+            if (alumnoRepository.existsByDni(alumnoDto.getDni())) {
+                throw new ConflictException("Ya existe otro alumno con el DNI " + alumnoDto.getDni());
+            }
+        }
+
+        // 3. Validar cantidad de clases
+        if (!Arrays.asList(Constantes.CANTIDAD_CLASES).contains(alumnoDto.getCantidadClases())) {
+            throw new IllegalArgumentException("La cantidad de clases debe ser 4, 8, 12 o 16");
+        }
+
+        // 4. Crear objeto temporal con los nuevos datos
+        Alumno alumnoNuevo = new Alumno();
+        alumnoNuevo.setDni(alumnoDto.getDni());
+        alumnoNuevo.setNombre(alumnoDto.getNombre());
+        alumnoNuevo.setApellido(alumnoDto.getApellido());
+        alumnoNuevo.setFechaNacimiento(alumnoDto.getFechaNacimiento());
+        alumnoNuevo.setTelefono(alumnoDto.getTelefono());
+        alumnoNuevo.setEmail(alumnoDto.getEmail());
+        alumnoNuevo.setFechaInscripcion(alumnoDto.getFechaInscripcion());
+        alumnoNuevo.setCantidadClases(alumnoDto.getCantidadClases());
+        alumnoNuevo.setActivo(alumnoDto.isActivo());
+        alumnoNuevo.setPropietario(alumnoDto.isPropietario());
+
+        // 5. Actualizar campos usando método auxiliar
+        actualizarCamposDesdeDto(alumnoExistente, alumnoNuevo);
+
+        // 6. Guardar
+        alumnoRepository.save(alumnoExistente);
+    }
+
+    /**
+     * Busca alumnos con múltiples filtros.
+     */
+    @Override
+    public List<Alumno> buscarAlumnosConFiltros(String nombre, String apellido, Boolean activo,
+            Boolean propietario, LocalDate fechaInscripcion,
+            LocalDate fechaNacimiento) {
+        // Aplicar filtros en orden de especificidad
+        if (nombre != null && apellido != null) {
+            return alumnoRepository.findByNombreAndApellidoIgnoreCase(nombre, apellido);
+        }
+
+        if (nombre != null) {
+            return alumnoRepository.findByNombreIgnoreCase(nombre);
+        }
+
+        if (apellido != null) {
+            return alumnoRepository.findByApellidoIgnoreCase(apellido);
+        }
+
+        if (activo != null) {
+            return alumnoRepository.findByActivo(activo);
+        }
+
+        if (propietario != null) {
+            return alumnoRepository.findByPropietario(propietario);
+        }
+
+        if (fechaInscripcion != null) {
+            return alumnoRepository.findByFechaInscripcion(fechaInscripcion);
+        }
+
+        if (fechaNacimiento != null) {
+            return alumnoRepository.findByFechaNacimiento(fechaNacimiento);
+        }
+
+        // Si no hay filtros, retornar lista vacía (el controller devuelve todos)
+        return new ArrayList<>();
+    }
+
+    /**
+     * Método auxiliar para validar existencia (ya lo tienes).
      */
     private Alumno obtenerAlumnoOLanzarExcepcion(Long id) {
         return alumnoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Alumno", "ID", id));
-    };
+    }
 
     /**
      * Método auxiliar para mapear DTO a entidad existente.

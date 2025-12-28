@@ -23,7 +23,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping(Constantes.API_VERSION)
@@ -44,7 +43,15 @@ public class ClaseController {
     @Autowired
     CaballoService caballoService;
 
+    // ============================================================
+    // ENDPOINTS BÁSICOS (sin detalles)
+    // ============================================================
+
     // Endpoint GET para listar todos las clases
+    /**
+     * GET /api/v1/clases
+     * Lista todas las clases (sin detalles de relaciones).
+     */
     @GetMapping(Constantes.RESOURCE_CLASES)
     public ResponseEntity<List<Clase>> listarClases() {
         List<Clase> clases = claseService.listarClases();
@@ -52,6 +59,10 @@ public class ClaseController {
     }
 
     // Endpoint GET para buscar una clase por ID
+    /**
+     * GET /api/v1/clases/{id}
+     * Obtiene una clase por ID.
+     */
     @GetMapping(Constantes.RESOURCE_CLASES + "/{id}")
     public ResponseEntity<?> obtenerClasePorId(@PathVariable("id") Long id) {
 
@@ -73,102 +84,57 @@ public class ClaseController {
     }
 
     // Endpoint DELETE para eliminar un clase por ID
+    /**
+     * DELETE /api/v1/clases/{id}
+     * Elimina una clase (eliminación física).
+     */
     @DeleteMapping(Constantes.RESOURCE_CLASES + "/{id}")
     public ResponseEntity<?> eliminarClase(@PathVariable Long id) {
-        if (!claseService.existeClasePorId(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Mensaje("No existe el clase con ese ID"));
-        }
+        // El Service valida que existe antes de eliminar
         claseService.eliminarClase(id);
-        return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Clase eliminada correctamente"));
 
+        return ResponseEntity.ok(new Mensaje("Clase con ID " + id + " eliminada correctamente"));
     }
 
     // Endpoint POST para crear una nueva clase
+    /**
+     * POST /api/v1/clases
+     * Crea una nueva clase.
+     */
     @PostMapping(Constantes.RESOURCE_CLASES)
     public ResponseEntity<?> crearClase(@Valid @RequestBody ClaseDto claseDto) {
-        // Las validaciones ahora están en el Service
-        // Si hay error, GlobalExceptionHandler lo captura automáticamente
 
-        var instructorOpt = instructorService.buscarInstructorPorId(claseDto.getInstructorId());
-        var alumnoOpt = alumnoService.buscarAlumnoPorId(claseDto.getAlumnoId());
-        var caballoOpt = caballoService.buscarCaballoPorId(claseDto.getCaballoId());
-
-        // Crear la clase
-        Clase clase = new Clase();
-        clase.setEspecialidades(claseDto.getEspecialidades());
-        clase.setDia(claseDto.getDia());
-        clase.setHora(claseDto.getHora());
-        clase.setEstado(claseDto.getEstado());
-        clase.setObservaciones(claseDto.getObservaciones());
-        clase.setInstructor(instructorOpt.get());
-        clase.setAlumno(alumnoOpt.get());
-        clase.setCaballo(caballoOpt.get());
-
-        // El Service se encarga de las validaciones y lanza excepciones si hay
-        // problemas
-        claseService.guardarClase(clase);
+        Clase clase = claseService.crearClaseDesdeDto(claseDto);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new Mensaje("Clase creada correctamente"));
+                .body(new Mensaje("Clase creada correctamente con ID: " + clase.getId()));
     }
 
     // Endpoint PUT para actualizar un clase por ID
+    /**
+     * PUT /api/v1/clases/{id}
+     * Actualiza una clase existente.
+     */
     @PutMapping(Constantes.RESOURCE_CLASES + "/{id}")
-    public ResponseEntity<?> actualizarOnstructor(@PathVariable("id") Long id,
-            @Valid @RequestBody ClaseDto claseDto) {
-        if (!claseService.existeClasePorId(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Mensaje("No existe la clase con ese ID"));
-        }
-        try {
-            var claseOpt = claseService.buscarClasePorId(id);
-            if (claseOpt.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Mensaje("No existe la clase con ese ID"));
-            }
+    public ResponseEntity<?> actualizarClase(@PathVariable Long id, @Valid @RequestBody ClaseDto claseDto) {
+        // El Service maneja todas las validaciones
+        claseService.actualizarClaseDesdeDto(id, claseDto);
 
-            var clase = claseOpt.get();
-            // resolver nuevas asociaciones si vienen en DTO
-            if (claseDto.getInstructorId() != null) {
-                var instr = instructorService.buscarInstructorPorId(claseDto.getInstructorId());
-                if (instr.isEmpty())
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Mensaje("Instructor no encontrado"));
-                clase.setInstructor(instr.get());
-            }
-            if (claseDto.getAlumnoId() != null) {
-                var alum = alumnoService.buscarAlumnoPorId(claseDto.getAlumnoId());
-                if (alum.isEmpty())
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Mensaje("Alumno no encontrado"));
-                clase.setAlumno(alum.get());
-            }
-            if (claseDto.getCaballoId() != null) {
-                var cab = caballoService.buscarCaballoPorId(claseDto.getCaballoId());
-                if (cab.isEmpty())
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Mensaje("Caballo no encontrado"));
-                clase.setCaballo(cab.get());
-            }
-
-            if (claseDto.getEspecialidades() != null)
-                clase.setEspecialidades(claseDto.getEspecialidades());
-            if (claseDto.getDia() != null)
-                clase.setDia(claseDto.getDia());
-            if (claseDto.getEstado() != null)
-                clase.setEstado(claseDto.getEstado());
-
-            claseService.guardarClase(clase);
-            return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Clase modificada correctamente"));
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Mensaje(ex.getMessage()));
-        }
-
+        return ResponseEntity.ok(new Mensaje("Clase con ID " + id + " actualizada correctamente"));
     }
 
     // ============================================================
-    // ENDPOINTS NUEVOS - Retornan clases con detalles relacionados
+    // ENDPOINTS CON DETALLES (relaciones cargadas)
     // ============================================================
 
+    /**
+     * GET /api/v1/clases/detalles
+     * Lista todas las clases con información de instructor, alumno y caballo.
+     */
     @GetMapping(Constantes.RESOURCE_CLASES + "/detalles")
     public ResponseEntity<List<ClaseResponseDto>> listarClasesConDetalles() {
         List<ClaseResponseDto> clases = claseService.listarClasesConDetalles();
-        return ResponseEntity.status(HttpStatus.OK).body(clases);
+        return ResponseEntity.ok(clases);
     }
 
     /**
@@ -176,46 +142,31 @@ public class ClaseController {
      * Obtiene una clase específica con todos sus detalles.
      */
     @GetMapping(Constantes.RESOURCE_CLASES + "/{id}/detalles")
-    public ResponseEntity<?> obtenerClaseConDetalles(@PathVariable Long id) {
-        Optional<ClaseResponseDto> claseOpt = claseService.buscarClasePorIdConDetalles(id);
+    public ResponseEntity<ClaseResponseDto> obtenerClaseConDetalles(@PathVariable Long id) {
+        ClaseResponseDto clase = claseService.buscarClasePorIdConDetalles(id)
+                .orElseThrow(
+                        () -> new com.escueladeequitacion.hrs.exception.ResourceNotFoundException("Clase", "ID", id));
 
-        if (claseOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new Mensaje("La clase con ID " + id + " no existe en la base de datos"));
-        }
-
-        return ResponseEntity.ok(claseOpt.get());
+        return ResponseEntity.ok(clase);
     }
 
     /**
      * GET /api/v1/clases/dia/{dia}/detalles
      * Busca clases por fecha con detalles.
-     * Ejemplo: /api/v1/clases/dia/2025-12-26/detalles
      */
     @GetMapping(Constantes.RESOURCE_CLASES + "/dia/{dia}/detalles")
-    public ResponseEntity<?> obtenerClasesPorDiaConDetalles(@PathVariable LocalDate dia) {
+    public ResponseEntity<List<ClaseResponseDto>> obtenerClasesPorDiaConDetalles(@PathVariable LocalDate dia) {
         List<ClaseResponseDto> clases = claseService.buscarClasePorDiaConDetalles(dia);
-
-        if (clases.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new Mensaje("No hay clases programadas para el día " + dia));
-        }
-
         return ResponseEntity.ok(clases);
     }
 
     /**
      * GET /api/v1/clases/instructor/{instructorId}/detalles
      * Obtiene todas las clases de un instructor específico.
-     * Útil para que el instructor vea su agenda.
      */
     @GetMapping(Constantes.RESOURCE_CLASES + "/instructor/{instructorId}/detalles")
-    public ResponseEntity<?> obtenerClasesPorInstructorConDetalles(@PathVariable Long instructorId) {
-        if (!instructorService.existeInstructorPorId(instructorId)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new Mensaje("El instructor con ID " + instructorId + " no existe"));
-        }
-
+    public ResponseEntity<List<ClaseResponseDto>> obtenerClasesPorInstructorConDetalles(
+            @PathVariable Long instructorId) {
         List<ClaseResponseDto> clases = claseService.buscarClasePorInstructorConDetalles(instructorId);
         return ResponseEntity.ok(clases);
     }
@@ -223,31 +174,24 @@ public class ClaseController {
     /**
      * GET /api/v1/clases/alumno/{alumnoId}/detalles
      * Obtiene todas las clases de un alumno específico.
-     * Útil para que el alumno vea sus clases programadas.
      */
     @GetMapping(Constantes.RESOURCE_CLASES + "/alumno/{alumnoId}/detalles")
-    public ResponseEntity<?> obtenerClasesPorAlumnoConDetalles(@PathVariable Long alumnoId) {
-        if (!alumnoService.existeAlumnoPorId(alumnoId)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new Mensaje("El alumno con ID " + alumnoId + " no existe"));
-        }
-
+    public ResponseEntity<List<ClaseResponseDto>> obtenerClasesPorAlumnoConDetalles(@PathVariable Long alumnoId) {
         List<ClaseResponseDto> clases = claseService.buscarClasePorAlumnoConDetalles(alumnoId);
         return ResponseEntity.ok(clases);
     }
 
-        @GetMapping(Constantes.RESOURCE_CLASES + "/caballo/{caballoId}/detalles")
+    /**
+     * GET /api/v1/clases/alumno/{alumnoId}/detalles
+     * Obtiene todas las clases de un alumno específico.
+     */
+    @GetMapping(Constantes.RESOURCE_CLASES + "/caballo/{caballoId}/detalles")
     public ResponseEntity<?> obtenerClasesPorCaballoConDetalles(@PathVariable Long caballoId) {
-        if (!caballoService.existeCaballoPorId(caballoId)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new Mensaje("El caballo con ID " + caballoId + " no existe"));
-        }
-
         List<ClaseResponseDto> clases = claseService.buscarClasePorCaballoConDetalles(caballoId);
         return ResponseEntity.ok(clases);
     }
 
-            @GetMapping(Constantes.RESOURCE_CLASES + "/estado/{estado}/detalles")
+    @GetMapping(Constantes.RESOURCE_CLASES + "/estado/{estado}/detalles")
     public ResponseEntity<?> obtenerClasesPorEstadoConDetalles(@PathVariable Estado estado) {
         if (!claseService.existeClasePorEstado(estado)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)

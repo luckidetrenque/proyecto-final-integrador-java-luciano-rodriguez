@@ -1,5 +1,6 @@
 package com.escueladeequitacion.hrs.service;
 
+import com.escueladeequitacion.hrs.dto.InstructorDto;
 import com.escueladeequitacion.hrs.model.Instructor;
 
 import java.time.LocalDate;
@@ -47,4 +48,20 @@ public interface InstructorService {
     public void eliminarInstructor(Long id);
 
     public void eliminarInstructorTemporalmente(Long id);
+
+    /**
+     * Crea un instructor desde un DTO.
+     */
+    public Instructor crearInstructorDesdeDto(InstructorDto instructorDto);
+
+    /**
+     * Actualiza un instructor desde un DTO.
+     */
+    public void actualizarInstructorDesdeDto(Long id, InstructorDto instructorDto);
+
+    /**
+     * Busca instructores con múltiples filtros.
+     */
+    public List<Instructor> buscarInstructoresConFiltros(String nombre, String apellido,
+            Boolean activo, LocalDate fechaNacimiento);
 }

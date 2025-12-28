@@ -1,8 +1,10 @@
 package com.escueladeequitacion.hrs.repository;
 
+import com.escueladeequitacion.hrs.enums.Estado;
 import com.escueladeequitacion.hrs.model.Alumno;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -39,5 +41,16 @@ public interface AlumnoRepository extends JpaRepository<Alumno, Long> {
 
     // Método para eliminar un alumno por su DNI
     public void deleteByDni(Integer dni);
+
+    // Método para contar las clases completadas de un alumno
+    @Query("SELECT COUNT(c) FROM Clase c WHERE c.alumno.id = :alumnoId AND c.estado = :estado")
+    public long contarClasesPorEstado(@Param("alumnoId") Long alumnoId, @Param("estado") Estado estado);
+
+    // Método para contar las clases a recuperar (canceladas o ausente con aviso) de
+    // un alumno
+    @Query("SELECT COUNT(c) FROM Clase c WHERE c.alumno.id = :alumnoId AND c.estado IN :estados")
+    public long contarClasesPorEstados(
+            @Param("alumnoId") Long alumnoId,
+            @Param("estados") List<Estado> estados);
 
 }

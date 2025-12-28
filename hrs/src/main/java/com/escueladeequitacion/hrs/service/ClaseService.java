@@ -1,5 +1,6 @@
 package com.escueladeequitacion.hrs.service;
 
+import com.escueladeequitacion.hrs.dto.ClaseDto;
 import com.escueladeequitacion.hrs.dto.ClaseResponseDto;
 import com.escueladeequitacion.hrs.enums.Especialidades;
 import com.escueladeequitacion.hrs.enums.Estado;
@@ -108,4 +109,31 @@ public interface ClaseService {
      * Busca clases por estado con detalles.
      */
     public List<ClaseResponseDto> buscarClasePorEstadoConDetalles(Estado estado);
+
+    // AGREGAR después de los métodos existentes:
+
+    /**
+     * Crea una clase desde un DTO, validando todas las reglas de negocio.
+     */
+    public Clase crearClaseDesdeDto(ClaseDto claseDto);
+
+    /**
+     * Actualiza una clase desde un DTO, validando todas las reglas de negocio.
+     */
+    public void actualizarClaseDesdeDto(Long id, ClaseDto claseDto);
+
+    /**
+     * Cuenta clases completadas por alumno.
+     */
+    public long contarClasesCompletadasPorAlumno(Long alumnoId);
+
+    /**
+     * Cuenta clases completadas por instructor.
+     */
+    public long contarClasesCompletadasPorInstructor(Long instructorId);
+
+    /**
+     * Cuenta clases completadas por caballo.
+     */
+    public long contarClasesCompletadasPorCaballo(Long caballoId);
 }

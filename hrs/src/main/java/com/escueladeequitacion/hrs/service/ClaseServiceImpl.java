@@ -1,11 +1,15 @@
 package com.escueladeequitacion.hrs.service;
 
+import com.escueladeequitacion.hrs.dto.ClaseDto;
 import com.escueladeequitacion.hrs.dto.ClaseResponseDto;
 import com.escueladeequitacion.hrs.enums.Especialidades;
 import com.escueladeequitacion.hrs.enums.Estado;
 import com.escueladeequitacion.hrs.exception.BusinessException;
 import com.escueladeequitacion.hrs.exception.ResourceNotFoundException;
+import com.escueladeequitacion.hrs.model.Alumno;
+import com.escueladeequitacion.hrs.model.Caballo;
 import com.escueladeequitacion.hrs.model.Clase;
+import com.escueladeequitacion.hrs.model.Instructor;
 import com.escueladeequitacion.hrs.repository.ClaseRepository;
 
 import jakarta.transaction.Transactional;
@@ -362,4 +366,177 @@ public class ClaseServiceImpl implements ClaseService {
             }
         }
     }
+
+    /**
+     * Crea una clase desde un DTO con todas las validaciones.
+     */
+    @Override
+    public Clase crearClaseDesdeDto(ClaseDto claseDto) {
+        // 1. Validar y obtener instructor
+        Instructor instructor = instructorService.buscarInstructorPorId(claseDto.getInstructorId())
+                .orElseThrow(() -> new ResourceNotFoundException("Instructor", "ID", claseDto.getInstructorId()));
+
+        if (!instructor.isActivo()) {
+            throw new BusinessException("El instructor " + instructor.getNombreCompleto() + " no está activo");
+        }
+
+        // 2. Validar y obtener alumno
+        Alumno alumno = alumnoService.buscarAlumnoPorId(claseDto.getAlumnoId())
+                .orElseThrow(() -> new ResourceNotFoundException("Alumno", "ID", claseDto.getAlumnoId()));
+
+        if (!alumno.isActivo()) {
+            throw new BusinessException("El alumno " + alumno.getNombreCompleto() + " no está activo");
+        }
+
+        // 3. Validar y obtener caballo
+        Caballo caballo = caballoService.buscarCaballoPorId(claseDto.getCaballoId())
+                .orElseThrow(() -> new ResourceNotFoundException("Caballo", "ID", claseDto.getCaballoId()));
+
+        if (!caballo.isDisponible()) {
+            throw new BusinessException("El caballo " + caballo.getNombre() + " no está disponible");
+        }
+
+        // 4. Validar fecha y hora
+        validarFechaYHora(claseDto.getDia(), claseDto.getHora());
+
+        // 5. Validar conflictos de horario
+        validarConflictoDeHorario(
+                claseDto.getDia(),
+                claseDto.getHora(),
+                instructor.getId(),
+                alumno.getId(),
+                caballo.getId());
+
+        // 6. Crear la clase
+        Clase clase = new Clase();
+        clase.setEspecialidades(claseDto.getEspecialidades());
+        clase.setDia(claseDto.getDia());
+        clase.setHora(claseDto.getHora());
+        clase.setEstado(claseDto.getEstado());
+        clase.setObservaciones(claseDto.getObservaciones());
+        clase.setInstructor(instructor);
+        clase.setAlumno(alumno);
+        clase.setCaballo(caballo);
+
+        return claseRepository.save(clase);
+    }
+
+    /**
+     * Actualiza una clase desde un DTO.
+     */
+    @Override
+    public void actualizarClaseDesdeDto(Long id, ClaseDto claseDto) {
+        // 1. Verificar que la clase existe
+        Clase claseExistente = claseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Clase", "ID", id));
+
+        // 2. Actualizar instructor si cambió
+        if (claseDto.getInstructorId() != null) {
+            Instructor instructor = instructorService.buscarInstructorPorId(claseDto.getInstructorId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Instructor", "ID", claseDto.getInstructorId()));
+
+            if (!instructor.isActivo()) {
+                throw new BusinessException("El instructor no está activo");
+            }
+
+            claseExistente.setInstructor(instructor);
+        }
+
+        // 3. Actualizar alumno si cambió
+        if (claseDto.getAlumnoId() != null) {
+            Alumno alumno = alumnoService.buscarAlumnoPorId(claseDto.getAlumnoId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Alumno", "ID", claseDto.getAlumnoId()));
+
+            if (!alumno.isActivo()) {
+                throw new BusinessException("El alumno no está activo");
+            }
+
+            claseExistente.setAlumno(alumno);
+        }
+
+        // 4. Actualizar caballo si cambió
+        if (claseDto.getCaballoId() != null) {
+            Caballo caballo = caballoService.buscarCaballoPorId(claseDto.getCaballoId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Caballo", "ID", claseDto.getCaballoId()));
+
+            if (!caballo.isDisponible()) {
+                throw new BusinessException("El caballo no está disponible");
+            }
+
+            claseExistente.setCaballo(caballo);
+        }
+
+        // 5. Actualizar campos simples
+        if (claseDto.getEspecialidades() != null) {
+            claseExistente.setEspecialidades(claseDto.getEspecialidades());
+        }
+        if (claseDto.getDia() != null) {
+            claseExistente.setDia(claseDto.getDia());
+        }
+        if (claseDto.getHora() != null) {
+            claseExistente.setHora(claseDto.getHora());
+        }
+        if (claseDto.getEstado() != null) {
+            claseExistente.setEstado(claseDto.getEstado());
+        }
+        if (claseDto.getObservaciones() != null) {
+            claseExistente.setObservaciones(claseDto.getObservaciones());
+        }
+
+        // 6. Validar conflictos si cambió día u hora
+        if (claseDto.getDia() != null || claseDto.getHora() != null) {
+            validarConflictoDeHorario(
+                    claseExistente.getDia(),
+                    claseExistente.getHora(),
+                    claseExistente.getInstructor().getId(),
+                    claseExistente.getAlumno().getId(),
+                    claseExistente.getCaballo().getId());
+        }
+
+        claseRepository.save(claseExistente);
+    }
+
+    /**
+     * Método auxiliar para validar fecha y hora.
+     */
+    private void validarFechaYHora(LocalDate dia, LocalTime hora) {
+        LocalDate hoy = LocalDate.now();
+
+        if (dia.isBefore(hoy)) {
+            throw new BusinessException("La fecha de la clase no puede ser anterior a hoy");
+        }
+
+        if (dia.isEqual(hoy)) {
+            LocalTime ahora = LocalTime.now();
+            if (hora.isBefore(ahora.plusMinutes(60))) {
+                throw new BusinessException("La clase debe programarse con al menos 60 minutos de anticipación");
+            }
+        }
+    }
+
+    /**
+     * Cuenta clases completadas por alumno.
+     */
+    @Override
+    public long contarClasesCompletadasPorAlumno(Long alumnoId) {
+        return claseRepository.contarPorAlumnoYEstado(alumnoId, Estado.COMPLETADA);
+    }
+
+    /**
+     * Cuenta clases completadas por instructor.
+     */
+    @Override
+    public long contarClasesCompletadasPorInstructor(Long instructorId) {
+        return claseRepository.contarPorInstructorYEstado(instructorId, Estado.COMPLETADA);
+    }
+
+    /**
+     * Cuenta clases completadas por caballo.
+     */
+    @Override
+    public long contarClasesCompletadasPorCaballo(Long caballoId) {
+        return claseRepository.contarPorCaballoYEstado(caballoId, Estado.COMPLETADA);
+    }
+
+    // Método validarConflictoDeHorario ya existe (lo agregaste antes)
 }

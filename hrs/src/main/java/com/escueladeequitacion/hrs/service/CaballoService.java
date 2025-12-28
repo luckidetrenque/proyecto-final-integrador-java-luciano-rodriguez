@@ -1,5 +1,6 @@
 package com.escueladeequitacion.hrs.service;
 
+import com.escueladeequitacion.hrs.dto.CaballoDto;
 import com.escueladeequitacion.hrs.enums.TipoCaballo;
 import com.escueladeequitacion.hrs.model.Caballo;
 
@@ -39,6 +40,21 @@ public interface CaballoService {
     // Métodos para eliminar un alumno (físicamente o lógicamente)
     public void eliminarCaballo(Long id);
 
-    public void eliminarCaballoTemporalmente(Long id);
+    public void eliminarcaballoTemporalmente(Long id);
+
+    /**
+     * Crea un caballo desde un DTO.
+     */
+    public Caballo crearCaballoDesdeDto(CaballoDto caballoDto);
+
+    /**
+     * Actualiza un caballo desde un DTO.
+     */
+    public void actualizarCaballoDesdeDto(Long id, CaballoDto caballoDto);
+
+    /**
+     * Busca caballos con múltiples filtros.
+     */
+    public List<Caballo> buscarCaballosConFiltros(String nombre, Boolean disponible, TipoCaballo tipo);
 
 }

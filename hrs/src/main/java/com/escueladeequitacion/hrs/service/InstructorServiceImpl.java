@@ -1,5 +1,6 @@
 package com.escueladeequitacion.hrs.service;
 
+import com.escueladeequitacion.hrs.dto.InstructorDto;
 import com.escueladeequitacion.hrs.exception.BusinessException;
 import com.escueladeequitacion.hrs.exception.ConflictException;
 import com.escueladeequitacion.hrs.exception.ResourceNotFoundException;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -122,20 +124,105 @@ public class InstructorServiceImpl implements InstructorService {
         instructorRepository.deleteById(id);
     };
 
-@Override
-public void eliminarInstructorTemporalmente(Long id) {
-    // 1. Verificar que existe
-Instructor instructor = obtenerInstructorOLanzarExcepcion(id);
-    
-    // 2. Verificar que está activo
-    if (!instructor.isActivo()) {
-        throw new BusinessException("El instructor con ID " + id + " ya está inactivo");
+    @Override
+    public void eliminarInstructorTemporalmente(Long id) {
+        // 1. Verificar que existe
+        Instructor instructor = obtenerInstructorOLanzarExcepcion(id);
+
+        // 2. Verificar que está activo
+        if (!instructor.isActivo()) {
+            throw new BusinessException("El instructor con ID " + id + " ya está inactivo");
+        }
+
+        // 3. Inactivar
+        instructor.setActivo(false);
+        instructorRepository.save(instructor);
+    };
+
+    /**
+     * Crea un instructor desde un DTO con validaciones.
+     */
+    @Override
+    public Instructor crearInstructorDesdeDto(InstructorDto instructorDto) {
+        // Validar DNI duplicado
+        if (instructorRepository.existsByDni(instructorDto.getDni())) {
+            throw new ConflictException("Instructor", "DNI", instructorDto.getDni());
+        }
+
+        // Crear el instructor
+        Instructor instructor = new Instructor(
+                instructorDto.getDni(),
+                instructorDto.getNombre(),
+                instructorDto.getApellido(),
+                instructorDto.getFechaNacimiento(),
+                instructorDto.getTelefono(),
+                instructorDto.getEmail(),
+                instructorDto.isActivo());
+
+        return instructorRepository.save(instructor);
     }
-    
-    // 3. Inactivar
-    instructor.setActivo(false);
-    instructorRepository.save(instructor);
-};
+
+    /**
+     * Actualiza un instructor desde un DTO con validaciones.
+     */
+    @Override
+    public void actualizarInstructorDesdeDto(Long id, InstructorDto instructorDto) {
+        // 1. Obtener instructor existente
+        Instructor instructorExistente = instructorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Instructor", "ID", id));
+
+        // 2. Validar DNI duplicado solo si cambió
+        if (!instructorExistente.getDni().equals(instructorDto.getDni())) {
+            if (instructorRepository.existsByDni(instructorDto.getDni())) {
+                throw new ConflictException("Ya existe otro instructor con el DNI " + instructorDto.getDni());
+            }
+        }
+
+        // 3. Crear objeto temporal
+        Instructor instructorNuevo = new Instructor();
+        instructorNuevo.setDni(instructorDto.getDni());
+        instructorNuevo.setNombre(instructorDto.getNombre());
+        instructorNuevo.setApellido(instructorDto.getApellido());
+        instructorNuevo.setFechaNacimiento(instructorDto.getFechaNacimiento());
+        instructorNuevo.setTelefono(instructorDto.getTelefono());
+        instructorNuevo.setEmail(instructorDto.getEmail());
+        instructorNuevo.setActivo(instructorDto.isActivo());
+
+        // 4. Actualizar usando método auxiliar
+        actualizarCamposDesdeDto(instructorExistente, instructorNuevo);
+
+        // 5. Guardar
+        instructorRepository.save(instructorExistente);
+    }
+
+    /**
+     * Busca instructores con múltiples filtros.
+     */
+    @Override
+    public List<Instructor> buscarInstructoresConFiltros(String nombre, String apellido,
+            Boolean activo, LocalDate fechaNacimiento) {
+        if (nombre != null && apellido != null) {
+            return instructorRepository.findByNombreAndApellidoIgnoreCase(nombre, apellido);
+        }
+
+        if (nombre != null) {
+            return instructorRepository.findByNombreIgnoreCase(nombre);
+        }
+
+        if (apellido != null) {
+            return instructorRepository.findByApellidoIgnoreCase(apellido);
+        }
+
+        if (activo != null) {
+            return instructorRepository.findByActivo(activo);
+        }
+
+        if (fechaNacimiento != null) {
+            return instructorRepository.findByFechaNacimiento(fechaNacimiento);
+        }
+
+        return new ArrayList<>();
+    }
 
     /**
      * Método auxiliar para validar que un instructor existe

@@ -1,5 +1,6 @@
 package com.escueladeequitacion.hrs.service;
 
+import com.escueladeequitacion.hrs.dto.CaballoDto;
 import com.escueladeequitacion.hrs.enums.TipoCaballo;
 import com.escueladeequitacion.hrs.exception.BusinessException;
 import com.escueladeequitacion.hrs.exception.ConflictException;
@@ -12,6 +13,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -100,20 +102,89 @@ public class CaballoServiceImpl implements CaballoService {
         caballoRepository.deleteById(id);
     };
 
-@Override
-public void eliminarCaballoTemporalmente(Long id) {
-    // 1. Verificar que existe
-Caballo caballo = obtenerCaballoOLanzarExcepcion(id);
-    
-    // 2. Verificar que está disponible
-    if (!caballo.isDisponible()) {
-        throw new BusinessException("El caballo con ID " + id + " ya no está disponible");
+    @Override
+    public void eliminarcaballoTemporalmente(Long id) {
+        // 1. Verificar que existe
+        Caballo caballo = obtenerCaballoOLanzarExcepcion(id);
+
+        // 2. Verificar que está disponible
+        if (!caballo.isDisponible()) {
+            throw new BusinessException("El caballo con ID " + id + " ya no está disponible");
+        }
+
+        // 3. Marcar como no disponible
+        caballo.setDisponible(false);
+        caballoRepository.save(caballo);
     }
-    
-    // 3. Marcar como no disponible
-    caballo.setDisponible(false);
-    caballoRepository.save(caballo);
-}
+
+    /**
+     * Crea un caballo desde un DTO con validaciones.
+     */
+    @Override
+    public Caballo crearCaballoDesdeDto(CaballoDto caballoDto) {
+        // Validar nombre duplicado
+        if (caballoRepository.existsByNombre(caballoDto.getNombre())) {
+            throw new ConflictException("Caballo", "nombre", caballoDto.getNombre());
+        }
+
+        // Crear el caballo
+        Caballo caballo = new Caballo(
+                caballoDto.getNombre(),
+                caballoDto.isDisponible(),
+                caballoDto.getTipoCaballo());
+
+        return caballoRepository.save(caballo);
+    }
+
+    /**
+     * Actualiza un caballo desde un DTO con validaciones.
+     */
+    @Override
+    public void actualizarCaballoDesdeDto(Long id, CaballoDto caballoDto) {
+        // 1. Obtener caballo existente
+        Caballo caballoExistente = caballoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Caballo", "ID", id));
+
+        // 2. Validar nombre duplicado solo si cambió
+        if (!caballoExistente.getNombre().equalsIgnoreCase(caballoDto.getNombre())) {
+            if (caballoRepository.existsByNombre(caballoDto.getNombre())) {
+                throw new ConflictException("Ya existe otro caballo con el nombre " + caballoDto.getNombre());
+            }
+        }
+
+        // 3. Crear objeto temporal
+        Caballo caballoNuevo = new Caballo();
+        caballoNuevo.setNombre(caballoDto.getNombre());
+        caballoNuevo.setDisponible(caballoDto.isDisponible());
+        caballoNuevo.setTipoCaballo(caballoDto.getTipoCaballo());
+
+        // 4. Actualizar usando método auxiliar
+        actualizarCamposDesdeDto(caballoExistente, caballoNuevo);
+
+        // 5. Guardar
+        caballoRepository.save(caballoExistente);
+    }
+
+    /**
+     * Busca caballos con múltiples filtros.
+     */
+    @Override
+    public List<Caballo> buscarCaballosConFiltros(String nombre, Boolean disponible, TipoCaballo tipo) {
+        if (nombre != null) {
+            return caballoRepository.findByNombreIgnoreCase(nombre);
+        }
+
+        if (disponible != null) {
+            return caballoRepository.findByDisponible(disponible);
+        }
+
+        if (tipo != null) {
+            return caballoRepository.findByTipoCaballo(tipo);
+        }
+
+        return new ArrayList<>();
+    }
+
     /**
      * Método auxiliar para validar que un caballo existe
      */

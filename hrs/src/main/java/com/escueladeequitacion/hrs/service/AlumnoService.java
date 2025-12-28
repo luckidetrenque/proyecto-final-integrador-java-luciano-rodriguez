@@ -1,5 +1,7 @@
 package com.escueladeequitacion.hrs.service;
 
+import com.escueladeequitacion.hrs.dto.AlumnoDto;
+import com.escueladeequitacion.hrs.enums.Estado;
 import com.escueladeequitacion.hrs.model.Alumno;
 
 import java.time.LocalDate;
@@ -38,6 +40,13 @@ public interface AlumnoService {
 
     public Boolean existeAlumnoPorNombreYApellido(String nombre, String apellido);
 
+    // Métodos para contar las clases completadas de un alumno
+    public long contarClasesCompletadas(Long alumnoId);
+
+    // Métodos para contar las clases a recuperar (canceladas o ausente con aviso)
+    // de un alumno
+    public long contarClasesARecuperar(Long alumnoId, List<Estado> estados);
+
     // Método para verificar el estado (activo/inactivo) de un alumno por su ID
     public Boolean estadoAlumno(Long id);
 
@@ -51,4 +60,21 @@ public interface AlumnoService {
     public void eliminarAlumno(Long id);
 
     public void eliminarAlumnoTemporalmente(Long id);
+
+    /**
+     * Crea un alumno desde un DTO con validaciones.
+     */
+    public Alumno crearAlumnoDesdeDto(AlumnoDto alumnoDto);
+
+    /**
+     * Actualiza un alumno desde un DTO con validaciones.
+     */
+    public void actualizarAlumnoDesdeDto(Long id, AlumnoDto alumnoDto);
+
+    /**
+     * Busca alumnos con múltiples filtros.
+     */
+    public List<Alumno> buscarAlumnosConFiltros(String nombre, String apellido, Boolean activo,
+            Boolean propietario, LocalDate fechaInscripcion,
+            LocalDate fechaNacimiento);
 }
