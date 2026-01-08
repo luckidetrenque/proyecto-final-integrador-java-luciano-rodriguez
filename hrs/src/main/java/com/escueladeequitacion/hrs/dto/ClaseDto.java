@@ -18,7 +18,7 @@ public class ClaseDto {
     @FutureOrPresent(message = "El día debe ser en el futuro")
     private LocalDate dia;
     @NotNull(message = "La hora no puede estar vacía")
-    @FutureOrPresent(message = "La hora debe ser en el futuro")
+    // @FutureOrPresent(message = "La hora debe ser en el futuro")
     private LocalTime hora;
     @NotNull(message = "El estado de la clase no puede estar vacío, debe ser Programada, En curso, Completada o Cancelada")
     private Estado estado;

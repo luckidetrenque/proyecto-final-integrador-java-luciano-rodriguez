@@ -3,19 +3,23 @@ package com.escueladeequitacion.hrs.dto;
 import java.time.LocalDate;
 
 public class CalendarioDto {
-    private LocalDate fechaInicioOrigen; // El martes de la semana que quieres copiar
-    private LocalDate fechaInicioDestino;
-    public LocalDate getFechaInicioOrigen() {
-        return fechaInicioOrigen;
+    private LocalDate diaInicioOrigen; // El martes de la semana que quieres copiar
+    private LocalDate diaInicioDestino;
+
+    public LocalDate getDiaInicioOrigen() {
+        return diaInicioOrigen;
     }
-    public void setFechaInicioOrigen(LocalDate fechaInicioOrigen) {
-        this.fechaInicioOrigen = fechaInicioOrigen;
+
+    public void setDiaInicioOrigen(LocalDate diaInicioOrigen) {
+        this.diaInicioOrigen = diaInicioOrigen;
     }
-    public LocalDate getFechaInicioDestino() {
-        return fechaInicioDestino;
+
+    public LocalDate getDiaInicioDestino() {
+        return diaInicioDestino;
     }
-    public void setFechaInicioDestino(LocalDate fechaInicioDestino) {
-        this.fechaInicioDestino = fechaInicioDestino;
+
+    public void setDiaInicioDestino(LocalDate diaInicioDestino) {
+        this.diaInicioDestino = diaInicioDestino;
     } // El martes de la semana donde quieres pegar
 
 }

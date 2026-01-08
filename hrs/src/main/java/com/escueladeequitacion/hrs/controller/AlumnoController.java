@@ -96,7 +96,8 @@ public class AlumnoController {
         // 3. Cantidad de clases válida
         alumnoService.actualizarAlumnoDesdeDto(id, alumnoDto);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Alumno con ID " + id + " actualizado correctamente"));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new Mensaje("Alumno con ID " + id + " actualizado correctamente"));
     }
 
     // Endpoint DELETE para eliminar un alumno por ID (Eliminación Física)
@@ -109,7 +110,8 @@ public class AlumnoController {
         // El Service valida que existe antes de eliminar
         alumnoService.eliminarAlumno(id);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Alumno con ID " + id + " eliminado correctamente"));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new Mensaje("Alumno con ID " + id + " eliminado correctamente"));
     }
 
     // Endpoint DELETE para eliminar un alumno por ID (Eliminación Lógica)
@@ -124,7 +126,8 @@ public class AlumnoController {
         // 2. Alumno está activo
         alumnoService.eliminarAlumnoTemporalmente(id);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Alumno con ID " + id + " inactivado correctamente"));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new Mensaje("Alumno con ID " + id + " inactivado correctamente"));
     }
 
     // Endpoint GET para contar las clases completadas de un alumno

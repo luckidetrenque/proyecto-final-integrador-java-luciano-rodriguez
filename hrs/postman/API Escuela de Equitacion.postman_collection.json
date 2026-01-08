@@ -65,7 +65,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_ALUMNOS}}/buscar?nombre=Catalina&apellido=Rodriguez",
+							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_ALUMNOS}}/buscar?nombre=Catalina&apellido=Perez",
 							"host": [
 								"{{baseURL}}{{API_VERSION}}{{RESOURCE_ALUMNOS}}"
 							],
@@ -79,7 +79,7 @@
 								},
 								{
 									"key": "apellido",
-									"value": "Rodriguez"
+									"value": "Perez"
 								}
 							]
 						}
@@ -92,7 +92,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_ALUMNOS}}/buscar?nombre=Luciano",
+							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_ALUMNOS}}/buscar?nombre=Marcos",
 							"host": [
 								"{{baseURL}}{{API_VERSION}}{{RESOURCE_ALUMNOS}}"
 							],
@@ -102,7 +102,7 @@
 							"query": [
 								{
 									"key": "nombre",
-									"value": "Luciano"
+									"value": "Marcos"
 								}
 							]
 						}
@@ -161,7 +161,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_ALUMNOS}}/buscar?propietario=true",
+							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_ALUMNOS}}/buscar?propietario=false",
 							"host": [
 								"{{baseURL}}{{API_VERSION}}{{RESOURCE_ALUMNOS}}"
 							],
@@ -171,7 +171,7 @@
 							"query": [
 								{
 									"key": "propietario",
-									"value": "true"
+									"value": "false"
 								}
 							]
 						}
@@ -184,7 +184,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_ALUMNOS}}/buscar?fechaInscripcion=2025-12-05",
+							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_ALUMNOS}}/buscar?fechaInscripcion=2025-12-06",
 							"host": [
 								"{{baseURL}}{{API_VERSION}}{{RESOURCE_ALUMNOS}}"
 							],
@@ -194,7 +194,7 @@
 							"query": [
 								{
 									"key": "fechaInscripcion",
-									"value": "2025-12-05"
+									"value": "2025-12-06"
 								}
 							]
 						}
@@ -254,7 +254,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"dni\": 20321547,\n  \"nombre\": \"Mariela\",\n  \"apellido\": \"Rodriguez\",\n  \"fechaNacimiento\": \"2001-12-26\",\n  \"telefono\": 2325689,\n  \"email\": \"mariela@gmail.com\",\n  \"fechaInscripcion\": \"2025-12-23\",\n  \"cantidadClases\": 16,\n  \"activo\": true,\n  \"propietario\": true\n}"
+							"raw": "{\n  \"dni\": 22695487,\n  \"nombre\": \"Carlos\",\n  \"apellido\": \"Panda\",\n  \"fechaNacimiento\": \"1986-05-15\",\n  \"telefono\": 78787878,\n  \"email\": \"carlos@gmail.com\",\n  \"fechaInscripcion\": \"2025-12-20\",\n  \"cantidadClases\": 12,\n  \"activo\": true,\n  \"propietario\": true\n}"
 						},
 						"url": {
 							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_ALUMNOS}}",
@@ -278,15 +278,15 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n        \"dni\": 25726035,\n        \"nombre\": \"Luciano\",\n        \"apellido\": \"Amicone\",\n        \"fechaNacimiento\": \"1977-01-26\",\n        \"telefono\": 1163069810,\n        \"email\": \"luckidetrenque@gmail.com\",\n        \"id\": 2,\n        \"fechaInscripcion\": \"2025-12-05\",\n        \"cantidadClases\": 12,\n        \"activo\": true,\n        \"propietario\": true,\n        \"rol\": \"ALUMNO\",\n        \"nombreCompleto\": \"Luciano Amicone\",\n        \"edad\": 48\n}"
+							"raw": "{\n        \"dni\": 25726035,\n        \"nombre\": \"Luciano\",\n        \"apellido\": \"Rodriguez\",\n        \"fechaNacimiento\": \"1990-08-23\",\n        \"telefono\": 54256587,\n        \"email\": \"luciano@gmail.com\",\n        \"id\": 10,\n        \"fechaInscripcion\": \"2025-12-27\",\n        \"cantidadClases\": 8,\n        \"activo\": true,\n        \"propietario\": false,\n        \"rol\": \"ALUMNO\",\n        \"edad\": 27,\n        \"nombreCompleto\": \"Luciano Rodriguez\"\n}"
 						},
 						"url": {
-							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_ALUMNOS}}/2",
+							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_ALUMNOS}}/10",
 							"host": [
 								"{{baseURL}}{{API_VERSION}}{{RESOURCE_ALUMNOS}}"
 							],
 							"path": [
-								"2"
+								"10"
 							]
 						}
 					},
@@ -298,12 +298,12 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_ALUMNOS}}/5",
+							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_ALUMNOS}}/10",
 							"host": [
 								"{{baseURL}}{{API_VERSION}}{{RESOURCE_ALUMNOS}}"
 							],
 							"path": [
-								"5"
+								"10"
 							]
 						}
 					},
@@ -315,12 +315,12 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_ALUMNOS}}/6/inactivar",
+							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_ALUMNOS}}/9/inactivar",
 							"host": [
 								"{{baseURL}}{{API_VERSION}}{{RESOURCE_ALUMNOS}}"
 							],
 							"path": [
-								"6",
+								"9",
 								"inactivar"
 							]
 						}
@@ -554,15 +554,15 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"dni\": 29852147,\n  \"nombre\": \"Lilian\",\n  \"apellido\": \"Perez\",\n  \"fechaNacimiento\": \"1974-12-02\",\n  \"telefono\": 1254783,\n  \"email\": \"lili@gmail.com\",\n  \"activo\": true\n}"
+							"raw": "{\n  \"dni\": 29852147,\n        \"nombre\": \"Santiago\",\n        \"apellido\": \"Matheus\",\n        \"fechaNacimiento\": \"2026-01-08\",\n        \"telefono\": 1163039810,\n        \"email\": \"\",\n        \"activo\": true\n}"
 						},
 						"url": {
-							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_INSTRUCTORES}}/2",
+							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_INSTRUCTORES}}/3",
 							"host": [
 								"{{baseURL}}{{API_VERSION}}{{RESOURCE_INSTRUCTORES}}"
 							],
 							"path": [
-								"2"
+								"3"
 							]
 						}
 					},
@@ -777,7 +777,7 @@
 					"response": []
 				},
 				{
-					"name": "DELETE - Eliminar caballodefinitivamente (Física)",
+					"name": "DELETE - Eliminar caballo definitivamente (Física)",
 					"request": {
 						"method": "DELETE",
 						"header": [],
@@ -802,6 +802,276 @@
 							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_CABALLOS}}/6/inactivar",
 							"host": [
 								"{{baseURL}}{{API_VERSION}}{{RESOURCE_CABALLOS}}"
+							],
+							"path": [
+								"6",
+								"inactivar"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Clases",
+			"item": [
+				{
+					"name": "GET - Listar clases",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}",
+							"host": [
+								"{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET - Obtener clase por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}/2",
+							"host": [
+								"{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}"
+							],
+							"path": [
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET - Obtener clase por día",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}/dia/2025-12-26",
+							"host": [
+								"{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}"
+							],
+							"path": [
+								"dia",
+								"2025-12-26"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET - Obtener clases por día con detalles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}/dia/2025-12-25/detalles",
+							"host": [
+								"{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}"
+							],
+							"path": [
+								"dia",
+								"2025-12-25",
+								"detalles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET - Obtener clases por instructor",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}/instructor/1/detalles",
+							"host": [
+								"{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}"
+							],
+							"path": [
+								"instructor",
+								"1",
+								"detalles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET - Obtener clases por alumno",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}/alumno/2/detalles",
+							"host": [
+								"{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}"
+							],
+							"path": [
+								"alumno",
+								"2",
+								"detalles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET - Obtener clases por caballo",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}/caballo/2/detalles",
+							"host": [
+								"{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}"
+							],
+							"path": [
+								"caballo",
+								"2",
+								"detalles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET - Obtener clases por estado",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}/estado/COMPLETADA/detalles",
+							"host": [
+								"{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}"
+							],
+							"path": [
+								"estado",
+								"COMPLETADA",
+								"detalles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET - Obtener clases con detalles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}/detalles",
+							"host": [
+								"{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}"
+							],
+							"path": [
+								"detalles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET - Obtener una clase por ID con detalles",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}/2/detalles",
+							"host": [
+								"{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}"
+							],
+							"path": [
+								"2",
+								"detalles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST - Crear nueva clase",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"especialidades\": \"EQUITACION\",\n  \"dia\": \"2025-12-26\",\n  \"hora\": \"21:43:00\",\n  \"estado\": \"PROGRAMADA\",\n  \"observaciones\": \"\",\n  \"alumnoId\": 2,\n  \"caballoId\": 2,\n  \"instructorId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}",
+							"host": [
+								"{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT - Actualizar clase",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n        \"especialidades\": \"EQUITACION\",\n        \"dia\": \"2026-01-07\",\n        \"hora\": \"15:00:00\",\n        \"estado\": \"PROGRAMADA\",\n        \"observaciones\": \"\",\n        \"instructorId\": 2,\n        \"alumnoId\": 7,\n        \"caballoId\": 4\n}"
+						},
+						"url": {
+							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}/2",
+							"host": [
+								"{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}"
+							],
+							"path": [
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE - Eliminar clase definitivamente (Física)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}}/5",
+							"host": [
+								"{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}}"
+							],
+							"path": [
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE - Eliminar clase temporalmente (Lógica)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}/6/inactivar",
+							"host": [
+								"{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}"
 							],
 							"path": [
 								"6",

@@ -28,7 +28,7 @@ public class PersonaDto {
     private LocalDate fechaNacimiento;
     @NotNull(message = "El teléfono no puede estar vacío")
     @Min(value = 1000000, message = "El teléfono debe tener al menos 7 dígitos")
-    @Max(value = 9999999999L, message = "El teléfono no debe exceder los 10 dígitos")
+    @Max(value = 999999999, message = "El teléfono no debe exceder los 10 dígitos")
     private Integer telefono;
     @Email(message = "El email debe tener un formato válido")
     private String email;

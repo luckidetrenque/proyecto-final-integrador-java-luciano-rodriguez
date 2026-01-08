@@ -74,7 +74,8 @@ public class CaballoController {
 
         caballoService.actualizarCaballoDesdeDto(id, caballoDto);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Caballo con ID " + id + " actualizado correctamente"));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new Mensaje("Caballo con ID " + id + " actualizado correctamente"));
     }
 
     // Endpoint DELETE para eliminar un caballo por ID (Eliminación Física)
@@ -86,7 +87,8 @@ public class CaballoController {
 
         caballoService.eliminarCaballo(id);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Caballo con ID " + id + " eliminado correctamente"));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new Mensaje("Caballo con ID " + id + " eliminado correctamente"));
     }
 
     // Endpoint DELETE para eliminar un caballo por nombre (Eliminación Lógica)
@@ -98,7 +100,8 @@ public class CaballoController {
         // El Service maneja todas las validaciones
         caballoService.eliminarcaballoTemporalmente(id);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Caballo con ID " + id + " marcado como no disponible"));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new Mensaje("Caballo con ID " + id + " marcado como no disponible"));
     }
 
     // Endpoint GET para buscar por diferentes filtros

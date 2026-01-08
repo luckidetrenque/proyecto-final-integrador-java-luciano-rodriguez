@@ -22,11 +22,9 @@ public class CalendarioController {
     @Autowired
     private CalendarioService calendarioService;
 
-    @PostMapping(Constantes.RESOURCE_CALENDARIO+"/copiar-semana")
+    @PostMapping(Constantes.RESOURCE_CALENDARIO + "/copiar-semana")
     public ResponseEntity<String> copiar(@RequestBody CalendarioDto request) {
-        calendarioService.copiarSemanaCompleta(request.getFechaInicioOrigen(), request.getFechaInicioDestino());
-        return ResponseEntity.ok("Clases copiadas exitosamente a la semana del " + request.getFechaInicioDestino());
+        calendarioService.copiarSemanaCompleta(request.getDiaInicioOrigen(), request.getDiaInicioDestino());
+        return ResponseEntity.ok("Clases copiadas exitosamente a la semana del " + request.getDiaInicioDestino());
     }
 }
-
-

@@ -92,7 +92,8 @@ public class ClaseController {
         // El Service valida que existe antes de eliminar
         claseService.eliminarClase(id);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Clase con ID " + id + " eliminada correctamente"));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new Mensaje("Clase con ID " + id + " eliminada correctamente"));
     }
 
     // Endpoint POST para crear una nueva clase
@@ -119,7 +120,8 @@ public class ClaseController {
         // El Service maneja todas las validaciones
         claseService.actualizarClaseDesdeDto(id, claseDto);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Clase con ID " + id + " actualizada correctamente"));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new Mensaje("Clase con ID " + id + " actualizada correctamente"));
     }
 
     // ============================================================

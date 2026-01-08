@@ -16,41 +16,41 @@ import java.time.LocalDate;
 @Repository
 public interface AlumnoRepository extends JpaRepository<Alumno, Long> {
 
-    // Métodos para buscar alumnos por diferentes criterios
-    public Optional<Alumno> findByDni(@Param("dni") Integer dni);
+        // Métodos para buscar alumnos por diferentes criterios
+        public Optional<Alumno> findByDni(@Param("dni") Integer dni);
 
-    public List<Alumno> findByNombreIgnoreCase(@Param("nombre") String nombre);
+        public List<Alumno> findByNombreIgnoreCase(@Param("nombre") String nombre);
 
-    public List<Alumno> findByApellidoIgnoreCase(@Param("apellido") String apellido);
+        public List<Alumno> findByApellidoIgnoreCase(@Param("apellido") String apellido);
 
-    public List<Alumno> findByNombreAndApellidoIgnoreCase(@Param("nombre") String nombre,
-            @Param("apellido") String apellido);
+        public List<Alumno> findByNombreAndApellidoIgnoreCase(@Param("nombre") String nombre,
+                        @Param("apellido") String apellido);
 
-    public List<Alumno> findByActivo(@Param("activo") Boolean activo);
+        public List<Alumno> findByActivo(@Param("activo") Boolean activo);
 
-    public List<Alumno> findByPropietario(@Param("propietario") Boolean propietario);
+        public List<Alumno> findByPropietario(@Param("propietario") Boolean propietario);
 
-    public List<Alumno> findByFechaInscripcion(LocalDate fechaInscripcion);
+        public List<Alumno> findByFechaInscripcion(LocalDate fechaInscripcion);
 
-    public List<Alumno> findByFechaNacimiento(LocalDate fechaNacimiento);
+        public List<Alumno> findByFechaNacimiento(LocalDate fechaNacimiento);
 
-    // Métodos para verificar la existencia de un alumno por diferentes criterios
-    public Boolean existsByDni(Integer dni);
+        // Métodos para verificar la existencia de un alumno por diferentes criterios
+        public Boolean existsByDni(Integer dni);
 
-    public Boolean existsByNombreAndApellidoIgnoreCase(String nombre, String apellido);
+        public Boolean existsByNombreAndApellidoIgnoreCase(String nombre, String apellido);
 
-    // Método para eliminar un alumno por su DNI
-    public void deleteByDni(Integer dni);
+        // Método para eliminar un alumno por su DNI
+        public void deleteByDni(Integer dni);
 
-    // Método para contar las clases completadas de un alumno
-    @Query("SELECT COUNT(c) FROM Clase c WHERE c.alumno.id = :alumnoId AND c.estado = :estado")
-    public long contarClasesPorEstado(@Param("alumnoId") Long alumnoId, @Param("estado") Estado estado);
+        // Método para contar las clases completadas de un alumno
+        @Query("SELECT COUNT(c) FROM Clase c WHERE c.alumno.id = :alumnoId AND c.estado = :estado")
+        public long contarClasesPorEstado(@Param("alumnoId") Long alumnoId, @Param("estado") Estado estado);
 
-    // Método para contar las clases a recuperar (canceladas o ausente con aviso) de
-    // un alumno
-    @Query("SELECT COUNT(c) FROM Clase c WHERE c.alumno.id = :alumnoId AND c.estado IN :estados")
-    public long contarClasesPorEstados(
-            @Param("alumnoId") Long alumnoId,
-            @Param("estados") List<Estado> estados);
+        // Método para contar las clases a recuperar (canceladas o ausente con aviso) de
+        // un alumno
+        @Query("SELECT COUNT(c) FROM Clase c WHERE c.alumno.id = :alumnoId AND c.estado IN :estados")
+        public long contarClasesPorEstados(
+                        @Param("alumnoId") Long alumnoId,
+                        @Param("estados") List<Estado> estados);
 
 }

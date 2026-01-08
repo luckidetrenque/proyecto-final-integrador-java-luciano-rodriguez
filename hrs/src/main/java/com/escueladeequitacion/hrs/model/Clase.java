@@ -33,7 +33,7 @@ public class Clase {
     @Column(name = "especialidades", nullable = false, length = 16)
     @Enumerated(EnumType.STRING)
     private Especialidades especialidades;
-    @Column(name = "DIA", nullable = false)
+    @Column(name = "dia", nullable = false)
     private LocalDate dia;
     @Column(name = "hora", nullable = false)
     private LocalTime hora;

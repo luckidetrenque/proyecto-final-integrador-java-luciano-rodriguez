@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -160,7 +161,9 @@ public class ClaseServiceImpl implements ClaseService {
         }
 
         if (clase.getDia().isEqual(hoy)) {
-            LocalTime ahora = LocalTime.now();
+            // Definir la zona horaria
+            ZoneId zona = ZoneId.of("America/Buenos_Aires");
+            LocalTime ahora = LocalTime.now(zona);
             if (clase.getHora().isBefore(ahora.plusMinutes(60))) {
                 throw new BusinessException("La clase debe programarse con al menos 60 minutos de anticipación");
             }
@@ -168,6 +171,7 @@ public class ClaseServiceImpl implements ClaseService {
 
         // ✅ AGREGAR ESTA VALIDACIÓN DE CONFLICTO DE HORARIO:
         validarConflictoDeHorario(
+                clase.getId(),
                 clase.getDia(),
                 clase.getHora(),
                 clase.getInstructor().getId(),
@@ -182,12 +186,24 @@ public class ClaseServiceImpl implements ClaseService {
 
     @Override
     public void actualizarClase(Long id, Clase clase) {
+        // Obtener la clase a actualizar
         var claseOpt = claseRepository.findById(id);
         if (claseOpt.isEmpty()) {
             throw new ResourceNotFoundException("Clase", "ID", id);
         }
 
         var claseExistente = claseOpt.get();
+
+        // Validar conflictos de horario si cambió día u hora
+        if (clase.getDia() != null || clase.getHora() != null) {
+            validarConflictoDeHorario(
+                    claseExistente.getId(),
+                    claseExistente.getDia(),
+                    claseExistente.getHora(),
+                    claseExistente.getInstructor().getId(),
+                    claseExistente.getAlumno().getId(),
+                    claseExistente.getCaballo().getId());
+        }
 
         // ⚠️ Solo actualizar si vienen en el DTO (pueden ser null)
         if (clase.getInstructor() != null) {
@@ -225,16 +241,6 @@ public class ClaseServiceImpl implements ClaseService {
             claseExistente.setEstado(clase.getEstado());
         if (clase.getObservaciones() != null)
             claseExistente.setObservaciones(clase.getObservaciones());
-
-        // Validar conflictos de horario si cambió día u hora
-        if (clase.getDia() != null || clase.getHora() != null) {
-            validarConflictoDeHorario(
-                    claseExistente.getDia(),
-                    claseExistente.getHora(),
-                    claseExistente.getInstructor().getId(),
-                    claseExistente.getAlumno().getId(),
-                    claseExistente.getCaballo().getId());
-        }
 
         claseRepository.save(claseExistente);
     };
@@ -348,23 +354,43 @@ public class ClaseServiceImpl implements ClaseService {
      * 
      * @throws BusinessException si hay conflicto de horario
      */
-    private void validarConflictoDeHorario(LocalDate dia, LocalTime hora, Long instructorId, Long alumnoId,
+    private void validarConflictoDeHorario(Long id, LocalDate dia, LocalTime hora, Long instructorId, Long alumnoId,
             Long caballoId) {
-        List<Clase> clasesEnMismoHorario = claseRepository.findByDiaWithDetails(dia);
+        List<Clase> clasesEnMismoHorario = claseRepository.findByDiaAndHoraWithDetails(dia, hora);
 
         for (Clase clase : clasesEnMismoHorario) {
-            if (clase.getHora().equals(hora)) {
-                if (clase.getInstructor().getId().equals(instructorId)) {
-                    throw new BusinessException("El instructor ya tiene una clase asignada a esa hora");
-                }
-                if (clase.getAlumno().getId().equals(alumnoId)) {
-                    throw new BusinessException("El alumno ya tiene una clase asignada a esa hora");
-                }
-                if (clase.getCaballo().getId().equals(caballoId)) {
-                    throw new BusinessException("El caballo ya está asignado a una clase en esa hora");
-                }
+            // Excluir la clase que estamos editando
+            if (clase.getId().equals(id)) {
+                continue;
+            }
+
+            // Validar conflicto de alumno
+            if (clase.getAlumno().getId().equals(alumnoId)) {
+                throw new BusinessException("El alumno ya tiene una clase asignada a esa hora");
+            }
+
+            // Validar conflicto de caballo
+            if (clase.getCaballo().getId().equals(caballoId)) {
+                throw new BusinessException("El caballo ya está asignado a una clase en esa hora");
             }
         }
+
+        // for (Clase clase : clasesEnMismoHorario) {
+        // if (clase.getHora().equals(hora)) {
+        // if (clase.getInstructor().getId().equals(instructorId)) {
+        // throw new BusinessException("El instructor ya tiene una clase asignada a esa
+        // hora");
+        // }
+        // if (clase.getAlumno().getId().equals(alumnoId)) {
+        // throw new BusinessException("El alumno ya tiene una clase asignada a esa
+        // hora");
+        // }
+        // if (clase.getCaballo().getId().equals(caballoId)) {
+        // throw new BusinessException("El caballo ya está asignado a una clase en esa
+        // hora");
+        // }
+        // }
+        // }
     }
 
     /**
@@ -401,6 +427,7 @@ public class ClaseServiceImpl implements ClaseService {
 
         // 5. Validar conflictos de horario
         validarConflictoDeHorario(
+                null,
                 claseDto.getDia(),
                 claseDto.getHora(),
                 instructor.getId(),
@@ -486,6 +513,7 @@ public class ClaseServiceImpl implements ClaseService {
         // 6. Validar conflictos si cambió día u hora
         if (claseDto.getDia() != null || claseDto.getHora() != null) {
             validarConflictoDeHorario(
+                    claseExistente.getId(),
                     claseExistente.getDia(),
                     claseExistente.getHora(),
                     claseExistente.getInstructor().getId(),

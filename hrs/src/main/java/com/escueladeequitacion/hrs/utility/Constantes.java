@@ -11,7 +11,7 @@ public class Constantes {
     public static final String RESOURCE_CALENDARIO = "/calendario";
 
     // CrossOrigin
-    public static final String ORIGINS = "http://localhost:4200";
+    public static final String ORIGINS = "http://localhost:5173";
 
     // Canttidad de clases disponibles
     public static final Integer[] CANTIDAD_CLASES = { 4, 8, 12, 16 };

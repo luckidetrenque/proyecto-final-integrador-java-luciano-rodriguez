@@ -87,7 +87,8 @@ public class InstructorController {
 
         instructorService.actualizarInstructorDesdeDto(id, instructorDto);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Instructor con ID " + id + " actualizado correctamente"));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new Mensaje("Instructor con ID " + id + " actualizado correctamente"));
 
     }
 
@@ -100,7 +101,8 @@ public class InstructorController {
 
         instructorService.eliminarInstructor(id);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Instructor con ID " + id + " eliminado correctamente"));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new Mensaje("Instructor con ID " + id + " eliminado correctamente"));
     }
 
     // Endpoint DELETE para eliminar un instructor por ID (Eliminación Lógica)
@@ -111,7 +113,8 @@ public class InstructorController {
     public ResponseEntity<?> eliminarInstructorTemporalmente(@PathVariable Long id) {
         instructorService.eliminarInstructorTemporalmente(id);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new Mensaje("Instructor con ID " + id + " inactivado correctamente"));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new Mensaje("Instructor con ID " + id + " inactivado correctamente"));
     }
 
     // Endpoint GET para buscar por diferentes filtros
