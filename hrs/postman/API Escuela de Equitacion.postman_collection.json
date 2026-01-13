@@ -1008,7 +1008,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"especialidades\": \"EQUITACION\",\n  \"dia\": \"2025-12-26\",\n  \"hora\": \"21:43:00\",\n  \"estado\": \"PROGRAMADA\",\n  \"observaciones\": \"\",\n  \"alumnoId\": 2,\n  \"caballoId\": 2,\n  \"instructorId\": 1\n}"
+							"raw": "{\n  \"especialidad\": \"EQUITACION\",\n  \"dia\": \"2025-12-26\",\n  \"hora\": \"21:43:00\",\n  \"estado\": \"PROGRAMADA\",\n  \"observaciones\": \"\",\n  \"alumnoId\": 2,\n  \"caballoId\": 2,\n  \"instructorId\": 1\n}"
 						},
 						"url": {
 							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}",
@@ -1032,7 +1032,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n        \"especialidades\": \"EQUITACION\",\n        \"dia\": \"2026-01-07\",\n        \"hora\": \"15:00:00\",\n        \"estado\": \"PROGRAMADA\",\n        \"observaciones\": \"\",\n        \"instructorId\": 2,\n        \"alumnoId\": 7,\n        \"caballoId\": 4\n}"
+							"raw": "{\n        \"especialidad\": \"EQUITACION\",\n        \"dia\": \"2026-01-07\",\n        \"hora\": \"15:00:00\",\n        \"estado\": \"PROGRAMADA\",\n        \"observaciones\": \"\",\n        \"instructorId\": 2,\n        \"alumnoId\": 7,\n        \"caballoId\": 4\n}"
 						},
 						"url": {
 							"raw": "{{baseURL}}{{API_VERSION}}{{RESOURCE_CLASES}}/2",
@@ -1076,6 +1076,39 @@
 							"path": [
 								"6",
 								"inactivar"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Calendario",
+			"item": [
+				{
+					"name": "POST - Copiar semana",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"diaInicioOrigen\": \"2026-01-06\",\n  \"diaInicioDestino\": \"2026-01-13\"\n}"
+						},
+						"url": {
+							"raw": "{{baseURL}}{{API_VERSION}}/calendario/copiar-semana",
+							"host": [
+								"{{baseURL}}{{API_VERSION}}"
+							],
+							"path": [
+								"calendario",
+								"copiar-semana"
 							]
 						}
 					},

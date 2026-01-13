@@ -1,6 +1,6 @@
 package com.escueladeequitacion.hrs.repository;
 
-import com.escueladeequitacion.hrs.enums.Especialidades;
+import com.escueladeequitacion.hrs.enums.Especialidad;
 import com.escueladeequitacion.hrs.model.Clase;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,7 +18,7 @@ import com.escueladeequitacion.hrs.enums.Estado;
 public interface ClaseRepository extends JpaRepository<Clase, Long> {
 
         // Métodos para buscar alumnos por diferentes criterios
-        public List<Clase> findByEspecialidades(Especialidades especialidades);
+        public List<Clase> findByEspecialidad(Especialidad especialidad);
 
         public List<Clase> findByDia(LocalDate dia);
 
@@ -33,7 +33,7 @@ public interface ClaseRepository extends JpaRepository<Clase, Long> {
         public List<Clase> findByCaballoId(Long caballo_id);
 
         // Métodos para verificar la existencia de una clase por diferentes criterios
-        public boolean existsByEspecialidades(Especialidades especialidades);
+        public boolean existsByEspecialidad(Especialidad especialidad);
 
         public boolean existsByDia(LocalDate dia);
 

@@ -106,7 +106,7 @@ INSERT INTO `caballos` (`id`, `disponible`, `nombre`, `tipo_caballo`) VALUES
 CREATE TABLE `clases` (
   `id` bigint(20) NOT NULL,
   `dia` date NOT NULL,
-  `especialidades` enum('ADIESTRAMIENTO','EQUINOTERAPIA','EQUITACION') NOT NULL,
+  `especialidad` enum('ADIESTRAMIENTO','EQUINOTERAPIA','EQUITACION') NOT NULL,
   `estado` enum('CANCELADA','COMPLETADA','EN_CURSO','PROGRAMADA') NOT NULL,
   `hora` time(6) NOT NULL,
   `observaciones` varchar(50) DEFAULT NULL,
@@ -119,7 +119,7 @@ CREATE TABLE `clases` (
 -- Volcado de datos para la tabla `clases`
 --
 
-INSERT INTO `clases` (`id`, `dia`, `especialidades`, `estado`, `hora`, `observaciones`, `alumno_id`, `caballo_id`, `instructor_id`) VALUES
+INSERT INTO `clases` (`id`, `dia`, `especialidad`, `estado`, `hora`, `observaciones`, `alumno_id`, `caballo_id`, `instructor_id`) VALUES
 (1, '2025-12-26', 'EQUITACION', 'PROGRAMADA', '20:00:00.000000', '', 7, 5, 1),
 (2, '2025-12-26', 'EQUITACION', 'PROGRAMADA', '21:00:00.000000', '', 2, 5, 1),
 (3, '2025-12-26', 'EQUITACION', 'PROGRAMADA', '21:43:00.000000', '', 2, 2, 1);

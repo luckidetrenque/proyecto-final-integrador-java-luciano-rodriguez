@@ -2,7 +2,7 @@ package com.escueladeequitacion.hrs.service;
 
 import com.escueladeequitacion.hrs.dto.ClaseDto;
 import com.escueladeequitacion.hrs.dto.ClaseResponseDto;
-import com.escueladeequitacion.hrs.enums.Especialidades;
+import com.escueladeequitacion.hrs.enums.Especialidad;
 import com.escueladeequitacion.hrs.enums.Estado;
 import com.escueladeequitacion.hrs.exception.BusinessException;
 import com.escueladeequitacion.hrs.exception.ResourceNotFoundException;
@@ -52,8 +52,8 @@ public class ClaseServiceImpl implements ClaseService {
     };
 
     @Override
-    public List<Clase> buscarClasePorEspecialidad(Especialidades especialidad) {
-        return claseRepository.findByEspecialidades(especialidad);
+    public List<Clase> buscarClasePorEspecialidad(Especialidad especialidad) {
+        return claseRepository.findByEspecialidad(especialidad);
     };
 
     @Override
@@ -92,8 +92,8 @@ public class ClaseServiceImpl implements ClaseService {
     };
 
     @Override
-    public Boolean existeClasePorEspecialidades(Especialidades especialidades) {
-        return claseRepository.existsByEspecialidades(especialidades);
+    public Boolean existeClasePorEspecialidad(Especialidad especialidad) {
+        return claseRepository.existsByEspecialidad(especialidad);
     };
 
     @Override
@@ -231,8 +231,8 @@ public class ClaseServiceImpl implements ClaseService {
         }
 
         // Actualizar campos simples solo si vienen
-        if (clase.getEspecialidades() != null)
-            claseExistente.setEspecialidades(clase.getEspecialidades());
+        if (clase.getEspecialidad() != null)
+            claseExistente.setEspecialidad(clase.getEspecialidad());
         if (clase.getDia() != null)
             claseExistente.setDia(clase.getDia());
         if (clase.getHora() != null)
@@ -436,7 +436,7 @@ public class ClaseServiceImpl implements ClaseService {
 
         // 6. Crear la clase
         Clase clase = new Clase();
-        clase.setEspecialidades(claseDto.getEspecialidades());
+        clase.setEspecialidad(claseDto.getEspecialidad());
         clase.setDia(claseDto.getDia());
         clase.setHora(claseDto.getHora());
         clase.setEstado(claseDto.getEstado());
@@ -494,8 +494,8 @@ public class ClaseServiceImpl implements ClaseService {
         }
 
         // 5. Actualizar campos simples
-        if (claseDto.getEspecialidades() != null) {
-            claseExistente.setEspecialidades(claseDto.getEspecialidades());
+        if (claseDto.getEspecialidad() != null) {
+            claseExistente.setEspecialidad(claseDto.getEspecialidad());
         }
         if (claseDto.getDia() != null) {
             claseExistente.setDia(claseDto.getDia());

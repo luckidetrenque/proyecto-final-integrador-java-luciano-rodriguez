@@ -2,7 +2,7 @@ package com.escueladeequitacion.hrs.service;
 
 import com.escueladeequitacion.hrs.dto.ClaseDto;
 import com.escueladeequitacion.hrs.dto.ClaseResponseDto;
-import com.escueladeequitacion.hrs.enums.Especialidades;
+import com.escueladeequitacion.hrs.enums.Especialidad;
 import com.escueladeequitacion.hrs.enums.Estado;
 import com.escueladeequitacion.hrs.model.Clase;
 
@@ -20,7 +20,7 @@ public interface ClaseService {
     // Métodos para buscar caballos por diferentes criterios
     public Optional<Clase> buscarClasePorId(Long id);
 
-    public List<Clase> buscarClasePorEspecialidad(Especialidades especialidad);
+    public List<Clase> buscarClasePorEspecialidad(Especialidad especialidad);
 
     public List<Clase> buscarClasePorDia(LocalDate dia);
 
@@ -37,7 +37,7 @@ public interface ClaseService {
     // Métodos para verificar la existencia de clases por diferentes criterios
     public Boolean existeClasePorId(Long id);
 
-    public Boolean existeClasePorEspecialidades(Especialidades especialidades);
+    public Boolean existeClasePorEspecialidad(Especialidad especialidad);
 
     public Boolean existeClasePorDia(LocalDate fechas);
 

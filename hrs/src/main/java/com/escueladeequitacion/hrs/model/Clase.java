@@ -3,7 +3,7 @@ package com.escueladeequitacion.hrs.model;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import com.escueladeequitacion.hrs.enums.Especialidades;
+import com.escueladeequitacion.hrs.enums.Especialidad;
 import com.escueladeequitacion.hrs.enums.Estado;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -30,9 +30,9 @@ public class Clase {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-    @Column(name = "especialidades", nullable = false, length = 16)
+    @Column(name = "especialidad", nullable = false, length = 16)
     @Enumerated(EnumType.STRING)
-    private Especialidades especialidades;
+    private Especialidad especialidad;
     @Column(name = "dia", nullable = false)
     private LocalDate dia;
     @Column(name = "hora", nullable = false)
@@ -63,12 +63,12 @@ public class Clase {
     }
 
     // Constructor con parámetros
-    public Clase(Instructor instructor, Alumno alumno, Caballo caballo, Especialidades especialidades,
+    public Clase(Instructor instructor, Alumno alumno, Caballo caballo, Especialidad especialidad,
             LocalDate dia, LocalTime hora, Estado estado) {
         this.instructor = instructor;
         this.alumno = alumno;
         this.caballo = caballo;
-        this.especialidades = especialidades;
+        this.especialidad = especialidad;
         this.dia = dia;
         this.hora = hora;
         this.estado = estado;
@@ -107,12 +107,12 @@ public class Clase {
         this.caballo = caballo;
     }
 
-    public Especialidades getEspecialidades() {
-        return especialidades;
+    public Especialidad getEspecialidad() {
+        return especialidad;
     }
 
-    public void setEspecialidades(Especialidades especialidades) {
-        this.especialidades = especialidades;
+    public void setEspecialidad(Especialidad especialidad) {
+        this.especialidad = especialidad;
     }
 
     public LocalDate getDia() {

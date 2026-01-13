@@ -1,6 +1,6 @@
 package com.escueladeequitacion.hrs.dto;
 
-import com.escueladeequitacion.hrs.enums.Especialidades;
+import com.escueladeequitacion.hrs.enums.Especialidad;
 import com.escueladeequitacion.hrs.enums.Estado;
 import com.escueladeequitacion.hrs.model.Clase;
 
@@ -10,7 +10,7 @@ import java.time.LocalTime;
 // DTO para la respuesta de Clase con datos relacionados de Instructor, Alumno y Caballo.
 public class ClaseResponseDto {
     private Long id;
-    private Especialidades especialidades;
+    private Especialidad especialidad;
     private LocalDate dia;
     private LocalTime hora;
     private Estado estado;
@@ -42,7 +42,7 @@ public class ClaseResponseDto {
      */
     public ClaseResponseDto(Clase clase) {
         this.id = clase.getId();
-        this.especialidades = clase.getEspecialidades();
+        this.especialidad = clase.getEspecialidad();
         this.dia = clase.getDia();
         this.hora = clase.getHora();
         this.estado = clase.getEstado();
@@ -81,12 +81,12 @@ public class ClaseResponseDto {
         this.id = id;
     }
 
-    public Especialidades getEspecialidades() {
-        return especialidades;
+    public Especialidad getEspecialidad() {
+        return especialidad;
     }
 
-    public void setEspecialidades(Especialidades especialidades) {
-        this.especialidades = especialidades;
+    public void setEspecialidad(Especialidad especialidad) {
+        this.especialidad = especialidad;
     }
 
     public LocalDate getDia() {

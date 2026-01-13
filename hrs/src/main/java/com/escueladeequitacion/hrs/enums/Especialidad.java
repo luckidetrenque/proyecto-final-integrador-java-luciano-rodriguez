@@ -1,6 +1,6 @@
 package com.escueladeequitacion.hrs.enums;
 
-public enum Especialidades {
+public enum Especialidad {
     EQUINOTERAPIA,
     EQUITACION,
     ADIESTRAMIENTO

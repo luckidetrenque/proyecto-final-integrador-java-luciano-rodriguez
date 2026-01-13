@@ -3,7 +3,7 @@ package com.escueladeequitacion.hrs.dto;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import com.escueladeequitacion.hrs.enums.Especialidades;
+import com.escueladeequitacion.hrs.enums.Especialidad;
 import com.escueladeequitacion.hrs.enums.Estado;
 
 import jakarta.validation.constraints.FutureOrPresent;
@@ -13,7 +13,7 @@ import jakarta.validation.constraints.NotNull;
 // DTO para representar una clase
 public class ClaseDto {
 
-    private Especialidades especialidades;
+    private Especialidad especialidad;
     @NotNull(message = "El día no puede estar vacío")
     @FutureOrPresent(message = "El día debe ser en el futuro")
     private LocalDate dia;
@@ -38,9 +38,9 @@ public class ClaseDto {
 
     }
 
-    public ClaseDto(Especialidades especialidades, LocalDate dia, LocalTime hora, Estado estado,
+    public ClaseDto(Especialidad especialidad, LocalDate dia, LocalTime hora, Estado estado,
             String observaciones, Long instructorId, Long alumnoId, Long caballoId) {
-        this.especialidades = especialidades;
+        this.especialidad = especialidad;
         this.dia = dia;
         this.hora = hora;
         this.estado = estado;
@@ -50,12 +50,12 @@ public class ClaseDto {
         this.caballoId = caballoId;
     }
 
-    public Especialidades getEspecialidades() {
-        return especialidades;
+    public Especialidad getEspecialidad() {
+        return especialidad;
     }
 
-    public void setEspecialidades(Especialidades especialidades) {
-        this.especialidades = especialidades;
+    public void setEspecialidad(Especialidad especialidad) {
+        this.especialidad = especialidad;
     }
 
     public LocalDate getDia() {
