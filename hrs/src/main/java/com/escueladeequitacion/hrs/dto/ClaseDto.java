@@ -13,9 +13,13 @@ import jakarta.validation.constraints.NotNull;
 // DTO para representar una clase
 public class ClaseDto {
 
+    // Interfaces para validación condicional
+    public interface AlCrear {}
+    public interface AlActualizar {}
+
     private Especialidad especialidad;
     @NotNull(message = "El día no puede estar vacío")
-    @FutureOrPresent(message = "El día debe ser en el futuro")
+    @FutureOrPresent(message = "El día debe ser en el futuro", groups = AlCrear.class)
     private LocalDate dia;
     @NotNull(message = "La hora no puede estar vacía")
     // @FutureOrPresent(message = "La hora debe ser en el futuro")

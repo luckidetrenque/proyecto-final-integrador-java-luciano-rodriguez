@@ -68,6 +68,11 @@ public class AuthController {
         public void setPersonaDni(Integer personaDni) { this.personaDni = personaDni; }
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<Mensaje> login() {
+        return ResponseEntity.ok(new Mensaje("Login exitoso"));
+    }
+
     /**
      * POST /api/v1/auth/register
      * Registra un nuevo usuario.

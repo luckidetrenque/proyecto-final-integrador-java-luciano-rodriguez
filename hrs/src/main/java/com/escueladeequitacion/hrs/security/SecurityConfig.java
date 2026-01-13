@@ -26,24 +26,24 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Endpoints públicos
                 .requestMatchers("/api/v1/auth/**").permitAll() // Login/registro
-                .requestMatchers(HttpMethod.GET, "/api/v1/caballos").permitAll()
+                // .requestMatchers(HttpMethod.GET, "/api/v1/alumnos").permitAll()
                 
                 // Solo ADMIN
-                .requestMatchers(HttpMethod.POST, "/api/v1/alumnos/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/v1/alumnos/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/v1/alumnos/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/v1/instructores/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/v1/instructores/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/v1/instructores/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/v1/caballos/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/v1/caballos/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/v1/caballos/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/v1/clases/**").hasRole("ADMIN")
+                // .requestMatchers(HttpMethod.POST, "/api/v1/alumnos/**").hasRole("ADMIN")
+                // .requestMatchers(HttpMethod.PUT, "/api/v1/alumnos/**").hasRole("ADMIN")
+                // .requestMatchers(HttpMethod.DELETE, "/api/v1/alumnos/**").hasRole("ADMIN")
+                // .requestMatchers(HttpMethod.POST, "/api/v1/instructores/**").hasRole("ADMIN")
+                // .requestMatchers(HttpMethod.PUT, "/api/v1/instructores/**").hasRole("ADMIN")
+                // .requestMatchers(HttpMethod.DELETE, "/api/v1/instructores/**").hasRole("ADMIN")
+                // .requestMatchers(HttpMethod.POST, "/api/v1/caballos/**").hasRole("ADMIN")
+                // .requestMatchers(HttpMethod.PUT, "/api/v1/caballos/**").hasRole("ADMIN")
+                // .requestMatchers(HttpMethod.DELETE, "/api/v1/caballos/**").hasRole("ADMIN")
+                // .requestMatchers(HttpMethod.POST, "/api/v1/clases/**").hasRole("ADMIN")
                 
                 // ADMIN e INSTRUCTOR
-                .requestMatchers(HttpMethod.GET, "/api/v1/clases/**").hasAnyRole("ADMIN", "INSTRUCTOR")
-                .requestMatchers(HttpMethod.PUT, "/api/v1/clases/**").hasAnyRole("ADMIN", "INSTRUCTOR")
-                .requestMatchers(HttpMethod.DELETE, "/api/v1/clases/**").hasRole("ADMIN")
+                // .requestMatchers(HttpMethod.GET, "/api/v1/clases/**").hasAnyRole("ADMIN", "INSTRUCTOR")
+                // .requestMatchers(HttpMethod.PUT, "/api/v1/clases/**").hasAnyRole("ADMIN", "INSTRUCTOR")
+                // .requestMatchers(HttpMethod.DELETE, "/api/v1/clases/**").hasRole("ADMIN")
                 
                 // ALUMNO
                 .requestMatchers(HttpMethod.GET, "/api/v1/alumnos/**").hasAnyRole("ADMIN", "ALUMNO")

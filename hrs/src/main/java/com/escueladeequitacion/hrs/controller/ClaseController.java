@@ -1,6 +1,8 @@
 package com.escueladeequitacion.hrs.controller;
 
 import com.escueladeequitacion.hrs.dto.ClaseDto;
+import com.escueladeequitacion.hrs.dto.ClaseDto.AlActualizar;
+import com.escueladeequitacion.hrs.dto.ClaseDto.AlCrear;
 import com.escueladeequitacion.hrs.dto.ClaseResponseDto;
 import com.escueladeequitacion.hrs.enums.Estado;
 import com.escueladeequitacion.hrs.model.Clase;
@@ -12,13 +14,12 @@ import com.escueladeequitacion.hrs.service.CaballoService;
 import com.escueladeequitacion.hrs.utility.Mensaje;
 import com.escueladeequitacion.hrs.utility.Constantes;
 
-import jakarta.validation.Valid;
-
 import java.time.LocalDate;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -102,7 +103,7 @@ public class ClaseController {
      * Crea una nueva clase.
      */
     @PostMapping(Constantes.RESOURCE_CLASES)
-    public ResponseEntity<?> crearClase(@Valid @RequestBody ClaseDto claseDto) {
+    public ResponseEntity<?> crearClase(@Validated(AlCrear.class) @RequestBody ClaseDto claseDto) {
 
         Clase clase = claseService.crearClaseDesdeDto(claseDto);
 
@@ -116,7 +117,7 @@ public class ClaseController {
      * Actualiza una clase existente.
      */
     @PutMapping(Constantes.RESOURCE_CLASES + "/{id}")
-    public ResponseEntity<?> actualizarClase(@PathVariable Long id, @Valid @RequestBody ClaseDto claseDto) {
+    public ResponseEntity<?> actualizarClase(@PathVariable Long id, @Validated(AlActualizar.class) @RequestBody ClaseDto claseDto) {
         // El Service maneja todas las validaciones
         claseService.actualizarClaseDesdeDto(id, claseDto);
 
