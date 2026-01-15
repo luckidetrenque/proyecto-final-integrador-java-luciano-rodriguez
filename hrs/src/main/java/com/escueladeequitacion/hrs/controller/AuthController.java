@@ -23,7 +23,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/v1/auth")
-@CrossOrigin(origins = { "http://localhost:4200" })
+@CrossOrigin(origins = { "http://localhost:5173" })
 public class AuthController {
 
     @Autowired
@@ -68,9 +68,16 @@ public class AuthController {
         public void setPersonaDni(Integer personaDni) { this.personaDni = personaDni; }
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<Mensaje> login() {
-        return ResponseEntity.ok(new Mensaje("Login exitoso"));
+@PostMapping("/login")
+    public ResponseEntity<?> login(java.security.Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        // Buscamos al usuario por el nombre que viene en el Header de Basic Auth
+        User user = userRepository.findByUsername(principal.getName())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        
+        return ResponseEntity.ok(user);
     }
 
     /**
