@@ -22,6 +22,9 @@ public class CalendarioServiceImpl implements CalendarioService {
 
     @Transactional
     public void copiarSemanaCompleta(LocalDate inicioOri, LocalDate inicioDes) {
+            if (inicioOri == null || inicioDes == null) {
+        throw new IllegalArgumentException("Las fechas de origen y destino no pueden estar vacías");
+    }
         // 1. Definir rango de la semana origen (7 días)
         LocalDate finOri = inicioOri.plusDays(6);
         List<Clase> clasesExistentes = claseRepository.findByDiaBetween(inicioOri, finOri);

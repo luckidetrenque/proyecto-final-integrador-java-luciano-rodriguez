@@ -52,23 +52,48 @@ public class AuthController {
         private Integer personaDni; // Opcional: vincular con Alumno/Instructor
 
         // Getters y Setters
-        public String getUsername() { return username; }
-        public void setUsername(String username) { this.username = username; }
-        
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
-        
-        public String getPassword() { return password; }
-        public void setPassword(String password) { this.password = password; }
-        
-        public RolSeguridad getRol() { return rol; }
-        public void setRol(RolSeguridad rol) { this.rol = rol; }
-        
-        public Integer getPersonaDni() { return personaDni; }
-        public void setPersonaDni(Integer personaDni) { this.personaDni = personaDni; }
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        public RolSeguridad getRol() {
+            return rol;
+        }
+
+        public void setRol(RolSeguridad rol) {
+            this.rol = rol;
+        }
+
+        public Integer getPersonaDni() {
+            return personaDni;
+        }
+
+        public void setPersonaDni(Integer personaDni) {
+            this.personaDni = personaDni;
+        }
     }
 
-@PostMapping("/login")
+    @PostMapping("/login")
     public ResponseEntity<?> login(java.security.Principal principal) {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -76,7 +101,7 @@ public class AuthController {
         // Buscamos al usuario por el nombre que viene en el Header de Basic Auth
         User user = userRepository.findByUsername(principal.getName())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        
+
         return ResponseEntity.ok(user);
     }
 
@@ -100,11 +125,10 @@ public class AuthController {
 
         // Crear usuario
         User user = new User(
-            request.getUsername(),
-            request.getEmail(),
-            passwordEncoder.encode(request.getPassword()),
-            request.getRol()
-        );
+                request.getUsername(),
+                request.getEmail(),
+                passwordEncoder.encode(request.getPassword()),
+                request.getRol());
 
         // Vincular con persona si se proporciona DNI
         if (request.getPersonaDni() != null) {
@@ -135,7 +159,8 @@ public class AuthController {
     @GetMapping("/users/{id}")
     public ResponseEntity<?> obtenerUsuario(@PathVariable Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new com.escueladeequitacion.hrs.exception.ResourceNotFoundException("User", "ID", id));
+                .orElseThrow(
+                        () -> new com.escueladeequitacion.hrs.exception.ResourceNotFoundException("User", "ID", id));
         return ResponseEntity.ok(user);
     }
 
@@ -152,5 +177,34 @@ public class AuthController {
 
         userRepository.deleteById(id);
         return ResponseEntity.ok(new Mensaje("Usuario eliminado correctamente"));
+    }
+
+    @PutMapping("/users/{id}")
+    public ResponseEntity<?> actualizarUsuario(@PathVariable("id") Long id,
+            @Valid @RequestBody RegisterRequest request) {
+        // Validar username duplicado
+        if (userRepository.existsByUsername(request.getUsername())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new Mensaje("El username ya existe"));
+        }
+
+        // Validar email duplicado
+        if (userRepository.existsByEmail(request.getEmail())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new Mensaje("El email ya está registrado"));
+        }
+
+        // Crear usuario
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRol(request.getRol());
+        user.setPersonaDni(request.getPersonaDni());
+
+        userRepository.save(user);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new Mensaje("Usuario actualizado correctamente: " + user.getUsername()));
     }
 }

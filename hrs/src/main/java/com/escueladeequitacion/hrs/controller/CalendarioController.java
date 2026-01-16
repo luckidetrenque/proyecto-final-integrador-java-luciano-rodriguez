@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.escueladeequitacion.hrs.dto.CalendarioDto;
 import com.escueladeequitacion.hrs.service.CalendarioService;
 import com.escueladeequitacion.hrs.utility.Constantes;
+import com.escueladeequitacion.hrs.utility.Mensaje;
 
 @RestController
 @RequestMapping(Constantes.API_VERSION)
@@ -23,8 +24,8 @@ public class CalendarioController {
     private CalendarioService calendarioService;
 
     @PostMapping(Constantes.RESOURCE_CALENDARIO + "/copiar-semana")
-    public ResponseEntity<String> copiar(@RequestBody CalendarioDto request) {
+    public ResponseEntity<Mensaje> copiar(@RequestBody CalendarioDto request) {
         calendarioService.copiarSemanaCompleta(request.getDiaInicioOrigen(), request.getDiaInicioDestino());
-        return ResponseEntity.ok("Clases copiadas exitosamente a la semana del " + request.getDiaInicioDestino());
+        return ResponseEntity.ok(new Mensaje("Clases copiadas exitosamente a la semana del " + request.getDiaInicioDestino()));
     }
 }
