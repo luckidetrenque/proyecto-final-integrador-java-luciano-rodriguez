@@ -142,6 +142,13 @@ public class AuthController {
                 .body(new Mensaje("Usuario registrado correctamente: " + user.getUsername()));
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        // No hay sesión que cerrar en el servidor (Basic Auth),
+        // pero respondemos 200 OK para que el frontend confirme la acción.
+        return ResponseEntity.ok().build();
+    }
+
     /**
      * GET /api/v1/auth/users
      * Lista todos los usuarios (solo ADMIN).
@@ -182,23 +189,35 @@ public class AuthController {
     @PutMapping("/users/{id}")
     public ResponseEntity<?> actualizarUsuario(@PathVariable("id") Long id,
             @Valid @RequestBody RegisterRequest request) {
-        // Validar username duplicado
+        // Validar id existente
+        if (!userRepository.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new Mensaje("Usuario no encontrado"));
+        }
+
         if (userRepository.existsByUsername(request.getUsername())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new Mensaje("El username ya existe"));
+            User existingUser = userRepository.findByUsername(request.getUsername()).get();
+            if (!existingUser.getId().equals(id)) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(new Mensaje("El username ya existe"));
+            }
         }
 
-        // Validar email duplicado
         if (userRepository.existsByEmail(request.getEmail())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new Mensaje("El email ya está registrado"));
+            User existingUser = userRepository.findByEmail(request.getEmail()).get();
+            if (!existingUser.getId().equals(id)) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(new Mensaje("El email ya está registrado"));
+            }
         }
 
-        // Crear usuario
-        User user = new User();
+        // Actualizar usuario
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        // user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRol(request.getRol());
         user.setPersonaDni(request.getPersonaDni());
 

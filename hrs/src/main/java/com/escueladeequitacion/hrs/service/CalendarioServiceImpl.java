@@ -22,9 +22,9 @@ public class CalendarioServiceImpl implements CalendarioService {
 
     @Transactional
     public void copiarSemanaCompleta(LocalDate inicioOri, LocalDate inicioDes) {
-            if (inicioOri == null || inicioDes == null) {
-        throw new IllegalArgumentException("Las fechas de origen y destino no pueden estar vacías");
-    }
+        if (inicioOri == null || inicioDes == null) {
+            throw new IllegalArgumentException("Las fechas de origen y destino no pueden estar vacías");
+        }
         // 1. Definir rango de la semana origen (7 días)
         LocalDate finOri = inicioOri.plusDays(6);
         List<Clase> clasesExistentes = claseRepository.findByDiaBetween(inicioOri, finOri);
@@ -49,4 +49,19 @@ public class CalendarioServiceImpl implements CalendarioService {
             claseRepository.saveAll(nuevasClases);
         }
     }
+
+    @Transactional
+    public void eliminarClasesEnPeriodo(LocalDate fechaInicio, LocalDate fechaFin) {
+        if (fechaInicio == null || fechaFin == null) {
+            throw new IllegalArgumentException("Las fechas de inicio y fin no pueden estar vacías");
+        }
+
+        if (fechaInicio.isAfter(fechaFin)) {
+            throw new IllegalArgumentException("La fecha de inicio no puede ser posterior a la fecha de fin");
+        }
+
+        // Ejecuta el borrado directamente en la base de datos para mayor eficiencia
+        claseRepository.deleteByDiaBetween(fechaInicio, fechaFin);
+    }
+
 }

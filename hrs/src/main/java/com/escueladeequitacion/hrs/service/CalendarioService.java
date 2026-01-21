@@ -7,4 +7,7 @@ public interface CalendarioService {
 
     // Método para copiar una semana completa de clases
     public void copiarSemanaCompleta(LocalDate inicioOri, LocalDate inicioDes);
+
+    // Método para eliminar clases en un periodo
+    public void eliminarClasesEnPeriodo(LocalDate fechaInicio, LocalDate inicioDes);
 }

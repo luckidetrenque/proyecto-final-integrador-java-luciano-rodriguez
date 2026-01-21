@@ -2,6 +2,8 @@ package com.escueladeequitacion.hrs.dto;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 import com.escueladeequitacion.hrs.enums.Especialidad;
 import com.escueladeequitacion.hrs.enums.Estado;
@@ -14,8 +16,11 @@ import jakarta.validation.constraints.NotNull;
 public class ClaseDto {
 
     // Interfaces para validación condicional
-    public interface AlCrear {}
-    public interface AlActualizar {}
+    public interface AlCrear {
+    }
+
+    public interface AlActualizar {
+    }
 
     private Especialidad especialidad;
     @NotNull(message = "El día no puede estar vacío")
@@ -117,4 +122,19 @@ public class ClaseDto {
     public void setCaballoId(Long caballoId) {
         this.caballoId = caballoId;
     }
+
+    /**
+     * Retorna la fecha y hora combinadas en formato ISO-8601 con zona UTC.
+     * Ejemplo: "2026-03-15T10:00:00Z"
+     * 
+     * @return OffsetDateTime en UTC, o null si dia u hora son null
+     */
+    public OffsetDateTime getDiaHoraCompleto() {
+        if (dia == null || hora == null) {
+            return null;
+        }
+        // Combinar LocalDate + LocalTime y convertir a UTC
+        return OffsetDateTime.of(dia, hora, ZoneOffset.UTC);
+    }
+
 }

@@ -4,6 +4,7 @@ import com.escueladeequitacion.hrs.enums.Especialidad;
 import com.escueladeequitacion.hrs.model.Clase;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -46,6 +47,12 @@ public interface ClaseRepository extends JpaRepository<Clase, Long> {
         public boolean existsByAlumnoId(Long alumno_id);
 
         public boolean existsByCaballoId(Long caballo_id);
+
+        /**
+         * Busca clases por día y estado específicos.
+         * Necesario para las tareas programadas de cambio de estado.
+         */
+        public List<Clase> findByDiaAndEstado(LocalDate dia, Estado estado);
 
         // ============================================================
         // CONSULTAS CON JOIN FETCH (Nuevas - traen datos relacionados)
@@ -165,7 +172,11 @@ public interface ClaseRepository extends JpaRepository<Clase, Long> {
         @Query("SELECT COUNT(c) FROM Clase c WHERE c.caballo.id = :caballoId AND c.estado = :estado")
         public long contarPorCaballoYEstado(@Param("caballoId") Long caballoId, @Param("estado") Estado estado);
 
-        // Método para copiar las clases de una una semana (martes a sábados)
+        // Método para copiar las clases de una una período a otro
         public List<Clase> findByDiaBetween(LocalDate inicio, LocalDate fin);
 
+        // Método para eliminar las clases en un período
+        @Modifying
+        @Query("DELETE FROM Clase c WHERE c.dia BETWEEN :inicio AND :fin")
+        public void deleteByDiaBetween(LocalDate inicio, LocalDate fin);
 }

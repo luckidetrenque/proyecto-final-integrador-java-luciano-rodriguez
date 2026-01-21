@@ -26,7 +26,7 @@ public abstract class Persona {
     @Column(name = "fecha_nacimiento", nullable = false)
     private LocalDate fechaNacimiento;
     @Column(name = "telefono", nullable = false)
-    private Integer telefono;
+    private String telefono;
     @Column(name = "email", nullable = true)
     private String email;
 
@@ -35,7 +35,7 @@ public abstract class Persona {
     }
 
     // Constructor con parámetros, excepto el email que es opcional
-    public Persona(Integer dni, String nombre, String apellido, LocalDate fechaNacimiento, Integer telefono,
+    public Persona(Integer dni, String nombre, String apellido, LocalDate fechaNacimiento, String telefono,
             String email) {
         this.dni = dni;
         this.nombre = nombre;
@@ -78,11 +78,11 @@ public abstract class Persona {
         this.fechaNacimiento = fechaNacimiento;
     }
 
-    public int getTelefono() {
+    public String getTelefono() {
         return telefono;
     }
 
-    public void setTelefono(Integer telefono) {
+    public void setTelefono(String telefono) {
         this.telefono = telefono;
     }
 

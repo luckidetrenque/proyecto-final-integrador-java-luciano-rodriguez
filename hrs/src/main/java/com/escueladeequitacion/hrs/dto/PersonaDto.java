@@ -2,12 +2,14 @@ package com.escueladeequitacion.hrs.dto;
 
 import java.time.LocalDate;
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 // DTO para representar una persona
@@ -26,10 +28,11 @@ public class PersonaDto {
     @NotNull(message = "La fecha de nacimiento no puede estar vacía")
     @Past(message = "La fecha de nacimiento debe ser una fecha pasada")
     private LocalDate fechaNacimiento;
-    @NotNull(message = "El teléfono no puede estar vacío")
-    @Min(value = 1000000, message = "El teléfono debe tener al menos 7 dígitos")
-    @Max(value = 999999999, message = "El teléfono no debe exceder los 10 dígitos")
-    private Integer telefono;
+    @NotBlank(message = "El teléfono no puede estar vacío")
+    @Size(min = 10, max = 15, message = "El teléfono debe tener entre 10 y 15 caracteres")
+    @Pattern(regexp = "^\\+?[0-9]*$", message = "El teléfono solo puede contener números y opcionalmente el prefijo '+'")
+    @Column(name = "telefono", length = 15, nullable = false)
+    private String telefono;
     @Email(message = "El email debe tener un formato válido")
     private String email;
 
@@ -37,7 +40,7 @@ public class PersonaDto {
     public PersonaDto() {
     }
 
-    public PersonaDto(Integer dni, String nombre, String apellido, LocalDate fechaNacimiento, Integer telefono,
+    public PersonaDto(Integer dni, String nombre, String apellido, LocalDate fechaNacimiento, String telefono,
             String email) {
         this.dni = dni;
         this.nombre = nombre;
@@ -79,11 +82,11 @@ public class PersonaDto {
         this.fechaNacimiento = fechaNacimiento;
     }
 
-    public Integer getTelefono() {
+    public String getTelefono() {
         return telefono;
     }
 
-    public void setTelefono(Integer telefono) {
+    public void setTelefono(String telefono) {
         this.telefono = telefono;
     }
 

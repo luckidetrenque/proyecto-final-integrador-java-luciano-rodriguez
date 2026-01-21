@@ -15,6 +15,7 @@ import com.escueladeequitacion.hrs.repository.ClaseRepository;
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -566,5 +567,36 @@ public class ClaseServiceImpl implements ClaseService {
         return claseRepository.contarPorCaballoYEstado(caballoId, Estado.COMPLETADA);
     }
 
-    // Método validarConflictoDeHorario ya existe (lo agregaste antes)
+    /**
+     * Tarea programada que se ejecuta cada minuto para actualizar estados de
+     * clases.
+     * - Cambia de PROGRAMADA a EN_CURSO cuando llega la hora de inicio
+     * - Cambia de EN_CURSO a COMPLETADA cuando transcurren 60 minutos
+     */
+    @Scheduled(cron = "0 0/30 9-18 * * TUE-SAT", zone = "America/Argentina/Buenos_Aires")
+    public void actualizarEstadosDeClases() {
+        LocalDate hoy = LocalDate.now(ZoneId.of("America/Buenos_Aires"));
+        LocalTime ahora = LocalTime.now(ZoneId.of("America/Buenos_Aires"));
+
+        // 1. Cambiar clases PROGRAMADA → EN_CURSO (cuando llega la hora de inicio)
+        List<Clase> clasesPorIniciar = claseRepository.findByDiaAndEstado(hoy, Estado.PROGRAMADA);
+
+        for (Clase clase : clasesPorIniciar) {
+            if (!clase.getHora().isAfter(ahora)) {
+                clase.setEstado(Estado.EN_CURSO);
+                claseRepository.save(clase);
+            }
+        }
+
+        // 2. Cambiar clases EN_CURSO → COMPLETADA (cuando transcurren 60 minutos)
+        List<Clase> clasesEnCurso = claseRepository.findByDiaAndEstado(hoy, Estado.EN_CURSO);
+
+        for (Clase clase : clasesEnCurso) {
+            LocalTime horaFinalizacion = clase.getHora().plusMinutes(60);
+            if (!horaFinalizacion.isAfter(ahora)) {
+                clase.setEstado(Estado.COMPLETADA);
+                claseRepository.save(clase);
+            }
+        }
+    }
 }

@@ -136,4 +136,6 @@ public interface ClaseService {
      * Cuenta clases completadas por caballo.
      */
     public long contarClasesCompletadasPorCaballo(Long caballoId);
+
+    public void actualizarEstadosDeClases();
 }

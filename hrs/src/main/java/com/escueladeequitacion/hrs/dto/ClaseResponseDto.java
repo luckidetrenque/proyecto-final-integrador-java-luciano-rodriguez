@@ -6,6 +6,8 @@ import com.escueladeequitacion.hrs.model.Clase;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 // DTO para la respuesta de Clase con datos relacionados de Instructor, Alumno y Caballo.
 public class ClaseResponseDto {
@@ -210,5 +212,16 @@ public class ClaseResponseDto {
 
     public void setCaballoTipo(String caballoTipo) {
         this.caballoTipo = caballoTipo;
+    }
+
+    /**
+     * Retorna la fecha y hora combinadas en formato ISO-8601 UTC.
+     * Ejemplo: "2026-03-15T10:00:00Z"
+     */
+    public OffsetDateTime getDiaHoraCompleto() {
+        if (dia == null || hora == null) {
+            return null;
+        }
+        return OffsetDateTime.of(dia, hora, ZoneOffset.UTC);
     }
 }

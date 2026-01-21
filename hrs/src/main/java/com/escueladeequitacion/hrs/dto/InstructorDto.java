@@ -15,7 +15,7 @@ public class InstructorDto extends PersonaDto {
         super();
     }
 
-    public InstructorDto(Integer dni, String nombre, String apellido, LocalDate fechaNacimiento, Integer telefono,
+    public InstructorDto(Integer dni, String nombre, String apellido, LocalDate fechaNacimiento, String telefono,
             String email,
             Boolean activo) {
         super(dni, nombre, apellido, fechaNacimiento, telefono, email);
