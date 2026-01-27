@@ -16,7 +16,7 @@ public interface InstructorService {
     // Métodos para buscar instructores por diferentes criterios
     public Optional<Instructor> buscarInstructorPorId(Long id);
 
-    public Optional<Instructor> buscarInstructorPorDni(Integer dni);
+    public Optional<Instructor> buscarInstructorPorDni(String dni);
 
     public List<Instructor> buscarInstructorPorNombre(String nombre);
 
@@ -31,7 +31,7 @@ public interface InstructorService {
     // Métodos para verificar la existencia de instructores por diferentes criterios
     public Boolean existeInstructorPorId(Long id);
 
-    public Boolean existeInstructorPorDni(Integer dni);
+    public Boolean existeInstructorPorDni(String dni);
 
     public Boolean existeInstructorPorNombreYApellido(String nombre, String apellido);
 

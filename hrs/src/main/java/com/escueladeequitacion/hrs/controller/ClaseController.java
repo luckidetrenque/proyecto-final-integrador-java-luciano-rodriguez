@@ -22,7 +22,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(Constantes.API_VERSION)
@@ -117,7 +119,8 @@ public class ClaseController {
      * Actualiza una clase existente.
      */
     @PutMapping(Constantes.RESOURCE_CLASES + "/{id}")
-    public ResponseEntity<?> actualizarClase(@PathVariable Long id, @Validated(AlActualizar.class) @RequestBody ClaseDto claseDto) {
+    public ResponseEntity<?> actualizarClase(@PathVariable Long id,
+            @Validated(AlActualizar.class) @RequestBody ClaseDto claseDto) {
         // El Service maneja todas las validaciones
         claseService.actualizarClaseDesdeDto(id, claseDto);
 
@@ -203,4 +206,35 @@ public class ClaseController {
         List<ClaseResponseDto> clases = claseService.buscarClasePorEstadoConDetalles(estado);
         return ResponseEntity.status(HttpStatus.OK).body(clases);
     }
+
+    // ============================================================
+    // ENDPOINTS DE CONTEO
+    // ============================================================
+
+    /**
+     * GET /api/v1/clases/alumno/{alumnoId}/completadas/count
+     * Cuenta las clases completadas de un alumno.
+     */
+    @GetMapping(Constantes.RESOURCE_CLASES + "/alumno/{alumnoId}/completadas/count")
+    public ResponseEntity<Map<String, Object>> contarClasesCompletadasPorAlumno(@PathVariable Long alumnoId) {
+        long count = claseService.contarClasesCompletadasPorAlumno(alumnoId);
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("alumnoId", alumnoId);
+        response.put("clasesCompletadas", count);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * GET /api/v1/clases/instructor/{instructorId}/completadas/count
+     * Cuenta las clases completadas de un instructor.
+     */
+    @GetMapping(Constantes.RESOURCE_CLASES + "/instructor/{instructorId}/completadas/count")
+    public ResponseEntity<Map<String, Object>> contarClasesCompletadasPorInstructor(@PathVariable Long instructorId) {
+        long count = claseService.contarClasesCompletadasPorInstructor(instructorId);
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("instructorId", instructorId);
+        response.put("clasesCompletadas", count);
+        return ResponseEntity.ok(response);
+    }
+
 }

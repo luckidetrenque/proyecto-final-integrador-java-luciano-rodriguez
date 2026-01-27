@@ -41,7 +41,7 @@ public class Instructor extends Persona {
     }
 
     // Constructor con parámetros
-    public Instructor(Integer dni, String nombre, String apellido, LocalDate fechaNacimiento, String telefono,
+    public Instructor(String dni, String nombre, String apellido, LocalDate fechaNacimiento, String telefono,
             String email,
             Boolean activo) {
         super(dni, nombre, apellido, fechaNacimiento, telefono, email);

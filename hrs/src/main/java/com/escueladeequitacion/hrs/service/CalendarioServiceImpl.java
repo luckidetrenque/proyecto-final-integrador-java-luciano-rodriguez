@@ -6,12 +6,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.escueladeequitacion.hrs.enums.Estado;
+import com.escueladeequitacion.hrs.exception.ValidationException;
 import com.escueladeequitacion.hrs.model.Clase;
 import com.escueladeequitacion.hrs.repository.ClaseRepository;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,47 +23,83 @@ public class CalendarioServiceImpl implements CalendarioService {
     private ClaseRepository claseRepository;
 
     @Transactional
-    public void copiarSemanaCompleta(LocalDate inicioOri, LocalDate inicioDes) {
+    public void copiarClases(LocalDate inicioOri, LocalDate inicioDes, int cantidadSemanas) {
         if (inicioOri == null || inicioDes == null) {
-            throw new IllegalArgumentException("Las fechas de origen y destino no pueden estar vacías");
+            throw new ValidationException("fechas", "Las fechas de inicio y fin no pueden estar vacías");
         }
-        // 1. Definir rango de la semana origen (7 días)
+
+        if (cantidadSemanas <= 0) {
+            throw new ValidationException("semanas", "La cantidad de semanas debe ser mayor a 0");
+        }
+
+        for (int i = 0; i < cantidadSemanas; i++) {
+            // Calculamos el desfase para cada iteración (0 días, 7 días, 14 días...)
+            long offsetDias = i * 7L;
+            LocalDate semanaOriActual = inicioOri.plusDays(offsetDias);
+            LocalDate semanaDesActual = inicioDes.plusDays(offsetDias);
+
+            // Reutilizamos la lógica de copiar una semana (refactorizada)
+            ejecutarCopiaSemana(semanaOriActual, semanaDesActual);
+        }
+    }
+
+    private void ejecutarCopiaSemana(LocalDate inicioOri, LocalDate inicioDes) {
         LocalDate finOri = inicioOri.plusDays(6);
-        List<Clase> clasesExistentes = claseRepository.findByDiaBetween(inicioOri, finOri);
+        LocalDate finDes = inicioDes.plusDays(6);
 
-        // 2. Calcular cuántos días de diferencia hay entre semanas
-        long diferenciaDias = ChronoUnit.DAYS.between(inicioOri, inicioDes);
+        // 1. Borrar solo lo programado en la semana destino actual
+        claseRepository.deleteByDiaBetweenAndEstado(inicioDes, finDes, Estado.PROGRAMADA);
+        claseRepository.flush();
 
-        // 3. Clonar registros ajustando la nuDia
-        List<Clase> nuevasClases = clasesExistentes.stream().map(claseOriginal -> {
-            Clase nuevaClase = new Clase();
-            // Copia todos los atributos excepto el ID
-            BeanUtils.copyProperties(claseOriginal, nuevaClase, "id");
-            // Ajustar a la nuDia
-            nuevaClase.setDia(claseOriginal.getDia().plusDays(diferenciaDias));
-            nuevaClase.setEstado(Estado.PROGRAMADA);
-            nuevaClase.setObservaciones("");
-            return nuevaClase;
-        }).collect(Collectors.toList());
+        // 2. Obtener origen y lo que sobrevivió en destino
+        List<Clase> clasesOrigen = claseRepository.findByDiaBetween(inicioOri, finOri);
+        List<Clase> destinoRestante = claseRepository.findByDiaBetween(inicioDes, finDes);
 
-        // 4. Guardar todo en un solo proceso (Batch insert)
-        if (!nuevasClases.isEmpty()) {
-            claseRepository.saveAll(nuevasClases);
-        }
+        if (clasesOrigen.isEmpty())
+            return;
+
+        long diferenciaEntreSemanas = ChronoUnit.DAYS.between(inicioOri, inicioDes);
+
+        List<Clase> nuevasClases = clasesOrigen.stream()
+                .map(claseOri -> {
+                    LocalDate nuevaFecha = claseOri.getDia().plusDays(diferenciaEntreSemanas);
+
+                    // Evitar duplicar si ya existe una clase (ej. COMPLETADA)
+                    boolean existe = destinoRestante.stream()
+                            .anyMatch(d -> d.getDia().equals(nuevaFecha) && d.getHora().equals(claseOri.getHora()) &&
+                                    d.getAlumno().equals(claseOri.getAlumno()));
+
+                    if (existe)
+                        return null;
+
+                    return clonarEntidad(claseOri, nuevaFecha);
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        claseRepository.saveAll(nuevasClases);
+    }
+
+    private Clase clonarEntidad(Clase origen, LocalDate nuevaFecha) {
+        Clase nueva = new Clase();
+        BeanUtils.copyProperties(origen, nueva, "id");
+        nueva.setDia(nuevaFecha);
+        nueva.setEstado(Estado.PROGRAMADA);
+        nueva.setObservaciones("Copia automatica");
+        return nueva;
     }
 
     @Transactional
-    public void eliminarClasesEnPeriodo(LocalDate fechaInicio, LocalDate fechaFin) {
+    public void eliminarClases(LocalDate fechaInicio, LocalDate fechaFin) {
         if (fechaInicio == null || fechaFin == null) {
-            throw new IllegalArgumentException("Las fechas de inicio y fin no pueden estar vacías");
+            throw new ValidationException("fechas", "Las fechas de origen y destino no pueden estar vacías");
         }
 
         if (fechaInicio.isAfter(fechaFin)) {
-            throw new IllegalArgumentException("La fecha de inicio no puede ser posterior a la fecha de fin");
+            throw new ValidationException("fechaInicio", "La fecha de inicio no puede ser posterior a la fecha de fin");
         }
 
-        // Ejecuta el borrado directamente en la base de datos para mayor eficiencia
-        claseRepository.deleteByDiaBetween(fechaInicio, fechaFin);
+        // Solo eliminamos lo que aún no ha sucedido o no se ha procesado
+        claseRepository.deleteByDiaBetweenAndEstado(fechaInicio, fechaFin, Estado.PROGRAMADA);
     }
-
 }

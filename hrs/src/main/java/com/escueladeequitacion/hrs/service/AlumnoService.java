@@ -17,7 +17,7 @@ public interface AlumnoService {
     // Métodos para buscar alumnos por diferentes criterios
     public Optional<Alumno> buscarAlumnoPorId(Long id);
 
-    public Optional<Alumno> buscarAlumnoPorDni(Integer dni);
+    public Optional<Alumno> buscarAlumnoPorDni(String dni);
 
     public List<Alumno> buscarAlumnoPorNombre(String nombre);
 
@@ -36,7 +36,7 @@ public interface AlumnoService {
     // Métodos para verificar la existencia de alumnos por diferentes criterios
     public Boolean existeAlumnoPorId(Long id);
 
-    public Boolean existeAlumnoPorDni(Integer dni);
+    public Boolean existeAlumnoPorDni(String dni);
 
     public Boolean existeAlumnoPorNombreYApellido(String nombre, String apellido);
 

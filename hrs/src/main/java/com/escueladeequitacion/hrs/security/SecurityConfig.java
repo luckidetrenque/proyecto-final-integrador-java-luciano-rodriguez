@@ -1,9 +1,11 @@
 package com.escueladeequitacion.hrs.security;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -53,12 +55,23 @@ public class SecurityConfig {
                         // .requestMatchers(HttpMethod.DELETE, "/api/v1/clases/**").hasRole("ADMIN")
 
                         // ALUMNO
-                        // .requestMatchers(HttpMethod.GET, "/api/v1/alumnos/**").hasAnyRole("ADMIN", "ALUMNO")
+                        // .requestMatchers(HttpMethod.GET, "/api/v1/alumnos/**").hasAnyRole("ADMIN",
+                        // "ALUMNO")
 
                         .anyRequest().authenticated())
 
                 .httpBasic(basic -> {
-                });
+                }).exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                            response.setContentType("application/json");
+                            response.getWriter().write(
+                                    "{\"timestamp\":\"" + LocalDateTime.now() + "\"," +
+                                            "\"status\":401," +
+                                            "\"error\":\"Unauthorized\"," +
+                                            "\"mensaje\":\"" + authException.getMessage() + "\"," +
+                                            "\"path\":\"" + request.getRequestURI() + "\"}");
+                        }));
 
         return http.build();
     }
@@ -74,15 +87,15 @@ public class SecurityConfig {
     }
 
     @Bean
-public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // Puerto de React
-    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-    configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
-    configuration.setAllowCredentials(true); // Muy importante para Basic Auth
-    
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", configuration);
-    return source;
-}
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // Puerto de React
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
+        configuration.setAllowCredentials(true); // Muy importante para Basic Auth
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 }

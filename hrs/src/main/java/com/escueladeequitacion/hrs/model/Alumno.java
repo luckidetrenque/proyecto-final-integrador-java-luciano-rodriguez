@@ -47,7 +47,7 @@ public class Alumno extends Persona {
     }
 
     // Constructor con parámetros
-    public Alumno(Integer dni, String nombre, String apellido, LocalDate fechaNacimiento, String telefono,
+    public Alumno(String dni, String nombre, String apellido, LocalDate fechaNacimiento, String telefono,
             String email,
             LocalDate fechaInscripcion, Integer cantidadClases, Boolean activo, Boolean propietario) {
         super(dni, nombre, apellido, fechaNacimiento, telefono, email);

@@ -5,8 +5,9 @@ import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
 public class CalendarioDto {
-    private @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate diaInicioOrigen; // El martes de la semana que quieres copiar
+    private @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate diaInicioOrigen;
     private @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate diaInicioDestino;
+    private int cantidadSemanas; // Cantidad de semanas a copiar
 
     public LocalDate getDiaInicioOrigen() {
         return diaInicioOrigen;
@@ -22,6 +23,14 @@ public class CalendarioDto {
 
     public void setDiaInicioDestino(LocalDate diaInicioDestino) {
         this.diaInicioDestino = diaInicioDestino;
-    } // El martes de la semana donde quieres pegar
+    }
+
+    public int getCantidadSemanas() {
+        return cantidadSemanas;
+    }
+
+    public void setCantidadSemanas(int cantidadSemanas) {
+        this.cantidadSemanas = cantidadSemanas;
+    }
 
 }

@@ -23,7 +23,7 @@ public class AlumnoDto extends PersonaDto {
         super();
     }
 
-    public AlumnoDto(Integer dni, String nombre, String apellido, LocalDate fechaNacimiento, String telefono,
+    public AlumnoDto(String dni, String nombre, String apellido, LocalDate fechaNacimiento, String telefono,
             String email,
             LocalDate fechaInscripcion, Integer cantidadClases, Boolean activo, Boolean propietario) {
         super(dni, nombre, apellido, fechaNacimiento, telefono, email);

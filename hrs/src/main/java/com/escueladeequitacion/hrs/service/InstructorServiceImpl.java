@@ -36,7 +36,7 @@ public class InstructorServiceImpl implements InstructorService {
     };
 
     @Override
-    public Optional<Instructor> buscarInstructorPorDni(Integer dni) {
+    public Optional<Instructor> buscarInstructorPorDni(String dni) {
         return instructorRepository.findByDni(dni);
     };
 
@@ -71,7 +71,7 @@ public class InstructorServiceImpl implements InstructorService {
     };
 
     @Override
-    public Boolean existeInstructorPorDni(Integer dni) {
+    public Boolean existeInstructorPorDni(String dni) {
         return instructorRepository.existsByDni(dni);
     };
 

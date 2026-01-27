@@ -1,5 +1,7 @@
 package com.escueladeequitacion.hrs.controller;
 
+import com.escueladeequitacion.hrs.exception.ConflictException;
+import com.escueladeequitacion.hrs.exception.ResourceNotFoundException;
 import com.escueladeequitacion.hrs.security.RolSeguridad;
 import com.escueladeequitacion.hrs.security.User;
 import com.escueladeequitacion.hrs.security.UserRepository;
@@ -93,14 +95,19 @@ public class AuthController {
         }
     }
 
+    /**
+     * POST /api/v1/auth/login
+     * Endpoint de login que retorna los datos del usuario autenticado.
+     */
     @PostMapping("/login")
     public ResponseEntity<?> login(java.security.Principal principal) {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+
         // Buscamos al usuario por el nombre que viene en el Header de Basic Auth
         User user = userRepository.findByUsername(principal.getName())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "username", principal.getName()));
 
         return ResponseEntity.ok(user);
     }
@@ -113,14 +120,12 @@ public class AuthController {
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest request) {
         // Validar username duplicado
         if (userRepository.existsByUsername(request.getUsername())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new Mensaje("El username ya existe"));
+            throw new ConflictException("Usuario", "username", request.getUsername());
         }
 
         // Validar email duplicado
         if (userRepository.existsByEmail(request.getEmail())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new Mensaje("El email ya está registrado"));
+            throw new ConflictException("Usuario", "email", request.getEmail());
         }
 
         // Crear usuario
@@ -142,6 +147,10 @@ public class AuthController {
                 .body(new Mensaje("Usuario registrado correctamente: " + user.getUsername()));
     }
 
+    /**
+     * POST /api/v1/auth/logout
+     * Endpoint de logout (en Basic Auth no hay sesión real).
+     */
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
         // No hay sesión que cerrar en el servidor (Basic Auth),
@@ -166,8 +175,7 @@ public class AuthController {
     @GetMapping("/users/{id}")
     public ResponseEntity<?> obtenerUsuario(@PathVariable Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(
-                        () -> new com.escueladeequitacion.hrs.exception.ResourceNotFoundException("User", "ID", id));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "ID", id));
         return ResponseEntity.ok(user);
     }
 
@@ -177,44 +185,41 @@ public class AuthController {
      */
     @DeleteMapping("/users/{id}")
     public ResponseEntity<?> eliminarUsuario(@PathVariable Long id) {
+        // Validar que existe antes de eliminar
         if (!userRepository.existsById(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new Mensaje("Usuario no encontrado"));
+            throw new ResourceNotFoundException("Usuario", "ID", id);
         }
 
         userRepository.deleteById(id);
         return ResponseEntity.ok(new Mensaje("Usuario eliminado correctamente"));
     }
 
+    /**
+     * PUT /api/v1/auth/users/{id}
+     * Actualiza un usuario existente.
+     */
     @PutMapping("/users/{id}")
     public ResponseEntity<?> actualizarUsuario(@PathVariable("id") Long id,
             @Valid @RequestBody RegisterRequest request) {
-        // Validar id existente
-        if (!userRepository.existsById(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new Mensaje("Usuario no encontrado"));
-        }
-
-        if (userRepository.existsByUsername(request.getUsername())) {
-            User existingUser = userRepository.findByUsername(request.getUsername()).get();
-            if (!existingUser.getId().equals(id)) {
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body(new Mensaje("El username ya existe"));
-            }
-        }
-
-        if (userRepository.existsByEmail(request.getEmail())) {
-            User existingUser = userRepository.findByEmail(request.getEmail()).get();
-            if (!existingUser.getId().equals(id)) {
-                return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body(new Mensaje("El email ya está registrado"));
-            }
-        }
-
-        // Actualizar usuario
+        // 1. Validar que el usuario existe
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "ID", id));
 
+        // 2. Validar username duplicado solo si cambió
+        if (!user.getUsername().equals(request.getUsername())) {
+            if (userRepository.existsByUsername(request.getUsername())) {
+                throw new ConflictException("Usuario", "username", request.getUsername());
+            }
+        }
+
+        // 3. Validar email duplicado solo si cambió
+        if (!user.getEmail().equals(request.getEmail())) {
+            if (userRepository.existsByEmail(request.getEmail())) {
+                throw new ConflictException("Usuario", "email", request.getEmail());
+            }
+        }
+
+        // 4. Actualizar campos
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         // user.setPassword(passwordEncoder.encode(request.getPassword()));

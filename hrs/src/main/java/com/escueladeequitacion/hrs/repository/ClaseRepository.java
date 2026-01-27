@@ -172,11 +172,11 @@ public interface ClaseRepository extends JpaRepository<Clase, Long> {
         @Query("SELECT COUNT(c) FROM Clase c WHERE c.caballo.id = :caballoId AND c.estado = :estado")
         public long contarPorCaballoYEstado(@Param("caballoId") Long caballoId, @Param("estado") Estado estado);
 
-        // Método para copiar las clases de una una período a otro
+        // Método para copiar las clases de un período a otro
         public List<Clase> findByDiaBetween(LocalDate inicio, LocalDate fin);
 
         // Método para eliminar las clases en un período
         @Modifying
-        @Query("DELETE FROM Clase c WHERE c.dia BETWEEN :inicio AND :fin")
-        public void deleteByDiaBetween(LocalDate inicio, LocalDate fin);
+        @Query("DELETE FROM Clase c WHERE c.dia BETWEEN :inicio AND :fin AND c.estado = :estado")
+        void deleteByDiaBetweenAndEstado(LocalDate inicio, LocalDate fin, Estado estado);
 }

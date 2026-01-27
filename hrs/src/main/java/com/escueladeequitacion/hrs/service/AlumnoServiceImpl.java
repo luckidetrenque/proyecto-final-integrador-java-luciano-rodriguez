@@ -5,6 +5,7 @@ import com.escueladeequitacion.hrs.enums.Estado;
 import com.escueladeequitacion.hrs.exception.BusinessException;
 import com.escueladeequitacion.hrs.exception.ConflictException;
 import com.escueladeequitacion.hrs.exception.ResourceNotFoundException;
+import com.escueladeequitacion.hrs.exception.ValidationException;
 import com.escueladeequitacion.hrs.model.Alumno;
 import com.escueladeequitacion.hrs.repository.AlumnoRepository;
 import com.escueladeequitacion.hrs.utility.Constantes;
@@ -39,7 +40,7 @@ public class AlumnoServiceImpl implements AlumnoService {
     };
 
     @Override
-    public Optional<Alumno> buscarAlumnoPorDni(Integer dni) {
+    public Optional<Alumno> buscarAlumnoPorDni(String dni) {
         return alumnoRepository.findByDni(dni);
     };
 
@@ -84,7 +85,7 @@ public class AlumnoServiceImpl implements AlumnoService {
     };
 
     @Override
-    public Boolean existeAlumnoPorDni(Integer dni) {
+    public Boolean existeAlumnoPorDni(String dni) {
         return alumnoRepository.existsByDni(dni);
     };
 
@@ -177,7 +178,7 @@ public class AlumnoServiceImpl implements AlumnoService {
         // 2. Validar cantidad de clases
         int cantidadClases = alumnoDto.getCantidadClases();
         if (!Arrays.asList(Constantes.CANTIDAD_CLASES).contains(cantidadClases)) {
-            throw new IllegalArgumentException("La cantidad de clases debe ser 4, 8, 12 o 16");
+            throw new ValidationException("cantidadClases", "La cantidad de clases debe ser 4, 8, 12 o 16");
         }
 
         // 3. Crear el alumno
@@ -214,7 +215,7 @@ public class AlumnoServiceImpl implements AlumnoService {
 
         // 3. Validar cantidad de clases
         if (!Arrays.asList(Constantes.CANTIDAD_CLASES).contains(alumnoDto.getCantidadClases())) {
-            throw new IllegalArgumentException("La cantidad de clases debe ser 4, 8, 12 o 16");
+            throw new ValidationException("cantidadClases", "La cantidad de clases debe ser 4, 8, 12 o 16");
         }
 
         // 4. Crear objeto temporal con los nuevos datos

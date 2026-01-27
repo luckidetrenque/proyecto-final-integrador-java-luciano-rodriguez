@@ -17,15 +17,15 @@ import jakarta.persistence.MappedSuperclass;
 public abstract class Persona {
 
     // Atributos comunes a todas las personas
-    @Column(name = "dni", nullable = false, unique = true)
-    private Integer dni;
+    @Column(name = "dni", nullable = false, unique = true, length = 15)
+    private String dni;
     @Column(name = "nombre", nullable = false)
     private String nombre;
     @Column(name = "apellido", nullable = false)
     private String apellido;
     @Column(name = "fecha_nacimiento", nullable = false)
     private LocalDate fechaNacimiento;
-    @Column(name = "telefono", nullable = false)
+    @Column(name = "telefono", nullable = false, length = 13)
     private String telefono;
     @Column(name = "email", nullable = true)
     private String email;
@@ -35,7 +35,7 @@ public abstract class Persona {
     }
 
     // Constructor con parámetros, excepto el email que es opcional
-    public Persona(Integer dni, String nombre, String apellido, LocalDate fechaNacimiento, String telefono,
+    public Persona(String dni, String nombre, String apellido, LocalDate fechaNacimiento, String telefono,
             String email) {
         this.dni = dni;
         this.nombre = nombre;
@@ -46,11 +46,11 @@ public abstract class Persona {
     }
 
     // Getters y Setters
-    public Integer getDni() {
+    public String getDni() {
         return dni;
     }
 
-    public void setDni(Integer dni) {
+    public void setDni(String dni) {
         this.dni = dni;
     }
 

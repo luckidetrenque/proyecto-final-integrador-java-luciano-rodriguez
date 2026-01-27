@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface InstructorRepository extends JpaRepository<Instructor, Long> {
 
     // Métodos para buscar alumnos por diferentes criterios
-    public Optional<Instructor> findByDni(@Param("dni") Integer dni);
+    public Optional<Instructor> findByDni(@Param("dni") String dni);
 
     public List<Instructor> findByNombreIgnoreCase(@Param("nombre") String nombre);
 
@@ -28,11 +28,11 @@ public interface InstructorRepository extends JpaRepository<Instructor, Long> {
 
     // Métodos para verificar la existencia de un instructor por diferentes
     // criterios
-    public Boolean existsByDni(Integer dni);
+    public Boolean existsByDni(String dni);
 
     public Boolean existsByNombreAndApellidoIgnoreCase(String nombre, String apellido);
 
     // Método para eliminar un instructor por su DNI
-    public void deleteByDni(Integer dni);
+    public void deleteByDni(String dni);
 
 }

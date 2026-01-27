@@ -4,8 +4,6 @@ import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
@@ -15,10 +13,10 @@ import jakarta.validation.constraints.Size;
 // DTO para representar una persona
 public class PersonaDto {
 
-    @NotNull(message = "El DNI no puede estar vacío")
-    @Min(value = 1000000, message = "El DNI debe tener al menos 7 dígitos")
-    @Max(value = 999999999, message = "El DNI no debe exceder los 9 dígitos")
-    private Integer dni;
+    @NotBlank(message = "El DNI no puede estar vacío")
+    @Size(min = 7, max = 9, message = "El DNI debe tener entre 7 y 9 dígitos")
+    @Pattern(regexp = "^[0-9]+$", message = "El DNI solo debe contener números")
+    private String dni;
     @NotBlank(message = "El nombre no puede estar vacío")
     @Size(min = 2, max = 50, message = "El nombre debe tener entre 2 y 50 caracteres")
     private String nombre;
@@ -40,7 +38,7 @@ public class PersonaDto {
     public PersonaDto() {
     }
 
-    public PersonaDto(Integer dni, String nombre, String apellido, LocalDate fechaNacimiento, String telefono,
+    public PersonaDto(String dni, String nombre, String apellido, LocalDate fechaNacimiento, String telefono,
             String email) {
         this.dni = dni;
         this.nombre = nombre;
@@ -50,11 +48,11 @@ public class PersonaDto {
         this.email = email;
     }
 
-    public Integer getDni() {
+    public String getDni() {
         return dni;
     }
 
-    public void setDni(Integer dni) {
+    public void setDni(String dni) {
         this.dni = dni;
     }
 

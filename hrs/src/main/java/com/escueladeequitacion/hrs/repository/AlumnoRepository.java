@@ -17,7 +17,7 @@ import java.time.LocalDate;
 public interface AlumnoRepository extends JpaRepository<Alumno, Long> {
 
         // Métodos para buscar alumnos por diferentes criterios
-        public Optional<Alumno> findByDni(@Param("dni") Integer dni);
+        public Optional<Alumno> findByDni(@Param("dni") String dni);
 
         public List<Alumno> findByNombreIgnoreCase(@Param("nombre") String nombre);
 
@@ -35,12 +35,12 @@ public interface AlumnoRepository extends JpaRepository<Alumno, Long> {
         public List<Alumno> findByFechaNacimiento(LocalDate fechaNacimiento);
 
         // Métodos para verificar la existencia de un alumno por diferentes criterios
-        public Boolean existsByDni(Integer dni);
+        public Boolean existsByDni(String dni);
 
         public Boolean existsByNombreAndApellidoIgnoreCase(String nombre, String apellido);
 
         // Método para eliminar un alumno por su DNI
-        public void deleteByDni(Integer dni);
+        public void deleteByDni(String dni);
 
         // Método para contar las clases completadas de un alumno
         @Query("SELECT COUNT(c) FROM Clase c WHERE c.alumno.id = :alumnoId AND c.estado = :estado")

@@ -108,8 +108,51 @@ public class GlobalExceptionHandler {
         }
 
         /**
+         * Maneja UnauthorizedException (errores de autenticación).
+         * Se lanza cuando un usuario no está autenticado o no tiene permisos.
+         */
+        @ExceptionHandler(UnauthorizedException.class)
+        @ResponseStatus(HttpStatus.UNAUTHORIZED)
+        public ResponseEntity<ErrorResponseDto> handleUnauthorizedException(
+                        UnauthorizedException ex,
+                        HttpServletRequest request) {
+
+                ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+                                HttpStatus.UNAUTHORIZED.value(),
+                                "Unauthorized",
+                                ex.getMessage(),
+                                request.getRequestURI());
+
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponseDto);
+        }
+
+        /**
+         * Maneja ValidationException (validaciones personalizadas de negocio).
+         * Se lanza cuando los datos no cumplen con reglas específicas del dominio.
+         */
+        @ExceptionHandler(ValidationException.class)
+        @ResponseStatus(HttpStatus.BAD_REQUEST)
+        public ResponseEntity<ErrorResponseDto> handleValidationException(
+                        ValidationException ex,
+                        HttpServletRequest request) {
+
+                ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "Validation Error",
+                                ex.getMessage(),
+                                request.getRequestURI());
+
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponseDto);
+        }
+
+        /**
          * Maneja IllegalArgumentException (argumentos inválidos).
          * Ejemplo: cantidad de clases no permitida (debe ser 4, 8, 12 o 16).
+         */
+        /**
+         * Maneja IllegalArgumentException (argumentos inválidos).
+         * 
+         * @deprecated Usar ValidationException para nuevos casos de validación.
          */
         @ExceptionHandler(IllegalArgumentException.class)
         @ResponseStatus(HttpStatus.BAD_REQUEST)

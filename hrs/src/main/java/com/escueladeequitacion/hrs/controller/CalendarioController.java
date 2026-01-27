@@ -26,14 +26,15 @@ public class CalendarioController {
 
     @PostMapping(Constantes.RESOURCE_CALENDARIO + "/copiar-semana")
     public ResponseEntity<Mensaje> copiar(@RequestBody CalendarioDto request) {
-        calendarioService.copiarSemanaCompleta(request.getDiaInicioOrigen(), request.getDiaInicioDestino());
+        calendarioService.copiarClases(request.getDiaInicioOrigen(), request.getDiaInicioDestino(),
+                request.getCantidadSemanas());
         return ResponseEntity
                 .ok(new Mensaje("Clases copiadas exitosamente a la semana del " + request.getDiaInicioDestino()));
     }
 
     @DeleteMapping(Constantes.RESOURCE_CALENDARIO + "/eliminar-periodo")
     public ResponseEntity<Mensaje> eliminarPeriodo(@RequestBody CalendarioDto request) {
-        calendarioService.eliminarClasesEnPeriodo(request.getDiaInicioOrigen(), request.getDiaInicioDestino());
+        calendarioService.eliminarClases(request.getDiaInicioOrigen(), request.getDiaInicioDestino());
         return ResponseEntity
                 .ok(new Mensaje("Clases eliminadas exitosamente desde " + request.getDiaInicioOrigen() + " hasta "
                         + request.getDiaInicioDestino()));

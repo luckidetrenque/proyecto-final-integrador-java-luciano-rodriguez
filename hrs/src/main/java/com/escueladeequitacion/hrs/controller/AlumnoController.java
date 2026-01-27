@@ -59,7 +59,7 @@ public class AlumnoController {
      * Obtiene un alumno por DNI.
      */
     @GetMapping(Constantes.RESOURCE_ALUMNOS + "/dni/{dni}")
-    public ResponseEntity<?> obtenerAlumnoPorDni(@PathVariable("dni") Integer dni) {
+    public ResponseEntity<?> obtenerAlumnoPorDni(@PathVariable("dni") String dni) {
 
         Alumno alumno = alumnoService.buscarAlumnoPorDni(dni)
                 .orElseThrow(() -> new com.escueladeequitacion.hrs.exception.ResourceNotFoundException("Alumno", "DNI",

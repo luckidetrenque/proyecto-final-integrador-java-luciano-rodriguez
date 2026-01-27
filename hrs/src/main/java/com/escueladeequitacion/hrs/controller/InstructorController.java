@@ -56,7 +56,7 @@ public class InstructorController {
      * GET /api/v1/instructores/dni/{dni}
      */
     @GetMapping(Constantes.RESOURCE_INSTRUCTORES + "/dni/{dni}")
-    public ResponseEntity<?> obtenerInstructorPorDni(@PathVariable("dni") Integer dni) {
+    public ResponseEntity<?> obtenerInstructorPorDni(@PathVariable("dni") String dni) {
 
         Instructor instructor = instructorService.buscarInstructorPorDni(dni)
                 .orElseThrow(() -> new com.escueladeequitacion.hrs.exception.ResourceNotFoundException("Instructor",
