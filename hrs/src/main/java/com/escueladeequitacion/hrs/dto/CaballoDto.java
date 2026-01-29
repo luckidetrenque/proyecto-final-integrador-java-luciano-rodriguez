@@ -1,6 +1,6 @@
 package com.escueladeequitacion.hrs.dto;
 
-import com.escueladeequitacion.hrs.enums.TipoCaballo;
+import com.escueladeequitacion.hrs.enums.Tipo;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -15,17 +15,17 @@ public class CaballoDto {
     @NotNull(message = "El estado del caballo no puede estar vacío")
     private Boolean disponible;
     @NotNull(message = "El tipo de caballo no puede estar vacío")
-    private TipoCaballo tipoCaballo;
+    private Tipo tipo;
 
     // Constructores, getters y setters
     public CaballoDto() {
 
     }
 
-    public CaballoDto(String nombre, Boolean disponible, TipoCaballo tipoCaballo) {
+    public CaballoDto(String nombre, Boolean disponible, Tipo tipo) {
         this.nombre = nombre;
         this.disponible = disponible;
-        this.tipoCaballo = tipoCaballo;
+        this.tipo = tipo;
     }
 
     public String getNombre() {
@@ -44,11 +44,11 @@ public class CaballoDto {
         this.disponible = disponible;
     }
 
-    public TipoCaballo getTipoCaballo() {
-        return tipoCaballo;
+    public Tipo gettipo() {
+        return tipo;
     }
 
-    public void setTipoCaballo(TipoCaballo tipoCaballo) {
-        this.tipoCaballo = tipoCaballo;
+    public void settipo(Tipo tipo) {
+        this.tipo = tipo;
     }
 }

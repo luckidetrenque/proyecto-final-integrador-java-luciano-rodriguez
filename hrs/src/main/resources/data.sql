@@ -1,0 +1,1 @@
+INSERT IGNORE INTO alumnos (id, dni, nombre, apellido, fecha_nacimiento, telefono, email, fecha_inscripcion, cantidad_clases, activo, propietario) VALUES (1, "11111111", "HRS", "HRS", "2020-01-01", "1111111111", "", "2020-01-01", 4, 1,0);

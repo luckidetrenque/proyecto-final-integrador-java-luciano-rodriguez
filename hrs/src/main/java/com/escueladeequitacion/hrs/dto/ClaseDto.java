@@ -8,7 +8,7 @@ import java.time.ZoneOffset;
 import com.escueladeequitacion.hrs.enums.Especialidad;
 import com.escueladeequitacion.hrs.enums.Estado;
 
-import jakarta.validation.constraints.FutureOrPresent;
+// import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
@@ -24,12 +24,14 @@ public class ClaseDto {
 
     private Especialidad especialidad;
     @NotNull(message = "El día no puede estar vacío")
-    @FutureOrPresent(message = "El día debe ser en el futuro", groups = AlCrear.class)
+    // @FutureOrPresent(message = "El día debe ser en el futuro", groups =
+    // AlCrear.class)
+    // @FutureOrPresent(message = "El día debe ser en el futuro")
     private LocalDate dia;
     @NotNull(message = "La hora no puede estar vacía")
     // @FutureOrPresent(message = "La hora debe ser en el futuro")
     private LocalTime hora;
-    @NotNull(message = "El estado de la clase no puede estar vacío, debe ser Programada, En curso, Completada o Cancelada")
+    @NotNull(message = "El estado de la clase no puede estar vacío, debe ser Programada, Iniciada, Completada o Cancelada")
     private Estado estado;
     private String observaciones;
     @NotNull(message = "El instructorId no puede estar vacío")
@@ -41,6 +43,10 @@ public class ClaseDto {
     @NotNull(message = "El caballoId no puede estar vacío")
     @Min(value = 1, message = "El caballoId debe ser un número positivo")
     private Long caballoId;
+    // Si ClaseDto ya existe, solo agrégale el campo esPrueba
+    // Si no, crea este DTO simplificado para clases de prueba
+    @NotNull(message = "El campo esPrueba es obligatorio")
+    private Boolean esPrueba;
 
     // Constructores, getters y setters
     public ClaseDto() {
@@ -48,7 +54,7 @@ public class ClaseDto {
     }
 
     public ClaseDto(Especialidad especialidad, LocalDate dia, LocalTime hora, Estado estado,
-            String observaciones, Long instructorId, Long alumnoId, Long caballoId) {
+            String observaciones, Long instructorId, Long alumnoId, Long caballoId, Boolean esPrueba) {
         this.especialidad = especialidad;
         this.dia = dia;
         this.hora = hora;
@@ -57,6 +63,7 @@ public class ClaseDto {
         this.instructorId = instructorId;
         this.alumnoId = alumnoId;
         this.caballoId = caballoId;
+        this.esPrueba = esPrueba;
     }
 
     public Especialidad getEspecialidad() {
@@ -121,6 +128,14 @@ public class ClaseDto {
 
     public void setCaballoId(Long caballoId) {
         this.caballoId = caballoId;
+    }
+
+    public Boolean isEsPrueba() {
+        return esPrueba;
+    }
+
+    public void setEsPrueba(Boolean esPrueba) {
+        this.esPrueba = esPrueba;
     }
 
     /**

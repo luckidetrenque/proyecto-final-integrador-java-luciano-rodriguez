@@ -1,7 +1,7 @@
 package com.escueladeequitacion.hrs.controller;
 
 import com.escueladeequitacion.hrs.dto.CaballoDto;
-import com.escueladeequitacion.hrs.enums.TipoCaballo;
+import com.escueladeequitacion.hrs.enums.Tipo;
 import com.escueladeequitacion.hrs.model.Caballo;
 import com.escueladeequitacion.hrs.service.CaballoService;
 import com.escueladeequitacion.hrs.utility.Mensaje;
@@ -112,7 +112,7 @@ public class CaballoController {
     public ResponseEntity<?> buscarCaballo(
             @RequestParam(required = false) String nombre,
             @RequestParam(required = false) Boolean disponible,
-            @RequestParam(required = false) TipoCaballo tipo) {
+            @RequestParam(required = false) Tipo tipo) {
 
         List<Caballo> caballos = caballoService.buscarCaballosConFiltros(nombre, disponible, tipo);
 

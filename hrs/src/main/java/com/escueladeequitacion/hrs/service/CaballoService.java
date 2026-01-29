@@ -1,7 +1,7 @@
 package com.escueladeequitacion.hrs.service;
 
 import com.escueladeequitacion.hrs.dto.CaballoDto;
-import com.escueladeequitacion.hrs.enums.TipoCaballo;
+import com.escueladeequitacion.hrs.enums.Tipo;
 import com.escueladeequitacion.hrs.model.Caballo;
 
 import java.util.List;
@@ -20,7 +20,7 @@ public interface CaballoService {
 
     public List<Caballo> buscarCaballoPorEstado(Boolean disponible);
 
-    public List<Caballo> buscarCaballoPorTipo(TipoCaballo tipoCaballo);
+    public List<Caballo> buscarCaballoPorTipo(Tipo tipo);
 
     // Métodos para verificar la existencia de caballos por diferentes criterios
     public Boolean existeCaballoPorId(Long id);
@@ -55,6 +55,6 @@ public interface CaballoService {
     /**
      * Busca caballos con múltiples filtros.
      */
-    public List<Caballo> buscarCaballosConFiltros(String nombre, Boolean disponible, TipoCaballo tipo);
+    public List<Caballo> buscarCaballosConFiltros(String nombre, Boolean disponible, Tipo tipo);
 
 }

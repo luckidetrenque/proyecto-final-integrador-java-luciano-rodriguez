@@ -16,7 +16,7 @@ public class AlumnoDto extends PersonaDto {
     @NotNull(message = "El estado del alumno no puede estar vacío")
     private Boolean activo;
     @NotNull(message = "El estado del alumno no puede estar vacío")
-    private Boolean propietario;
+    private Boolean propietario = false;
 
     // Constructores, getters y setters
     public AlumnoDto() {

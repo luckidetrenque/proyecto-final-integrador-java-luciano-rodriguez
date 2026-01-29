@@ -279,6 +279,42 @@ public class AlumnoServiceImpl implements AlumnoService {
     }
 
     /**
+     * Convierte un alumno de clase de prueba a alumno regular.
+     * Actualiza: activo=true, fechaInscripcion=hoy, cantidadClases según paquete.
+     */
+    @Override
+    public void convertirAlumnoAPlan(Long alumnoId, Integer cantidadClases) {
+        // 1. Obtener alumno
+        Alumno alumno = obtenerAlumnoOLanzarExcepcion(alumnoId);
+
+        // 2. Verificar que esté inactivo (es de prueba)
+        if (alumno.isActivo()) {
+            throw new BusinessException("El alumno ya está activo, no necesita conversión");
+        }
+
+        // 3. Verificar que haya tomado clase de prueba
+        long clasesDePrueba = alumnoRepository.contarClasesPorEstados(alumnoId,
+                List.of(Estado.COMPLETADA, Estado.INICIADA));
+
+        if (clasesDePrueba == 0) {
+            throw new BusinessException("El alumno no ha completado ninguna clase de prueba");
+        }
+
+        // 4. Validar cantidad de clases
+        if (!Arrays.asList(Constantes.CANTIDAD_CLASES).contains(cantidadClases)) {
+            throw new ValidationException("cantidadClases",
+                    "La cantidad de clases debe ser 4, 8, 12 o 16");
+        }
+
+        // 5. Actualizar alumno
+        alumno.setActivo(true);
+        alumno.setFechaInscripcion(LocalDate.now());
+        alumno.setCantidadClases(cantidadClases);
+
+        alumnoRepository.save(alumno);
+    }
+
+    /**
      * Método auxiliar para validar existencia (ya lo tienes).
      */
     private Alumno obtenerAlumnoOLanzarExcepcion(Long id) {

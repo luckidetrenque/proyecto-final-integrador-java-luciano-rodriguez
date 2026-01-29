@@ -21,7 +21,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -125,125 +127,6 @@ public class ClaseServiceImpl implements ClaseService {
     @Override
     public Boolean existeClasePorCaballo(Long caballo_id) {
         return claseRepository.existsByCaballoId(caballo_id);
-    };
-
-    // BUSCA el método guardarClase y MODIFÍCALO para incluir la validación:
-
-    @Override
-    public void guardarClase(Clase clase) {
-        // Validar que instructor existe y está activo
-        var instructor = instructorService.buscarInstructorPorId(clase.getInstructor().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Instructor", "ID", clase.getInstructor().getId()));
-
-        if (!instructor.isActivo()) {
-            throw new BusinessException("El instructor " + instructor.getNombreCompleto() + " no está activo");
-        }
-
-        // Validar que alumno existe y está activo
-        var alumno = alumnoService.buscarAlumnoPorId(clase.getAlumno().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Alumno", "ID", clase.getAlumno().getId()));
-
-        if (!alumno.isActivo()) {
-            throw new BusinessException("El alumno " + alumno.getNombreCompleto() + " no está activo");
-        }
-
-        // Validar que caballo existe y está disponible
-        var caballo = caballoService.buscarCaballoPorId(clase.getCaballo().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Caballo", "ID", clase.getCaballo().getId()));
-
-        if (!caballo.isDisponible()) {
-            throw new BusinessException("El caballo " + caballo.getNombre() + " no está disponible");
-        }
-
-        // Validar fecha y hora
-        LocalDate hoy = LocalDate.now();
-        if (clase.getDia().isBefore(hoy)) {
-            throw new BusinessException("La fecha de la clase no puede ser anterior a hoy");
-        }
-
-        if (clase.getDia().isEqual(hoy)) {
-            // Definir la zona horaria
-            ZoneId zona = ZoneId.of("America/Buenos_Aires");
-            LocalTime ahora = LocalTime.now(zona);
-            if (clase.getHora().isBefore(ahora.plusMinutes(60))) {
-                throw new BusinessException("La clase debe programarse con al menos 60 minutos de anticipación");
-            }
-        }
-
-        // ✅ AGREGAR ESTA VALIDACIÓN DE CONFLICTO DE HORARIO:
-        validarConflictoDeHorario(
-                clase.getId(),
-                clase.getDia(),
-                clase.getHora(),
-                clase.getInstructor().getId(),
-                clase.getAlumno().getId(),
-                clase.getCaballo().getId());
-
-        // Si todas las validaciones pasan, guardar
-        claseRepository.save(clase);
-    };
-
-    // BUSCA el método actualizarClase y AGRÉGALE la validación:
-
-    @Override
-    public void actualizarClase(Long id, Clase clase) {
-        // Obtener la clase a actualizar
-        var claseOpt = claseRepository.findById(id);
-        if (claseOpt.isEmpty()) {
-            throw new ResourceNotFoundException("Clase", "ID", id);
-        }
-
-        var claseExistente = claseOpt.get();
-
-        // Validar conflictos de horario si cambió día u hora
-        if (clase.getDia() != null || clase.getHora() != null) {
-            validarConflictoDeHorario(
-                    claseExistente.getId(),
-                    claseExistente.getDia(),
-                    claseExistente.getHora(),
-                    claseExistente.getInstructor().getId(),
-                    claseExistente.getAlumno().getId(),
-                    claseExistente.getCaballo().getId());
-        }
-
-        // ⚠️ Solo actualizar si vienen en el DTO (pueden ser null)
-        if (clase.getInstructor() != null) {
-            var instr = instructorService.buscarInstructorPorId(clase.getInstructor().getId());
-            if (instr.isEmpty()) {
-                throw new ResourceNotFoundException("Instructor", "ID", clase.getInstructor().getId());
-            }
-            claseExistente.setInstructor(instr.get());
-        }
-
-        if (clase.getAlumno() != null) {
-            var alum = alumnoService.buscarAlumnoPorId(clase.getAlumno().getId());
-            if (alum.isEmpty()) {
-                throw new ResourceNotFoundException("Alumno", "ID", clase.getAlumno().getId());
-            }
-            claseExistente.setAlumno(alum.get());
-        }
-
-        if (clase.getCaballo() != null) {
-            var cab = caballoService.buscarCaballoPorId(clase.getCaballo().getId());
-            if (cab.isEmpty()) {
-                throw new ResourceNotFoundException("Caballo", "ID", clase.getCaballo().getId());
-            }
-            claseExistente.setCaballo(cab.get());
-        }
-
-        // Actualizar campos simples solo si vienen
-        if (clase.getEspecialidad() != null)
-            claseExistente.setEspecialidad(clase.getEspecialidad());
-        if (clase.getDia() != null)
-            claseExistente.setDia(clase.getDia());
-        if (clase.getHora() != null)
-            claseExistente.setHora(clase.getHora());
-        if (clase.getEstado() != null)
-            claseExistente.setEstado(clase.getEstado());
-        if (clase.getObservaciones() != null)
-            claseExistente.setObservaciones(clase.getObservaciones());
-
-        claseRepository.save(claseExistente);
     };
 
     @Override
@@ -351,100 +234,52 @@ public class ClaseServiceImpl implements ClaseService {
     };
 
     /**
-     * Valida que no exista conflicto de horario para instructor, alumno o caballo.
-     * 
-     * @throws BusinessException si hay conflicto de horario
-     */
-    private void validarConflictoDeHorario(Long id, LocalDate dia, LocalTime hora, Long instructorId, Long alumnoId,
-            Long caballoId) {
-        List<Clase> clasesEnMismoHorario = claseRepository.findByDiaAndHoraWithDetails(dia, hora);
-
-        for (Clase clase : clasesEnMismoHorario) {
-            // Excluir la clase que estamos editando
-            if (clase.getId().equals(id)) {
-                continue;
-            }
-
-            // Validar conflicto de alumno
-            if (clase.getAlumno().getId().equals(alumnoId)) {
-                throw new BusinessException("El alumno ya tiene una clase asignada a esa hora");
-            }
-
-            // Validar conflicto de caballo
-            if (clase.getCaballo().getId().equals(caballoId)) {
-                throw new BusinessException("El caballo ya está asignado a una clase en esa hora");
-            }
-        }
-
-        // for (Clase clase : clasesEnMismoHorario) {
-        // if (clase.getHora().equals(hora)) {
-        // if (clase.getInstructor().getId().equals(instructorId)) {
-        // throw new BusinessException("El instructor ya tiene una clase asignada a esa
-        // hora");
-        // }
-        // if (clase.getAlumno().getId().equals(alumnoId)) {
-        // throw new BusinessException("El alumno ya tiene una clase asignada a esa
-        // hora");
-        // }
-        // if (clase.getCaballo().getId().equals(caballoId)) {
-        // throw new BusinessException("El caballo ya está asignado a una clase en esa
-        // hora");
-        // }
-        // }
-        // }
-    }
-
-    /**
      * Crea una clase desde un DTO con todas las validaciones.
      */
     @Override
-    public Clase crearClaseDesdeDto(ClaseDto claseDto) {
-        // 1. Validar y obtener instructor
-        Instructor instructor = instructorService.buscarInstructorPorId(claseDto.getInstructorId())
-                .orElseThrow(() -> new ResourceNotFoundException("Instructor", "ID", claseDto.getInstructorId()));
+    public Clase crearClase(ClaseDto claseDto) {
+        /**
+         * TODO Validar para el caso de MONTA
+         * TODO crear alumnno comodin para que sea por defecto cuando se selecciona
+         * MONTA
+         */
 
-        if (!instructor.isActivo()) {
-            throw new BusinessException("El instructor " + instructor.getNombreCompleto() + " no está activo");
+        Instructor instructor = obtenerInstructorValido(claseDto.getInstructorId());
+        Alumno alumno = obtenerAlumnoValido(claseDto.getAlumnoId());
+        Caballo caballo = obtenerCaballoValido(claseDto.getCaballoId());
+
+        if ((claseDto.getEstado() == Estado.PROGRAMADA || claseDto.getEstado() == Estado.INICIADA)) {
+            validarFechaYHora(claseDto.getDia(), claseDto.getHora());
         }
 
-        // 2. Validar y obtener alumno
-        Alumno alumno = alumnoService.buscarAlumnoPorId(claseDto.getAlumnoId())
-                .orElseThrow(() -> new ResourceNotFoundException("Alumno", "ID", claseDto.getAlumnoId()));
-
-        if (!alumno.isActivo()) {
-            throw new BusinessException("El alumno " + alumno.getNombreCompleto() + " no está activo");
-        }
-
-        // 3. Validar y obtener caballo
-        Caballo caballo = caballoService.buscarCaballoPorId(claseDto.getCaballoId())
-                .orElseThrow(() -> new ResourceNotFoundException("Caballo", "ID", claseDto.getCaballoId()));
-
-        if (!caballo.isDisponible()) {
-            throw new BusinessException("El caballo " + caballo.getNombre() + " no está disponible");
-        }
-
-        // 4. Validar fecha y hora
-        validarFechaYHora(claseDto.getDia(), claseDto.getHora());
-
-        // 5. Validar conflictos de horario
         validarConflictoDeHorario(
                 null,
                 claseDto.getDia(),
                 claseDto.getHora(),
-                instructor.getId(),
                 alumno.getId(),
                 caballo.getId());
 
-        // 6. Crear la clase
         Clase clase = new Clase();
-        clase.setEspecialidad(claseDto.getEspecialidad());
-        clase.setDia(claseDto.getDia());
-        clase.setHora(claseDto.getHora());
-        clase.setEstado(claseDto.getEstado());
-        clase.setObservaciones(claseDto.getObservaciones());
+        aplicarCamposSimples(clase, claseDto);
         clase.setInstructor(instructor);
         clase.setAlumno(alumno);
         clase.setCaballo(caballo);
+
+        // Validar reglas de clase de prueba
+        if (claseDto.isEsPrueba() != null && claseDto.isEsPrueba()) {
+            // Verificar que el alumno no haya tomado clase de prueba antes
+            if (claseRepository.alumnoTieneClaseDePrueba(alumno.getId())) {
+                throw new BusinessException("El alumno ya ha tomado una clase de prueba anteriormente");
+            }
+
+            // Verificar que el alumno esté inactivo (lógica de clase de prueba)
+            if (alumno.isActivo()) {
+                throw new BusinessException(
+                        "Las clases de prueba solo pueden asignarse a alumnos no inscritos (activo=false)");
+            }
+        }
+
+        clase.setEsPrueba(claseDto.isEsPrueba() != null ? claseDto.isEsPrueba() : false);
 
         return claseRepository.save(clase);
     }
@@ -453,94 +288,38 @@ public class ClaseServiceImpl implements ClaseService {
      * Actualiza una clase desde un DTO.
      */
     @Override
-    public void actualizarClaseDesdeDto(Long id, ClaseDto claseDto) {
-        // 1. Verificar que la clase existe
-        Clase claseExistente = claseRepository.findById(id)
+    public void actualizarClase(Long id, ClaseDto dto) {
+
+        Clase clase = claseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Clase", "ID", id));
 
-        // 2. Actualizar instructor si cambió
-        if (claseDto.getInstructorId() != null) {
-            Instructor instructor = instructorService.buscarInstructorPorId(claseDto.getInstructorId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Instructor", "ID", claseDto.getInstructorId()));
-
-            if (!instructor.isActivo()) {
-                throw new BusinessException("El instructor no está activo");
-            }
-
-            claseExistente.setInstructor(instructor);
+        if (dto.getInstructorId() != null) {
+            clase.setInstructor(obtenerInstructorValido(dto.getInstructorId()));
         }
 
-        // 3. Actualizar alumno si cambió
-        if (claseDto.getAlumnoId() != null) {
-            Alumno alumno = alumnoService.buscarAlumnoPorId(claseDto.getAlumnoId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Alumno", "ID", claseDto.getAlumnoId()));
-
-            if (!alumno.isActivo()) {
-                throw new BusinessException("El alumno no está activo");
-            }
-
-            claseExistente.setAlumno(alumno);
+        if (dto.getAlumnoId() != null) {
+            clase.setAlumno(obtenerAlumnoValido(dto.getAlumnoId()));
         }
 
-        // 4. Actualizar caballo si cambió
-        if (claseDto.getCaballoId() != null) {
-            Caballo caballo = caballoService.buscarCaballoPorId(claseDto.getCaballoId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Caballo", "ID", claseDto.getCaballoId()));
-
-            if (!caballo.isDisponible()) {
-                throw new BusinessException("El caballo no está disponible");
-            }
-
-            claseExistente.setCaballo(caballo);
+        if (dto.getCaballoId() != null) {
+            clase.setCaballo(obtenerCaballoValido(dto.getCaballoId()));
         }
 
-        // 5. Actualizar campos simples
-        if (claseDto.getEspecialidad() != null) {
-            claseExistente.setEspecialidad(claseDto.getEspecialidad());
+        // Nueva validación agregada
+        if ((dto.getDia() != null || dto.getHora() != null) && clase.getDia().isAfter(java.time.LocalDate.now(
+                ZoneId.of("America/Argentina/Buenos_Aires")))) {
+            validarFechaYHora(dto.getDia(), dto.getHora());
         }
-        if (claseDto.getDia() != null) {
-            claseExistente.setDia(claseDto.getDia());
-        }
-        if (claseDto.getHora() != null) {
-            claseExistente.setHora(claseDto.getHora());
-        }
-        if (claseDto.getEstado() != null) {
-            claseExistente.setEstado(claseDto.getEstado());
-        }
-        if (claseDto.getObservaciones() != null) {
-            claseExistente.setObservaciones(claseDto.getObservaciones());
-        }
+        aplicarCamposSimples(clase, dto);
 
-        // 6. Validar conflictos si cambió día u hora
-        if (claseDto.getDia() != null || claseDto.getHora() != null) {
-            validarConflictoDeHorario(
-                    claseExistente.getId(),
-                    claseExistente.getDia(),
-                    claseExistente.getHora(),
-                    claseExistente.getInstructor().getId(),
-                    claseExistente.getAlumno().getId(),
-                    claseExistente.getCaballo().getId());
-        }
+        validarConflictoDeHorario(
+                clase.getId(),
+                clase.getDia(),
+                clase.getHora(),
+                clase.getAlumno().getId(),
+                clase.getCaballo().getId());
 
-        claseRepository.save(claseExistente);
-    }
-
-    /**
-     * Método auxiliar para validar fecha y hora.
-     */
-    private void validarFechaYHora(LocalDate dia, LocalTime hora) {
-        LocalDate hoy = LocalDate.now();
-
-        if (dia.isBefore(hoy)) {
-            throw new BusinessException("La fecha de la clase no puede ser anterior a hoy");
-        }
-
-        if (dia.isEqual(hoy)) {
-            LocalTime ahora = LocalTime.now();
-            if (hora.isBefore(ahora.plusMinutes(60))) {
-                throw new BusinessException("La clase debe programarse con al menos 60 minutos de anticipación");
-            }
-        }
+        claseRepository.save(clase);
     }
 
     /**
@@ -570,26 +349,26 @@ public class ClaseServiceImpl implements ClaseService {
     /**
      * Tarea programada que se ejecuta cada minuto para actualizar estados de
      * clases.
-     * - Cambia de PROGRAMADA a EN_CURSO cuando llega la hora de inicio
-     * - Cambia de EN_CURSO a COMPLETADA cuando transcurren 60 minutos
+     * - Cambia de PROGRAMADA a INICIADA cuando llega la hora de inicio
+     * - Cambia de INICIADA a COMPLETADA cuando transcurren 60 minutos
      */
     @Scheduled(cron = "0 0/30 9-18 * * TUE-SAT", zone = "America/Argentina/Buenos_Aires")
     public void actualizarEstadosDeClases() {
         LocalDate hoy = LocalDate.now(ZoneId.of("America/Buenos_Aires"));
         LocalTime ahora = LocalTime.now(ZoneId.of("America/Buenos_Aires"));
 
-        // 1. Cambiar clases PROGRAMADA → EN_CURSO (cuando llega la hora de inicio)
+        // 1. Cambiar clases PROGRAMADA → INICIADA (cuando llega la hora de inicio)
         List<Clase> clasesPorIniciar = claseRepository.findByDiaAndEstado(hoy, Estado.PROGRAMADA);
 
         for (Clase clase : clasesPorIniciar) {
             if (!clase.getHora().isAfter(ahora)) {
-                clase.setEstado(Estado.EN_CURSO);
+                clase.setEstado(Estado.INICIADA);
                 claseRepository.save(clase);
             }
         }
 
-        // 2. Cambiar clases EN_CURSO → COMPLETADA (cuando transcurren 60 minutos)
-        List<Clase> clasesEnCurso = claseRepository.findByDiaAndEstado(hoy, Estado.EN_CURSO);
+        // 2. Cambiar clases INICIADA → COMPLETADA (cuando transcurren 60 minutos)
+        List<Clase> clasesEnCurso = claseRepository.findByDiaAndEstado(hoy, Estado.INICIADA);
 
         for (Clase clase : clasesEnCurso) {
             LocalTime horaFinalizacion = clase.getHora().plusMinutes(60);
@@ -599,4 +378,166 @@ public class ClaseServiceImpl implements ClaseService {
             }
         }
     }
+
+    /**
+     * Método auxiliar para validar fecha y hora.
+     */
+    private void validarFechaYHora(LocalDate dia, LocalTime hora) {
+        LocalDate hoy = LocalDate.now();
+
+        if (dia.isBefore(hoy)) {
+            throw new BusinessException("La fecha de la clase no puede ser anterior a hoy");
+        }
+
+        if (dia.isEqual(hoy)) {
+            LocalTime ahora = LocalTime.now();
+            if (hora.isBefore(ahora.plusMinutes(60))) {
+                throw new BusinessException("La clase debe programarse con al menos 60 minutos de anticipación");
+            }
+        }
+    }
+
+    /**
+     * Valida que no exista conflicto de horario para instructor, alumno o caballo.
+     * 
+     * @throws BusinessException si hay conflicto de horario
+     */
+    private void validarConflictoDeHorario(
+            Long id,
+            LocalDate dia,
+            LocalTime hora,
+            Long alumnoId,
+            Long caballoId) {
+
+        if (claseRepository.existsConflictoAlumno(id, dia, hora, alumnoId)) {
+            throw new BusinessException(
+                    "El alumno ya tiene una clase asignada a esa hora");
+        }
+
+        if (claseRepository.existsConflictoCaballo(id, dia, hora, caballoId)) {
+            throw new BusinessException(
+                    "El caballo ya está asignado a una clase en esa hora");
+        }
+    }
+
+    private Alumno obtenerAlumnoValido(Long id) {
+        Alumno alumno = alumnoService.buscarAlumnoPorId(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Alumno", "ID", id));
+
+        if (!alumno.isActivo()) {
+            throw new BusinessException("El alumno no está activo");
+        }
+
+        return alumno;
+    }
+
+    private Caballo obtenerCaballoValido(Long id) {
+        Caballo caballo = caballoService.buscarCaballoPorId(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Caballo", "ID", id));
+
+        if (!caballo.isDisponible()) {
+            throw new BusinessException("El caballo no está disponible");
+        }
+
+        return caballo;
+    }
+
+    private Instructor obtenerInstructorValido(Long id) {
+        Instructor instructor = instructorService.buscarInstructorPorId(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Instructor", "ID", id));
+
+        if (!instructor.isActivo()) {
+            throw new BusinessException("El instructor no está activo");
+        }
+
+        return instructor;
+    }
+
+    private void aplicarCamposSimples(Clase clase, ClaseDto dto) {
+
+        if (dto.getEspecialidad() != null)
+            clase.setEspecialidad(dto.getEspecialidad());
+
+        if (dto.getDia() != null)
+            clase.setDia(dto.getDia());
+
+        if (dto.getHora() != null)
+            clase.setHora(dto.getHora());
+
+        if (dto.getEstado() != null)
+            clase.setEstado(dto.getEstado());
+
+        if (dto.getObservaciones() != null)
+            clase.setObservaciones(dto.getObservaciones());
+    }
+
+    // ============================================================
+    // MÉTODOS PARA CLASES DE PRUEBA
+    // ============================================================
+
+    /**
+     * Verifica si un alumno ya tomó al menos una clase de prueba.
+     */
+    @Override
+    public boolean alumnoTieneClaseDePrueba(Long alumnoId) {
+        return claseRepository.alumnoTieneClaseDePrueba(alumnoId);
+    }
+
+    /**
+     * Cuenta cuántas clases de prueba ha tomado un alumno.
+     */
+    @Override
+    public long contarClasesDePruebaPorAlumno(Long alumnoId) {
+        return claseRepository.contarClasesDePruebaPorAlumno(alumnoId);
+    }
+
+    /**
+     * Obtiene información completa sobre clases de prueba de un alumno.
+     * Método auxiliar que encapsula la lógica de verificación.
+     */
+    @Override
+    public Map<String, Object> obtenerInfoClasesDePrueba(Long alumnoId) {
+        // Validar que el alumno existe
+        if (!alumnoService.existeAlumnoPorId(alumnoId)) {
+            throw new ResourceNotFoundException("Alumno", "ID", alumnoId);
+        }
+
+        boolean tienePrueba = alumnoTieneClaseDePrueba(alumnoId);
+        long cantidad = contarClasesDePruebaPorAlumno(alumnoId);
+
+        Map<String, Object> info = new HashMap<>();
+        info.put("alumnoId", alumnoId);
+        info.put("tienePrueba", tienePrueba);
+        info.put("cantidadClasesPrueba", cantidad);
+
+        return info;
+    }
+
+    /**
+     * Lista las clases de prueba de un alumno con detalles.
+     */
+    @Override
+    public List<ClaseResponseDto> listarClasesDePruebaPorAlumno(Long alumnoId) {
+        // Validar que el alumno existe
+        if (!alumnoService.existeAlumnoPorId(alumnoId)) {
+            throw new ResourceNotFoundException("Alumno", "ID", alumnoId);
+        }
+
+        return claseRepository.findClasesDePruebaPorAlumno(alumnoId)
+                .stream()
+                .map(ClaseResponseDto::new)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Lista todas las clases de prueba del sistema con detalles.
+     */
+    @Override
+    public List<ClaseResponseDto> listarTodasLasClasesDePrueba() {
+        return claseRepository.findByEsPrueba(true)
+                .stream()
+                .map(ClaseResponseDto::new)
+                .collect(Collectors.toList());
+    }
+
 }

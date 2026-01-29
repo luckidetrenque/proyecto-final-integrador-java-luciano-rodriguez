@@ -65,6 +65,7 @@ public class SecurityConfig {
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpStatus.UNAUTHORIZED.value());
                             response.setContentType("application/json");
+                            response.setCharacterEncoding("UTF-8");
                             response.getWriter().write(
                                     "{\"timestamp\":\"" + LocalDateTime.now() + "\"," +
                                             "\"status\":401," +

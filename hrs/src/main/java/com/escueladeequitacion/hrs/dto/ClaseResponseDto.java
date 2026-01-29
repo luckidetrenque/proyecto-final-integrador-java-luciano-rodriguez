@@ -17,6 +17,7 @@ public class ClaseResponseDto {
     private LocalTime hora;
     private Estado estado;
     private String observaciones;
+    private Boolean esPrueba;
 
     // Datos del instructor
     private Long instructorId;
@@ -49,6 +50,7 @@ public class ClaseResponseDto {
         this.hora = clase.getHora();
         this.estado = clase.getEstado();
         this.observaciones = clase.getObservaciones();
+        this.esPrueba = clase.isEsPrueba();
 
         // Extraer datos del instructor
         if (clase.getInstructor() != null) {
@@ -70,7 +72,7 @@ public class ClaseResponseDto {
         if (clase.getCaballo() != null) {
             this.caballoId = clase.getCaballo().getId();
             this.caballoNombre = clase.getCaballo().getNombre();
-            this.caballoTipo = clase.getCaballo().getTipoCaballo().toString();
+            this.caballoTipo = clase.getCaballo().gettipo().toString();
         }
     }
 
@@ -212,6 +214,14 @@ public class ClaseResponseDto {
 
     public void setCaballoTipo(String caballoTipo) {
         this.caballoTipo = caballoTipo;
+    }
+
+    public Boolean isEsPrueba() {
+        return esPrueba;
+    }
+
+    public void setEsPrueba(Boolean esPrueba) {
+        this.esPrueba = esPrueba;
     }
 
     /**

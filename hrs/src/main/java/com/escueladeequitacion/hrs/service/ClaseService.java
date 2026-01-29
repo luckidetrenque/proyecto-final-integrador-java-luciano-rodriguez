@@ -9,6 +9,7 @@ import com.escueladeequitacion.hrs.model.Clase;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 // Interfaz para el servicio de Clase
@@ -51,15 +52,21 @@ public interface ClaseService {
 
     public Boolean existeClasePorCaballo(Long caballo_id);
 
-    // Método para verificar el estado ("Programada", "En curso", "Completada",
+    // Método para verificar el estado ("Programada", "Iniciada", "Completada",
     // "Cancelada") de una clase por su ID
     // public Estado estadoClase(Estado estado);
 
-    // Método para guardar una nueva clase
-    public void guardarClase(Clase clase);
+    /**
+     * Método para crear una clase desde un DTO, validando todas las reglas de
+     * negocio.
+     */
+    public Clase crearClase(ClaseDto claseDto);
 
-    // Método para actualizar una clase existente
-    public void actualizarClase(Long id, Clase clase);
+    /**
+     * Método para actualizar una clase desde un DTO, validando todas las reglas de
+     * negocio.
+     */
+    public void actualizarClase(Long id, ClaseDto claseDto);
 
     // Métodos para eliminar una clase (físicamente o lógicamente)
     public void eliminarClase(Long id);
@@ -110,18 +117,6 @@ public interface ClaseService {
      */
     public List<ClaseResponseDto> buscarClasePorEstadoConDetalles(Estado estado);
 
-    // AGREGAR después de los métodos existentes:
-
-    /**
-     * Crea una clase desde un DTO, validando todas las reglas de negocio.
-     */
-    public Clase crearClaseDesdeDto(ClaseDto claseDto);
-
-    /**
-     * Actualiza una clase desde un DTO, validando todas las reglas de negocio.
-     */
-    public void actualizarClaseDesdeDto(Long id, ClaseDto claseDto);
-
     /**
      * Cuenta clases completadas por alumno.
      */
@@ -138,4 +133,47 @@ public interface ClaseService {
     public long contarClasesCompletadasPorCaballo(Long caballoId);
 
     public void actualizarEstadosDeClases();
+
+    // ============================================================
+    // MÉTODOS PARA CLASES DE PRUEBA
+    // ============================================================
+
+    /**
+     * Verifica si un alumno ya tomó al menos una clase de prueba.
+     * 
+     * @param alumnoId - ID del alumno
+     * @return true si tiene clase de prueba, false si no
+     */
+    boolean alumnoTieneClaseDePrueba(Long alumnoId);
+
+    /**
+     * Cuenta cuántas clases de prueba ha tomado un alumno.
+     * 
+     * @param alumnoId - ID del alumno
+     * @return Cantidad de clases de prueba
+     */
+    long contarClasesDePruebaPorAlumno(Long alumnoId);
+
+    /**
+     * Obtiene información completa sobre clases de prueba de un alumno.
+     * 
+     * @param alumnoId - ID del alumno
+     * @return Map con alumnoId, tienePrueba y cantidadClasesPrueba
+     */
+    Map<String, Object> obtenerInfoClasesDePrueba(Long alumnoId);
+
+    /**
+     * Lista las clases de prueba de un alumno con detalles.
+     * 
+     * @param alumnoId - ID del alumno
+     * @return Lista de ClaseResponseDto de clases de prueba
+     */
+    List<ClaseResponseDto> listarClasesDePruebaPorAlumno(Long alumnoId);
+
+    /**
+     * Lista todas las clases de prueba del sistema con detalles.
+     * 
+     * @return Lista de ClaseResponseDto de todas las clases de prueba
+     */
+    List<ClaseResponseDto> listarTodasLasClasesDePrueba();
 }

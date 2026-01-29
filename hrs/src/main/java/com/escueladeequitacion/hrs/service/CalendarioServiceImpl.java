@@ -24,13 +24,6 @@ public class CalendarioServiceImpl implements CalendarioService {
 
     @Transactional
     public void copiarClases(LocalDate inicioOri, LocalDate inicioDes, int cantidadSemanas) {
-        if (inicioOri == null || inicioDes == null) {
-            throw new ValidationException("fechas", "Las fechas de inicio y fin no pueden estar vacías");
-        }
-
-        if (cantidadSemanas <= 0) {
-            throw new ValidationException("semanas", "La cantidad de semanas debe ser mayor a 0");
-        }
 
         for (int i = 0; i < cantidadSemanas; i++) {
             // Calculamos el desfase para cada iteración (0 días, 7 días, 14 días...)
@@ -85,7 +78,7 @@ public class CalendarioServiceImpl implements CalendarioService {
         BeanUtils.copyProperties(origen, nueva, "id");
         nueva.setDia(nuevaFecha);
         nueva.setEstado(Estado.PROGRAMADA);
-        nueva.setObservaciones("Copia automatica");
+        nueva.setObservaciones("");
         return nueva;
     }
 

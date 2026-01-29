@@ -1,6 +1,7 @@
 package com.escueladeequitacion.hrs.controller;
 
 import com.escueladeequitacion.hrs.dto.AlumnoDto;
+import com.escueladeequitacion.hrs.dto.ConversionAPlanRequest;
 import com.escueladeequitacion.hrs.model.Alumno;
 import com.escueladeequitacion.hrs.service.AlumnoService;
 import com.escueladeequitacion.hrs.utility.Mensaje;
@@ -172,6 +173,61 @@ public class AlumnoController {
         respuesta.put("alumnos", alumnos);
 
         return ResponseEntity.status(HttpStatus.OK).body(respuesta);
+    }
+
+    /**
+     * Convierte un alumno de clase de prueba a alumno regular con plan de clases.
+     * 
+     * PUT /api/v1/alumnos/{id}/convertir-a-plan
+     * 
+     * @param id      - ID del alumno
+     * @param request - Contiene cantidadClases (4, 8, 12 o 16)
+     * @return ResponseEntity con mensaje de éxito
+     */
+    @PutMapping(Constantes.RESOURCE_ALUMNOS + "/{id}/convertir-a-plan")
+    public ResponseEntity<?> convertirAlumnoAPlan(
+            @PathVariable Long id,
+            @RequestBody @Valid ConversionAPlanRequest request) {
+
+        alumnoService.convertirAlumnoAPlan(id, request.getCantidadClases());
+
+        return ResponseEntity.ok(Map.of(
+                "mensaje", "Alumno convertido a plan regular exitosamente",
+                "alumnoId", id,
+                "cantidadClases", request.getCantidadClases()));
+    }
+
+    /**
+     * Lista alumnos que están en estado de prueba (activo=false).
+     * 
+     * GET /api/v1/alumnos/prueba
+     * 
+     * @return Lista de alumnos inactivos (potenciales clases de prueba)
+     */
+    @GetMapping(Constantes.RESOURCE_ALUMNOS + "/prueba")
+    public ResponseEntity<List<Alumno>> listarAlumnosDePrueba() {
+        List<Alumno> alumnosPrueba = alumnoService.buscarAlumnoPorEstado(false);
+        return ResponseEntity.ok(alumnosPrueba);
+    }
+
+    /**
+     * Crea un alumno para clase de prueba (con valores por defecto).
+     * 
+     * POST /api/v1/alumnos/prueba
+     * 
+     * @param alumnoDto - Datos básicos del alumno (sin fechaInscripcion ni
+     *                  cantidadClases)
+     * @return Alumno creado
+     */
+    @PostMapping(Constantes.RESOURCE_ALUMNOS + "/prueba")
+    public ResponseEntity<Alumno> crearAlumnoDePrueba(@RequestBody @Valid AlumnoDto alumnoDto) {
+        // Forzar valores de clase de prueba
+        alumnoDto.setActivo(false);
+        alumnoDto.setCantidadClases(0);
+        alumnoDto.setFechaInscripcion(null); // Se asignará cuando se convierta a plan
+
+        Alumno alumno = alumnoService.crearAlumnoDesdeDto(alumnoDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(alumno);
     }
 
 }

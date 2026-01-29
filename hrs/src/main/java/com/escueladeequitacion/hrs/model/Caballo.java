@@ -3,7 +3,7 @@ package com.escueladeequitacion.hrs.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.escueladeequitacion.hrs.enums.TipoCaballo;
+import com.escueladeequitacion.hrs.enums.Tipo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
@@ -31,9 +31,9 @@ public class Caballo {
     private String nombre;
     @Column(name = "disponible", nullable = false)
     private Boolean disponible; // Para indicar si el caballo está disponible o no
-    @Column(name = "tipoCaballo", nullable = false, length = 8)
+    @Column(name = "tipo", nullable = false, length = 8)
     @Enumerated(EnumType.STRING)
-    private TipoCaballo tipoCaballo;
+    private Tipo tipo;
 
     @OneToMany(mappedBy = "caballo", cascade = CascadeType.ALL, orphanRemoval = false)
     @JsonIgnore
@@ -44,10 +44,10 @@ public class Caballo {
     }
 
     // Constructor con parámetros
-    public Caballo(String nombre, Boolean disponible, TipoCaballo tipoCaballo) {
+    public Caballo(String nombre, Boolean disponible, Tipo tipo) {
         this.nombre = nombre;
         this.disponible = disponible;
-        this.tipoCaballo = tipoCaballo;
+        this.tipo = tipo;
 
     }
 
@@ -76,12 +76,12 @@ public class Caballo {
         this.disponible = disponible;
     }
 
-    public TipoCaballo getTipoCaballo() {
-        return tipoCaballo;
+    public Tipo gettipo() {
+        return tipo;
     }
 
-    public void setTipoCaballo(TipoCaballo tipoCaballo) {
-        this.tipoCaballo = tipoCaballo;
+    public void settipo(Tipo tipo) {
+        this.tipo = tipo;
     }
 
     // Métodos para la lista de clases

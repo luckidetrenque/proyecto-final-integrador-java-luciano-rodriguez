@@ -5,6 +5,7 @@ import com.escueladeequitacion.hrs.dto.ClaseDto.AlActualizar;
 import com.escueladeequitacion.hrs.dto.ClaseDto.AlCrear;
 import com.escueladeequitacion.hrs.dto.ClaseResponseDto;
 import com.escueladeequitacion.hrs.enums.Estado;
+import com.escueladeequitacion.hrs.exception.ResourceNotFoundException;
 import com.escueladeequitacion.hrs.model.Clase;
 
 import com.escueladeequitacion.hrs.service.ClaseService;
@@ -12,6 +13,9 @@ import com.escueladeequitacion.hrs.service.AlumnoService;
 import com.escueladeequitacion.hrs.service.InstructorService;
 import com.escueladeequitacion.hrs.service.CaballoService;
 import com.escueladeequitacion.hrs.utility.Mensaje;
+
+import jakarta.validation.Valid;
+
 import com.escueladeequitacion.hrs.utility.Constantes;
 
 import java.time.LocalDate;
@@ -25,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(Constantes.API_VERSION)
@@ -105,9 +110,11 @@ public class ClaseController {
      * Crea una nueva clase.
      */
     @PostMapping(Constantes.RESOURCE_CLASES)
-    public ResponseEntity<?> crearClase(@Validated(AlCrear.class) @RequestBody ClaseDto claseDto) {
+    // public ResponseEntity<?> crearClase(@Validated(AlCrear.class) @RequestBody
+    // ClaseDto claseDto) {
+    public ResponseEntity<?> crearClase(@Valid @RequestBody ClaseDto claseDto) {
 
-        Clase clase = claseService.crearClaseDesdeDto(claseDto);
+        Clase clase = claseService.crearClase(claseDto);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new Mensaje("Clase creada correctamente con ID: " + clase.getId()));
@@ -122,7 +129,7 @@ public class ClaseController {
     public ResponseEntity<?> actualizarClase(@PathVariable Long id,
             @Validated(AlActualizar.class) @RequestBody ClaseDto claseDto) {
         // El Service maneja todas las validaciones
-        claseService.actualizarClaseDesdeDto(id, claseDto);
+        claseService.actualizarClase(id, claseDto);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new Mensaje("Clase con ID " + id + " actualizada correctamente"));
@@ -235,6 +242,70 @@ public class ClaseController {
         response.put("instructorId", instructorId);
         response.put("clasesCompletadas", count);
         return ResponseEntity.ok(response);
+    }
+
+    // ============================================================
+    // ENDPOINTS PARA CLASES DE PRUEBA
+    // ============================================================
+
+    /**
+     * Crea una clase de prueba.
+     * 
+     * POST /api/v1/clases/prueba
+     * 
+     * @param claseDto - Debe incluir esPrueba=true
+     * @return Clase creada
+     */
+    @PostMapping("/prueba")
+    public ResponseEntity<Clase> crearClaseDePrueba(@RequestBody @Valid ClaseDto claseDto) {
+        // Forzar que sea clase de prueba
+        claseDto.setEsPrueba(true);
+
+        Clase clase = claseService.crearClase(claseDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(clase);
+    }
+
+    /**
+     * Lista todas las clases de prueba del sistema.
+     * 
+     * GET /api/v1/clases/prueba
+     * 
+     * @return Lista de clases marcadas como prueba
+     */
+    @GetMapping("/prueba")
+    public ResponseEntity<List<ClaseResponseDto>> listarClasesDePrueba() {
+        List<ClaseResponseDto> clases = claseService.listarTodasLasClasesDePrueba();
+        return ResponseEntity.ok(clases);
+    }
+
+    /**
+     * Obtiene las clases de prueba de un alumno específico.
+     * 
+     * GET /api/v1/clases/alumno/{alumnoId}/prueba
+     * 
+     * @param alumnoId - ID del alumno
+     * @return Lista de clases de prueba del alumno
+     */
+    @GetMapping("/alumno/{alumnoId}/prueba")
+    public ResponseEntity<List<ClaseResponseDto>> obtenerClasesDePruebaPorAlumno(
+            @PathVariable Long alumnoId) {
+
+        List<ClaseResponseDto> clases = claseService.listarClasesDePruebaPorAlumno(alumnoId);
+        return ResponseEntity.ok(clases);
+    }
+
+    /**
+     * Verifica si un alumno ya tomó clase de prueba.
+     * 
+     * GET /api/v1/clases/alumno/{alumnoId}/tiene-prueba
+     * 
+     * @param alumnoId - ID del alumno
+     * @return {alumnoId: N, tienePrueba: true/false, cantidadClasesPrueba: N}
+     */
+    @GetMapping("/alumno/{alumnoId}/tiene-prueba")
+    public ResponseEntity<Map<String, Object>> verificarClaseDePrueba(@PathVariable Long alumnoId) {
+        Map<String, Object> info = claseService.obtenerInfoClasesDePrueba(alumnoId);
+        return ResponseEntity.ok(info);
     }
 
 }

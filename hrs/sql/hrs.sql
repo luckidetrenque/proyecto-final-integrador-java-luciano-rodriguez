@@ -107,7 +107,7 @@ CREATE TABLE `clases` (
   `id` bigint(20) NOT NULL,
   `dia` date NOT NULL,
   `especialidad` enum('ADIESTRAMIENTO','EQUINOTERAPIA','EQUITACION') NOT NULL,
-  `estado` enum('CANCELADA','COMPLETADA','EN_CURSO','PROGRAMADA') NOT NULL,
+  `estado` enum('CANCELADA','COMPLETADA','INICIADA','PROGRAMADA') NOT NULL,
   `hora` time(6) NOT NULL,
   `observaciones` varchar(50) DEFAULT NULL,
   `alumno_id` bigint(20) NOT NULL,

@@ -77,4 +77,6 @@ public interface AlumnoService {
     public List<Alumno> buscarAlumnosConFiltros(String nombre, String apellido, Boolean activo,
             Boolean propietario, LocalDate fechaInscripcion,
             LocalDate fechaNacimiento);
+
+    public void convertirAlumnoAPlan(Long alumnoId, Integer cantidadClases);
 }

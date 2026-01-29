@@ -52,8 +52,8 @@ public class Alumno extends Persona {
             LocalDate fechaInscripcion, Integer cantidadClases, Boolean activo, Boolean propietario) {
         super(dni, nombre, apellido, fechaNacimiento, telefono, email);
         this.fechaInscripcion = fechaInscripcion;
-        this.cantidadClases = cantidadClases;
-        this.activo = true;
+        this.cantidadClases = cantidadClases != null ? cantidadClases : 0;
+        this.activo = activo != null ? activo : false; // false para clases de prueba
         this.propietario = propietario;
     }
 

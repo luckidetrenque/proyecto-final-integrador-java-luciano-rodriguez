@@ -44,6 +44,8 @@ public class Clase {
     private Estado estado;
     @Column(name = "observaciones", nullable = true, length = 50)
     private String observaciones;
+    @Column(name = "es_prueba", nullable = false)
+    private Boolean esPrueba = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
@@ -66,7 +68,7 @@ public class Clase {
 
     // Constructor con parámetros
     public Clase(Instructor instructor, Alumno alumno, Caballo caballo, Especialidad especialidad,
-            LocalDate dia, LocalTime hora, Estado estado) {
+            LocalDate dia, LocalTime hora, Estado estado, Boolean esPrueba) {
         this.instructor = instructor;
         this.alumno = alumno;
         this.caballo = caballo;
@@ -74,6 +76,7 @@ public class Clase {
         this.dia = dia;
         this.hora = hora;
         this.estado = estado;
+        this.esPrueba = esPrueba != null ? esPrueba : false;
     }
 
     // Getters y Setters
@@ -147,6 +150,14 @@ public class Clase {
 
     public void setObservaciones(String observaciones) {
         this.observaciones = observaciones;
+    }
+
+    public Boolean isEsPrueba() {
+        return esPrueba;
+    }
+
+    public void setEsPrueba(Boolean esPrueba) {
+        this.esPrueba = esPrueba;
     }
 
     /**

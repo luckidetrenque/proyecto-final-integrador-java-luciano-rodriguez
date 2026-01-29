@@ -1,7 +1,7 @@
 package com.escueladeequitacion.hrs.service;
 
 import com.escueladeequitacion.hrs.dto.CaballoDto;
-import com.escueladeequitacion.hrs.enums.TipoCaballo;
+import com.escueladeequitacion.hrs.enums.Tipo;
 import com.escueladeequitacion.hrs.exception.BusinessException;
 import com.escueladeequitacion.hrs.exception.ConflictException;
 import com.escueladeequitacion.hrs.exception.ResourceNotFoundException;
@@ -45,8 +45,8 @@ public class CaballoServiceImpl implements CaballoService {
         return caballoRepository.findByDisponible(true);
     };
 
-    public List<Caballo> buscarCaballoPorTipo(TipoCaballo tipoCaballo) {
-        return caballoRepository.findByTipoCaballo(tipoCaballo);
+    public List<Caballo> buscarCaballoPorTipo(Tipo tipo) {
+        return caballoRepository.findBytipo(tipo);
     };
 
     @Override
@@ -131,7 +131,7 @@ public class CaballoServiceImpl implements CaballoService {
         Caballo caballo = new Caballo(
                 caballoDto.getNombre(),
                 caballoDto.isDisponible(),
-                caballoDto.getTipoCaballo());
+                caballoDto.gettipo());
 
         return caballoRepository.save(caballo);
     }
@@ -156,7 +156,7 @@ public class CaballoServiceImpl implements CaballoService {
         Caballo caballoNuevo = new Caballo();
         caballoNuevo.setNombre(caballoDto.getNombre());
         caballoNuevo.setDisponible(caballoDto.isDisponible());
-        caballoNuevo.setTipoCaballo(caballoDto.getTipoCaballo());
+        caballoNuevo.settipo(caballoDto.gettipo());
 
         // 4. Actualizar usando método auxiliar
         actualizarCamposDesdeDto(caballoExistente, caballoNuevo);
@@ -169,7 +169,7 @@ public class CaballoServiceImpl implements CaballoService {
      * Busca caballos con múltiples filtros.
      */
     @Override
-    public List<Caballo> buscarCaballosConFiltros(String nombre, Boolean disponible, TipoCaballo tipo) {
+    public List<Caballo> buscarCaballosConFiltros(String nombre, Boolean disponible, Tipo tipo) {
         if (nombre != null) {
             return caballoRepository.findByNombreIgnoreCase(nombre);
         }
@@ -179,7 +179,7 @@ public class CaballoServiceImpl implements CaballoService {
         }
 
         if (tipo != null) {
-            return caballoRepository.findByTipoCaballo(tipo);
+            return caballoRepository.findBytipo(tipo);
         }
 
         return new ArrayList<>();
@@ -200,6 +200,6 @@ public class CaballoServiceImpl implements CaballoService {
     private void actualizarCamposDesdeDto(Caballo caballoExistente, Caballo caballoNuevo) {
         caballoExistente.setNombre(caballoNuevo.getNombre());
         caballoExistente.setDisponible(caballoNuevo.isDisponible());
-        caballoExistente.setTipoCaballo(caballoNuevo.getTipoCaballo());
+        caballoExistente.settipo(caballoNuevo.gettipo());
     }
 }

@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import com.escueladeequitacion.hrs.enums.TipoCaballo;
+import com.escueladeequitacion.hrs.enums.Tipo;
 
 // Repositorio para la entidad Caballo
 @Repository
@@ -18,7 +18,7 @@ public interface CaballoRepository extends JpaRepository<Caballo, Long> {
 
     public List<Caballo> findByDisponible(@Param("disponible") Boolean disponible);
 
-    public List<Caballo> findByTipoCaballo(TipoCaballo tipoCaballo);
+    public List<Caballo> findBytipo(Tipo tipo);
 
     // Métodos para verificar la existencia de un caballo por diferentes criterios
     public Boolean existsByNombre(String nombre);
