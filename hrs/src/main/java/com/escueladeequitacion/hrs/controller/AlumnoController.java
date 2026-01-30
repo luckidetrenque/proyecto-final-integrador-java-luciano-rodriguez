@@ -1,6 +1,7 @@
 package com.escueladeequitacion.hrs.controller;
 
 import com.escueladeequitacion.hrs.dto.AlumnoDto;
+import com.escueladeequitacion.hrs.dto.AlumnoPruebaDto;
 import com.escueladeequitacion.hrs.dto.ConversionAPlanRequest;
 import com.escueladeequitacion.hrs.model.Alumno;
 import com.escueladeequitacion.hrs.service.AlumnoService;
@@ -220,13 +221,8 @@ public class AlumnoController {
      * @return Alumno creado
      */
     @PostMapping(Constantes.RESOURCE_ALUMNOS + "/prueba")
-    public ResponseEntity<Alumno> crearAlumnoDePrueba(@RequestBody @Valid AlumnoDto alumnoDto) {
-        // Forzar valores de clase de prueba
-        alumnoDto.setActivo(false);
-        alumnoDto.setCantidadClases(0);
-        alumnoDto.setFechaInscripcion(null); // Se asignará cuando se convierta a plan
-
-        Alumno alumno = alumnoService.crearAlumnoDesdeDto(alumnoDto);
+    public ResponseEntity<Alumno> crearAlumnoDePrueba(@RequestBody @Valid AlumnoPruebaDto alumnoDto) {
+        Alumno alumno = alumnoService.crearAlumnoDePrueba(alumnoDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(alumno);
     }
 

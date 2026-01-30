@@ -245,12 +245,16 @@ public class ClaseServiceImpl implements ClaseService {
          */
 
         Instructor instructor = obtenerInstructorValido(claseDto.getInstructorId());
-        Alumno alumno = obtenerAlumnoValido(claseDto.getAlumnoId());
 
-        // Usar caballo propio si existe, sino el seleccionado
-        Caballo caballo = (alumno.getCaballoPropio() != null && claseDto.getCaballoId() == null)
-                ? alumno.getCaballoPropio()
-                : obtenerCaballoValido(claseDto.getCaballoId());
+        // ⚠️ CAMBIO AQUÍ: Usar método sin validar estado si es clase de prueba
+        Alumno alumno;
+        if (claseDto.isEsPrueba() != null && claseDto.isEsPrueba()) {
+            alumno = obtenerAlumnoSinValidarEstado(claseDto.getAlumnoId());
+        } else {
+            alumno = obtenerAlumnoValido(claseDto.getAlumnoId());
+        }
+
+        Caballo caballo = obtenerCaballoValido(claseDto.getCaballoId());
 
         if ((claseDto.getEstado() == Estado.PROGRAMADA || claseDto.getEstado() == Estado.INICIADA)) {
             validarFechaYHora(claseDto.getDia(), claseDto.getHora());
@@ -293,27 +297,36 @@ public class ClaseServiceImpl implements ClaseService {
      */
     @Override
     public void actualizarClase(Long id, ClaseDto dto) {
-
         Clase clase = claseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Clase", "ID", id));
+
+        // ✅ OPCIONAL: Prevenir cambio de tipo de clase
+        if (dto.isEsPrueba() != null && !dto.isEsPrueba().equals(clase.isEsPrueba())) {
+            throw new BusinessException("No se puede cambiar el tipo de clase (regular ↔ prueba)");
+        }
 
         if (dto.getInstructorId() != null) {
             clase.setInstructor(obtenerInstructorValido(dto.getInstructorId()));
         }
 
         if (dto.getAlumnoId() != null) {
-            clase.setAlumno(obtenerAlumnoValido(dto.getAlumnoId()));
+            // ⚠️ Si es clase de prueba, no validar estado activo
+            if (clase.isEsPrueba()) {
+                clase.setAlumno(obtenerAlumnoSinValidarEstado(dto.getAlumnoId()));
+            } else {
+                clase.setAlumno(obtenerAlumnoValido(dto.getAlumnoId()));
+            }
         }
 
         if (dto.getCaballoId() != null) {
             clase.setCaballo(obtenerCaballoValido(dto.getCaballoId()));
         }
 
-        // Nueva validación agregada
-        if ((dto.getDia() != null || dto.getHora() != null) && clase.getDia().isAfter(java.time.LocalDate.now(
-                ZoneId.of("America/Argentina/Buenos_Aires")))) {
+        if ((dto.getDia() != null || dto.getHora() != null) &&
+                clase.getDia().isAfter(LocalDate.now(ZoneId.of("America/Argentina/Buenos_Aires")))) {
             validarFechaYHora(dto.getDia(), dto.getHora());
         }
+
         aplicarCamposSimples(clase, dto);
 
         validarConflictoDeHorario(
@@ -422,6 +435,11 @@ public class ClaseServiceImpl implements ClaseService {
             throw new BusinessException(
                     "El caballo ya está asignado a una clase en esa hora");
         }
+    }
+
+    private Alumno obtenerAlumnoSinValidarEstado(Long id) {
+        return alumnoService.buscarAlumnoPorId(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Alumno", "ID", id));
     }
 
     private Alumno obtenerAlumnoValido(Long id) {

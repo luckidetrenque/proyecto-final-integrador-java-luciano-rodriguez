@@ -1,6 +1,7 @@
 package com.escueladeequitacion.hrs.service;
 
 import com.escueladeequitacion.hrs.dto.AlumnoDto;
+import com.escueladeequitacion.hrs.dto.AlumnoPruebaDto;
 import com.escueladeequitacion.hrs.enums.Estado;
 import com.escueladeequitacion.hrs.exception.BusinessException;
 import com.escueladeequitacion.hrs.exception.ConflictException;
@@ -340,6 +341,29 @@ public class AlumnoServiceImpl implements AlumnoService {
         alumno.setCantidadClases(cantidadClases);
 
         alumnoRepository.save(alumno);
+    }
+
+    @Override
+    public Alumno crearAlumnoDePrueba(AlumnoPruebaDto alumnoDto) {
+        // 1. Validar DNI duplicado
+        if (alumnoRepository.existsByDni(alumnoDto.getDni())) {
+            throw new ConflictException("Alumno", "DNI", alumnoDto.getDni());
+        }
+
+        // 2. Crear el alumno de prueba
+        Alumno alumno = new Alumno(
+                alumnoDto.getDni(),
+                alumnoDto.getNombre(),
+                alumnoDto.getApellido(),
+                alumnoDto.getFechaNacimiento(),
+                alumnoDto.getTelefono(),
+                alumnoDto.getEmail(),
+                null, // Sin fecha de inscripción
+                0, // Sin clases
+                false, // Inactivo
+                alumnoDto.isPropietario());
+
+        return alumnoRepository.save(alumno);
     }
 
     /**

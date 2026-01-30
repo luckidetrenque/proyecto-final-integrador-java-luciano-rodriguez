@@ -45,7 +45,6 @@ public class ClaseDto {
     private Long caballoId;
     // Si ClaseDto ya existe, solo agrégale el campo esPrueba
     // Si no, crea este DTO simplificado para clases de prueba
-    @NotNull(message = "El campo esPrueba es obligatorio")
     private Boolean esPrueba;
 
     // Constructores, getters y setters
