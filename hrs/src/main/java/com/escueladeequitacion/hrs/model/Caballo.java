@@ -34,6 +34,9 @@ public class Caballo {
     @Column(name = "tipo", nullable = false, length = 8)
     @Enumerated(EnumType.STRING)
     private Tipo tipo;
+    @OneToMany(mappedBy = "caballoPropio")
+    @JsonIgnore
+    private List<Alumno> propietarios = new ArrayList<>();
 
     @OneToMany(mappedBy = "caballo", cascade = CascadeType.ALL, orphanRemoval = false)
     @JsonIgnore

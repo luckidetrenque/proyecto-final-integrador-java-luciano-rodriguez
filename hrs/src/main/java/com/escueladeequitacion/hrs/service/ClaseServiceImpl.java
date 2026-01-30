@@ -246,7 +246,11 @@ public class ClaseServiceImpl implements ClaseService {
 
         Instructor instructor = obtenerInstructorValido(claseDto.getInstructorId());
         Alumno alumno = obtenerAlumnoValido(claseDto.getAlumnoId());
-        Caballo caballo = obtenerCaballoValido(claseDto.getCaballoId());
+
+        // Usar caballo propio si existe, sino el seleccionado
+        Caballo caballo = (alumno.getCaballoPropio() != null && claseDto.getCaballoId() == null)
+                ? alumno.getCaballoPropio()
+                : obtenerCaballoValido(claseDto.getCaballoId());
 
         if ((claseDto.getEstado() == Estado.PROGRAMADA || claseDto.getEstado() == Estado.INICIADA)) {
             validarFechaYHora(claseDto.getDia(), claseDto.getHora());

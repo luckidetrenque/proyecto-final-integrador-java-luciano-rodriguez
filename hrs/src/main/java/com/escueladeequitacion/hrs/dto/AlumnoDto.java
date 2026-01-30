@@ -17,6 +17,7 @@ public class AlumnoDto extends PersonaDto {
     private Boolean activo;
     @NotNull(message = "El estado del alumno no puede estar vacío")
     private Boolean propietario = false;
+    private Long caballoId; // Nullable - solo si propietario=true
 
     // Constructores, getters y setters
     public AlumnoDto() {
@@ -63,5 +64,13 @@ public class AlumnoDto extends PersonaDto {
 
     public void setPropietario(Boolean propietario) {
         this.propietario = propietario;
+    }
+
+    public Long getCaballoId() {
+        return caballoId;
+    }
+
+    public void setCaballoId(Long caballoId) {
+        this.caballoId = caballoId;
     }
 }

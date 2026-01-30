@@ -7,7 +7,9 @@ import com.escueladeequitacion.hrs.exception.ConflictException;
 import com.escueladeequitacion.hrs.exception.ResourceNotFoundException;
 import com.escueladeequitacion.hrs.exception.ValidationException;
 import com.escueladeequitacion.hrs.model.Alumno;
+import com.escueladeequitacion.hrs.model.Caballo;
 import com.escueladeequitacion.hrs.repository.AlumnoRepository;
+import com.escueladeequitacion.hrs.repository.CaballoRepository;
 import com.escueladeequitacion.hrs.utility.Constantes;
 
 import jakarta.transaction.Transactional;
@@ -28,6 +30,8 @@ public class AlumnoServiceImpl implements AlumnoService {
 
     @Autowired
     private AlumnoRepository alumnoRepository;
+    @Autowired
+    private CaballoRepository caballoRepository;
 
     @Override
     public List<Alumno> listarAlumnos() {
@@ -194,6 +198,17 @@ public class AlumnoServiceImpl implements AlumnoService {
                 alumnoDto.isActivo(),
                 alumnoDto.isPropietario());
 
+        // 4. Asignar caballo si corresponde
+        if (alumnoDto.isPropietario()) {
+            if (alumnoDto.getCaballoId() != null) {
+                Caballo caballo = caballoRepository.findById(alumnoDto.getCaballoId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Caballo", "ID", alumnoDto.getCaballoId()));
+                alumno.setCaballoPropio(caballo);
+            } else {
+                throw new ValidationException("caballoId", "Debe especificar un caballo si es propietario");
+            }
+        }
+
         return alumnoRepository.save(alumno);
     }
 
@@ -231,10 +246,23 @@ public class AlumnoServiceImpl implements AlumnoService {
         alumnoNuevo.setActivo(alumnoDto.isActivo());
         alumnoNuevo.setPropietario(alumnoDto.isPropietario());
 
-        // 5. Actualizar campos usando método auxiliar
+        // 5. Asignar caballo si corresponde
+        if (alumnoDto.isPropietario()) {
+            if (alumnoDto.getCaballoId() != null) {
+                Caballo caballo = caballoRepository.findById(alumnoDto.getCaballoId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Caballo", "ID", alumnoDto.getCaballoId()));
+                alumnoNuevo.setCaballoPropio(caballo);
+            } else {
+                throw new ValidationException("caballoId", "Debe especificar un caballo si es propietario");
+            }
+        } else {
+            alumnoNuevo.setCaballoPropio(null);
+        }
+
+        // 6. Actualizar campos usando método auxiliar
         actualizarCamposDesdeDto(alumnoExistente, alumnoNuevo);
 
-        // 6. Guardar
+        // 7. Guardar
         alumnoRepository.save(alumnoExistente);
     }
 
@@ -337,5 +365,6 @@ public class AlumnoServiceImpl implements AlumnoService {
         alumnoExistente.setCantidadClases(alumnoNuevo.getCantidadClases());
         alumnoExistente.setActivo(alumnoNuevo.isActivo());
         alumnoExistente.setPropietario(alumnoNuevo.isPropietario());
+        alumnoExistente.setCaballoPropio(alumnoNuevo.getCaballoPropio());
     }
 }

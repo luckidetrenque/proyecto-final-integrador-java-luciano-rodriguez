@@ -10,9 +10,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -36,6 +39,10 @@ public class Alumno extends Persona {
     private Boolean activo; // Para indicar si el alumno está activo o inactivo
     @Column(name = "propietario", nullable = false)
     private Boolean propietario; // Para indicar si el alumno tiene caballo propio o no
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
+    @JoinColumn(name = "caballo_id", nullable = true)
+    private Caballo caballoPropio;
 
     @OneToMany(mappedBy = "alumno", cascade = CascadeType.ALL, orphanRemoval = false)
     @JsonIgnore
@@ -96,6 +103,14 @@ public class Alumno extends Persona {
 
     public void setPropietario(Boolean propietario) {
         this.propietario = propietario;
+    }
+
+    public Caballo getCaballoPropio() {
+        return caballoPropio;
+    }
+
+    public void setCaballoPropio(Caballo caballoPropio) {
+        this.caballoPropio = caballoPropio;
     }
 
     // Métodos para la lista de clases
