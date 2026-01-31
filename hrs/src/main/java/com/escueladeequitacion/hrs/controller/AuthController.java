@@ -5,6 +5,7 @@ import com.escueladeequitacion.hrs.exception.ResourceNotFoundException;
 import com.escueladeequitacion.hrs.security.RolSeguridad;
 import com.escueladeequitacion.hrs.security.User;
 import com.escueladeequitacion.hrs.security.UserRepository;
+import com.escueladeequitacion.hrs.security.WhitelistService;
 import com.escueladeequitacion.hrs.utility.Mensaje;
 
 import jakarta.validation.Valid;
@@ -13,11 +14,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -32,7 +35,13 @@ public class AuthController {
     private UserRepository userRepository;
 
     @Autowired
+    WhitelistService whitelistService;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Value("${app.whitelist.emails:claumarnavarro@gmail.com,luckidetrenque@gmail.com}")
+    private String whitelistEmails;
 
     /**
      * DTO para registro de usuarios.
@@ -118,6 +127,9 @@ public class AuthController {
      */
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest request) {
+        if (!whitelistService.isEmailAllowed(request.getEmail())) {
+            throw new ConflictException("Email no autorizado para registro");
+        }
         // Validar username duplicado
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new ConflictException("Usuario", "username", request.getUsername());
@@ -230,5 +242,15 @@ public class AuthController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new Mensaje("Usuario actualizado correctamente: " + user.getUsername()));
+    }
+
+    @GetMapping("/check-email/{email}")
+    public ResponseEntity<Void> checkEmailWhitelist(@PathVariable String email) {
+        List<String> allowedEmails = Arrays.asList(whitelistEmails.split(","));
+
+        boolean isAllowed = allowedEmails.stream()
+                .anyMatch(allowedEmail -> allowedEmail.trim().equalsIgnoreCase(email.trim()));
+
+        return isAllowed ? ResponseEntity.ok().build() : ResponseEntity.status(403).build();
     }
 }
