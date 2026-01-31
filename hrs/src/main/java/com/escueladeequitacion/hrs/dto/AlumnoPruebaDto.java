@@ -17,4 +17,12 @@ public class AlumnoPruebaDto extends PersonaDto {
     public void setPropietario(Boolean propietario) {
         this.propietario = propietario;
     }
+
+    public Long getCaballoId() {
+        return caballoId;
+    }
+
+    public void setCaballoId(Long caballoId) {
+        this.caballoId = caballoId;
+    }
 }

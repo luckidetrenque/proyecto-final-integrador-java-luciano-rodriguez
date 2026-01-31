@@ -2,10 +2,8 @@ package com.escueladeequitacion.hrs.controller;
 
 import com.escueladeequitacion.hrs.dto.ClaseDto;
 import com.escueladeequitacion.hrs.dto.ClaseDto.AlActualizar;
-import com.escueladeequitacion.hrs.dto.ClaseDto.AlCrear;
 import com.escueladeequitacion.hrs.dto.ClaseResponseDto;
 import com.escueladeequitacion.hrs.enums.Estado;
-import com.escueladeequitacion.hrs.exception.ResourceNotFoundException;
 import com.escueladeequitacion.hrs.model.Clase;
 
 import com.escueladeequitacion.hrs.service.ClaseService;
