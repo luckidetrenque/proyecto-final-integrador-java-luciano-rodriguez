@@ -41,6 +41,11 @@ public class InstructorServiceImpl implements InstructorService {
     };
 
     @Override
+    public Optional<Instructor> buscarInstructorPorColor(String color) {
+        return instructorRepository.findByColor(color);
+    };
+
+    @Override
     public List<Instructor> buscarInstructorPorNombre(String nombre) {
         return instructorRepository.findByNombreIgnoreCase(nombre);
     };
@@ -157,7 +162,8 @@ public class InstructorServiceImpl implements InstructorService {
                 instructorDto.getFechaNacimiento(),
                 instructorDto.getTelefono(),
                 instructorDto.getEmail(),
-                instructorDto.isActivo());
+                instructorDto.isActivo(),
+                instructorDto.getColor());
 
         return instructorRepository.save(instructor);
     }
@@ -187,6 +193,7 @@ public class InstructorServiceImpl implements InstructorService {
         instructorNuevo.setTelefono(instructorDto.getTelefono());
         instructorNuevo.setEmail(instructorDto.getEmail());
         instructorNuevo.setActivo(instructorDto.isActivo());
+        instructorNuevo.setColor(instructorDto.getColor());
 
         // 4. Actualizar usando método auxiliar
         actualizarCamposDesdeDto(instructorExistente, instructorNuevo);
@@ -244,5 +251,6 @@ public class InstructorServiceImpl implements InstructorService {
         instructorExistente.setTelefono(instructorNuevo.getTelefono());
         instructorExistente.setEmail(instructorNuevo.getEmail());
         instructorExistente.setActivo(instructorNuevo.isActivo());
+        instructorExistente.setColor(instructorNuevo.getColor());
     }
 }

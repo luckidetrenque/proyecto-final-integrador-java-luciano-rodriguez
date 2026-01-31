@@ -15,6 +15,8 @@ public interface InstructorRepository extends JpaRepository<Instructor, Long> {
     // Métodos para buscar alumnos por diferentes criterios
     public Optional<Instructor> findByDni(@Param("dni") String dni);
 
+    public Optional<Instructor> findByColor(@Param("color") String color);
+
     public List<Instructor> findByNombreIgnoreCase(@Param("nombre") String nombre);
 
     public List<Instructor> findByApellidoIgnoreCase(@Param("apellido") String apellido);

@@ -30,6 +30,8 @@ public class Instructor extends Persona {
     private Long id;
     @Column(name = "activo", nullable = false)
     private Boolean activo; // Para indicar si el alumno está activo o inactivo
+    @Column(name = "color", nullable = false, length = 7)
+    private String color;
 
     @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL, orphanRemoval = false)
     @JsonIgnore
@@ -43,9 +45,10 @@ public class Instructor extends Persona {
     // Constructor con parámetros
     public Instructor(String dni, String nombre, String apellido, LocalDate fechaNacimiento, String telefono,
             String email,
-            Boolean activo) {
+            Boolean activo, String color) {
         super(dni, nombre, apellido, fechaNacimiento, telefono, email);
         this.activo = activo;
+        this.color = color;
     }
 
     // Getters y Setters
@@ -63,6 +66,14 @@ public class Instructor extends Persona {
 
     public void setActivo(Boolean activo) {
         this.activo = activo;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
     }
 
     // Métodos para la lista de clases

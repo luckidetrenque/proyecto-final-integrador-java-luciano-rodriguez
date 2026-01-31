@@ -18,6 +18,8 @@ public interface InstructorService {
 
     public Optional<Instructor> buscarInstructorPorDni(String dni);
 
+    public Optional<Instructor> buscarInstructorPorColor(String color);
+
     public List<Instructor> buscarInstructorPorNombre(String nombre);
 
     public List<Instructor> buscarInstructorPorApellido(String apellido);
