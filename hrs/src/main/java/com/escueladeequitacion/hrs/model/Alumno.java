@@ -18,13 +18,19 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Index;
 
 /**
  * Clase que representa a un Alumno en la escuela de equitación.
  * Hereda de la clase Persona e incluye atributos específicos de un alumno.
  */
 @Entity
-@Table(name = "alumnos")
+@Table(name = "alumnos", indexes = {
+        @Index(name = "idx_alumno_dni", columnList = "dni", unique = true),
+        @Index(name = "idx_alumno_nombre_apellido", columnList = "nombre, apellido"),
+        @Index(name = "idx_alumno_activo", columnList = "activo"),
+        @Index(name = "idx_alumno_fecha_inscripcion", columnList = "fecha_inscripcion")
+})
 public class Alumno extends Persona {
     // Atributos específicos de Alumno
     @Id
@@ -131,17 +137,23 @@ public class Alumno extends Persona {
     }
 
     @Override
-    public double calcularPago() {
-        throw new UnsupportedOperationException("Unimplemented method 'calcularPago'");
-    };
+    public double calcularPago() {// Cuota base mensual
+        double cuotaBase = 1000.0;
 
-    // @Override
-    // public double calcularPago() {
-    // double cuotaBase = 1000.0; // Pago base mensual
-    // if (caballo != null) { // Si tiene caballo propio
-    // cuotaBase += 500.0; // Cargo adicional por mantenimiento
-    // }
-    // return cuotaBase;
-    // };
+        // Cálculo proporcional según cantidad de clases
+        // 4 clases = 1x, 8 clases = 1.5x, 12 clases = 2x, 16 clases = 2.5x
+        double multiplicador = switch (cantidadClases) {
+            case 4 -> 1.0;
+            case 8 -> 1.5;
+            case 12 -> 2.0;
+            case 16 -> 2.5;
+            default -> 1.0;
+        };
+
+        // Si tiene caballo propio, se cobra mantenimiento adicional
+        double cargoMantenimiento = propietario ? 500.0 : 0.0;
+
+        return (cuotaBase * multiplicador) + cargoMantenimiento;
+    }
 
 }

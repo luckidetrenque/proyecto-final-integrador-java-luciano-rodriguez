@@ -20,12 +20,20 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Index;
 
 /**
  * Clase que representa a una Clase en la escuela de equitación.
  */
 @Entity
-@Table(name = "clases")
+@Table(name = "clases", indexes = {
+        @Index(name = "idx_clase_dia_hora", columnList = "dia, hora"),
+        @Index(name = "idx_clase_instructor_dia", columnList = "instructor_id, dia"),
+        @Index(name = "idx_clase_alumno_dia", columnList = "alumno_id, dia"),
+        @Index(name = "idx_clase_caballo_dia", columnList = "caballo_id, dia"),
+        @Index(name = "idx_clase_estado", columnList = "estado"),
+        @Index(name = "idx_clase_especialidad", columnList = "especialidad")
+})
 public class Clase {
     // Atributos específicos de Clase
     @Id

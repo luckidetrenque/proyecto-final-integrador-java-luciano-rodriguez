@@ -16,12 +16,17 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Index;
 
 /**
  * Clase que representa a un Caballo en la escuela de equitación.
  */
 @Entity
-@Table(name = "caballos")
+@Table(name = "caballos" , indexes = {
+    @Index(name = "idx_caballo_nombre", columnList = "nombre"),
+    @Index(name = "idx_caballo_disponible", columnList = "disponible"),
+    @Index(name = "idx_caballo_tipo", columnList = "tipoCaballo")
+})
 public class Caballo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

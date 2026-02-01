@@ -15,13 +15,17 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Index;
 
 /**
  * Clase que representa a un Instructor en la escuela de equitación.
  * Hereda de la clase Persona e incluye atributos específicos de un instructor.
  */
 @Entity
-@Table(name = "instructores")
+@Table(name = "instructores", indexes = {
+        @Index(name = "idx_instructor_dni", columnList = "dni", unique = true),
+        @Index(name = "idx_instructor_activo", columnList = "activo")
+})
 public class Instructor extends Persona {
     // Atributos específicos de Instructor
     @Id
@@ -95,6 +99,17 @@ public class Instructor extends Persona {
 
     @Override
     public double calcularPago() {
-        return 100; // Verificar con el equipo cómo se calcula el pago de un instructor
+        // Salario base mensual para instructores
+        double salarioBase = 2000.0;
+
+        // Bono por clase impartida ($50 por clase)
+        long clasesDelMes = clases.stream()
+                .filter(c -> c.getDia().getMonth() == LocalDate.now().getMonth()
+                        && c.getDia().getYear() == LocalDate.now().getYear())
+                .count();
+
+        double bonoPorClases = clasesDelMes * 50.0;
+
+        return salarioBase + bonoPorClases;
     }
 }
