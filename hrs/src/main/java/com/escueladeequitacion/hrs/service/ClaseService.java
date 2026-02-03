@@ -176,4 +176,9 @@ public interface ClaseService {
      * @return Lista de ClaseResponseDto de todas las clases de prueba
      */
     List<ClaseResponseDto> listarTodasLasClasesDePrueba();
+
+    /**
+     * Verifica si un alumno ya tomó clase de prueba de una especialidad específica.
+     */
+    boolean alumnoTieneClaseDePruebaEnEspecialidad(Long alumnoId, String especialidad);
 }

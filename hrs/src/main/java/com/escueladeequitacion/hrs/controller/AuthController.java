@@ -2,10 +2,12 @@ package com.escueladeequitacion.hrs.controller;
 
 import com.escueladeequitacion.hrs.exception.ConflictException;
 import com.escueladeequitacion.hrs.exception.ResourceNotFoundException;
+import com.escueladeequitacion.hrs.exception.UnauthorizedException;
 import com.escueladeequitacion.hrs.security.RolSeguridad;
 import com.escueladeequitacion.hrs.security.User;
 import com.escueladeequitacion.hrs.security.UserRepository;
 import com.escueladeequitacion.hrs.security.WhitelistService;
+import com.escueladeequitacion.hrs.utility.Constantes;
 import com.escueladeequitacion.hrs.utility.Mensaje;
 
 import jakarta.validation.Valid;
@@ -28,7 +30,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/v1/auth")
-@CrossOrigin(origins = { "http://localhost:5173" })
+@CrossOrigin(origins = { Constantes.ORIGINS })
 public class AuthController {
 
     @Autowired
@@ -111,7 +113,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(java.security.Principal principal) {
         if (principal == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            throw new UnauthorizedException("Credenciales inválidas");
         }
 
         // Buscamos al usuario por el nombre que viene en el Header de Basic Auth

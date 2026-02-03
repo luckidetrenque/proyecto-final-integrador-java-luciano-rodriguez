@@ -275,18 +275,16 @@ public class ClaseServiceImpl implements ClaseService {
 
         // Validar reglas de clase de prueba
         if (claseDto.isEsPrueba() != null && claseDto.isEsPrueba()) {
-            // Verificar que el alumno no haya tomado clase de prueba antes
-            if (claseRepository.alumnoTieneClaseDePrueba(alumno.getId())) {
-                throw new BusinessException("El alumno ya ha tomado una clase de prueba anteriormente");
-            }
-
-            // Verificar que el alumno esté inactivo (lógica de clase de prueba)
-            if (alumno.isActivo()) {
+            // Verificar que el alumno no haya tomado clase de prueba DE ESTA ESPECIALIDAD
+            if (claseRepository.alumnoTieneClaseDePruebaEnEspecialidad(
+                    alumno.getId(),
+                    claseDto.getEspecialidad())) {
                 throw new BusinessException(
-                        "Las clases de prueba solo pueden asignarse a alumnos no inscritos (activo=false)");
+                        "El alumno ya ha tomado una clase de prueba de " + claseDto.getEspecialidad());
             }
-        }
 
+            // NO validar que esté inactivo - puede estar activo en otra especialidad
+        }
         clase.setEsPrueba(claseDto.isEsPrueba() != null ? claseDto.isEsPrueba() : false);
 
         return claseRepository.save(clase);
@@ -560,6 +558,15 @@ public class ClaseServiceImpl implements ClaseService {
                 .stream()
                 .map(ClaseResponseDto::new)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Verifica si un alumno ya tomó clase de prueba de una especialidad específica.
+     */
+    @Override
+    public boolean alumnoTieneClaseDePruebaEnEspecialidad(Long alumnoId, String especialidad) {
+        Especialidad esp = Especialidad.valueOf(especialidad);
+        return claseRepository.alumnoTieneClaseDePruebaEnEspecialidad(alumnoId, esp);
     }
 
 }

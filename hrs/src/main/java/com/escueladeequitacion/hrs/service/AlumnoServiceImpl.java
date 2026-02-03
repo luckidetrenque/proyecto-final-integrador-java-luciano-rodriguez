@@ -367,7 +367,7 @@ public class AlumnoServiceImpl implements AlumnoService {
     }
 
     /**
-     * Método auxiliar para validar existencia (ya lo tienes).
+     * Método auxiliar para validar existencia
      */
     private Alumno obtenerAlumnoOLanzarExcepcion(Long id) {
         return alumnoRepository.findById(id)

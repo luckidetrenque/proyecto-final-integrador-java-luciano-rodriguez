@@ -25,7 +25,7 @@ public abstract class Persona {
     private String apellido;
     @Column(name = "fecha_nacimiento", nullable = false)
     private LocalDate fechaNacimiento;
-    @Column(name = "telefono", nullable = false, length = 13)
+    @Column(name = "telefono", nullable = false, length = 14)
     private String telefono;
     @Column(name = "email", nullable = true)
     private String email;

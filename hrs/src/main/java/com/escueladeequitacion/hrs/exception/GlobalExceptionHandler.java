@@ -119,8 +119,7 @@ public class GlobalExceptionHandler {
 
                 ErrorResponseDto errorResponseDto = new ErrorResponseDto(
                                 HttpStatus.UNAUTHORIZED.value(),
-                                "Unauthorized",
-                                ex.getMessage(),
+                                "Unauthorized", "Credenciales inválidas: " + ex.getMessage(),
                                 request.getRequestURI());
 
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponseDto);
