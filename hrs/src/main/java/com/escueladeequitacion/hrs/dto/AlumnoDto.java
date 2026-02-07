@@ -17,7 +17,7 @@ public class AlumnoDto extends PersonaDto {
     private Boolean activo;
     @NotNull(message = "El estado del alumno no puede estar vacío")
     private Boolean propietario = false;
-    private Long caballoId; // Nullable - solo si propietario=true
+    private Long caballoId;
 
     // Constructores, getters y setters
     public AlumnoDto() {
@@ -26,12 +26,13 @@ public class AlumnoDto extends PersonaDto {
 
     public AlumnoDto(String dni, String nombre, String apellido, LocalDate fechaNacimiento, String telefono,
             String email,
-            LocalDate fechaInscripcion, Integer cantidadClases, Boolean activo, Boolean propietario) {
+            LocalDate fechaInscripcion, Integer cantidadClases, Boolean activo, Boolean propietario, Long caballoId) {
         super(dni, nombre, apellido, fechaNacimiento, telefono, email);
         this.fechaInscripcion = fechaInscripcion;
         this.cantidadClases = cantidadClases;
         this.activo = activo;
         this.propietario = propietario;
+        this.caballoId = caballoId;
     }
 
     public LocalDate getFechaInscripcion() {

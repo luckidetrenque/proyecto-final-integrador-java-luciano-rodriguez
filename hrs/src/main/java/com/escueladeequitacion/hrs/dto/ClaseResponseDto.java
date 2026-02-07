@@ -72,7 +72,7 @@ public class ClaseResponseDto {
         if (clase.getCaballo() != null) {
             this.caballoId = clase.getCaballo().getId();
             this.caballoNombre = clase.getCaballo().getNombre();
-            this.caballoTipo = clase.getCaballo().gettipo().toString();
+            this.caballoTipo = clase.getCaballo().getTipo().toString();
         }
     }
 

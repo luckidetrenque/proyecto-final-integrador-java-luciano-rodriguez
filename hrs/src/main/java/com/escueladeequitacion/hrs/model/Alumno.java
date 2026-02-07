@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.escueladeequitacion.hrs.enums.Rol;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -31,6 +33,7 @@ import jakarta.persistence.Index;
         @Index(name = "idx_alumno_activo", columnList = "activo"),
         @Index(name = "idx_alumno_fecha_inscripcion", columnList = "fecha_inscripcion")
 })
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Alumno extends Persona {
     // Atributos específicos de Alumno
     @Id
@@ -45,8 +48,7 @@ public class Alumno extends Persona {
     private Boolean activo; // Para indicar si el alumno está activo o inactivo
     @Column(name = "propietario", nullable = false)
     private Boolean propietario; // Para indicar si el alumno tiene caballo propio o no
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnore
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "caballo_id", nullable = true)
     private Caballo caballoPropio;
 
@@ -62,12 +64,14 @@ public class Alumno extends Persona {
     // Constructor con parámetros
     public Alumno(String dni, String nombre, String apellido, LocalDate fechaNacimiento, String telefono,
             String email,
-            LocalDate fechaInscripcion, Integer cantidadClases, Boolean activo, Boolean propietario) {
+            LocalDate fechaInscripcion, Integer cantidadClases, Boolean activo, Boolean propietario,
+            Caballo caballoPropio) {
         super(dni, nombre, apellido, fechaNacimiento, telefono, email);
         this.fechaInscripcion = fechaInscripcion;
         this.cantidadClases = cantidadClases != null ? cantidadClases : 0;
-        this.activo = activo != null ? activo : false; // false para clases de prueba
+        this.activo = activo != null ? activo : false;
         this.propietario = propietario;
+        this.caballoPropio = null;
     }
 
     // Getters y Setters

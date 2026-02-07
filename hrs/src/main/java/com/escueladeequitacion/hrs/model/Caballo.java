@@ -4,13 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.escueladeequitacion.hrs.enums.Tipo;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -22,11 +25,12 @@ import jakarta.persistence.Index;
  * Clase que representa a un Caballo en la escuela de equitación.
  */
 @Entity
-@Table(name = "caballos" , indexes = {
-    @Index(name = "idx_caballo_nombre", columnList = "nombre"),
-    @Index(name = "idx_caballo_disponible", columnList = "disponible"),
-    @Index(name = "idx_caballo_tipo", columnList = "tipoCaballo")
+@Table(name = "caballos", indexes = {
+        @Index(name = "idx_caballo_nombre", columnList = "nombre"),
+        @Index(name = "idx_caballo_disponible", columnList = "disponible"),
+        @Index(name = "idx_caballo_tipo", columnList = "tipoCaballo")
 })
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Caballo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,8 +43,7 @@ public class Caballo {
     @Column(name = "tipo", nullable = false, length = 8)
     @Enumerated(EnumType.STRING)
     private Tipo tipo;
-    @OneToMany(mappedBy = "caballoPropio")
-    @JsonIgnore
+    @OneToMany(mappedBy = "caballoPropio", fetch = FetchType.LAZY)
     private List<Alumno> propietarios = new ArrayList<>();
 
     @OneToMany(mappedBy = "caballo", cascade = CascadeType.ALL, orphanRemoval = false)
@@ -84,12 +87,20 @@ public class Caballo {
         this.disponible = disponible;
     }
 
-    public Tipo gettipo() {
+    public Tipo getTipo() {
         return tipo;
     }
 
-    public void settipo(Tipo tipo) {
+    public void setTipo(Tipo tipo) {
         this.tipo = tipo;
+    }
+
+    public List<Alumno> getPropietarios() {
+        return propietarios;
+    }
+
+    public void setPropietarios(List<Alumno> propietarios) {
+        this.propietarios = propietarios;
     }
 
     // Métodos para la lista de clases

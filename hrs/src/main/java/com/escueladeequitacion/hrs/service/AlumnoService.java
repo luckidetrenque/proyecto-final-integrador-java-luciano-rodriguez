@@ -34,6 +34,8 @@ public interface AlumnoService {
 
     public List<Alumno> buscarPorFechaNacimiento(LocalDate fechaNacimiento);
 
+    public Optional<Alumno> buscarAlumnoConCaballoPorId(Long id);
+
     // Métodos para verificar la existencia de alumnos por diferentes criterios
     public Boolean existeAlumnoPorId(Long id);
 

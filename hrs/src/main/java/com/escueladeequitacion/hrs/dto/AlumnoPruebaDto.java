@@ -3,7 +3,7 @@ package com.escueladeequitacion.hrs.dto;
 public class AlumnoPruebaDto extends PersonaDto {
 
     private Boolean propietario = false;
-    private Long caballoId; // Nullable - solo si propietario=true
+    private Long caballoId;
 
     // Constructores, getters y setters
     public AlumnoPruebaDto() {

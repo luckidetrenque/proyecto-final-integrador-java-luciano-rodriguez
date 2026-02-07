@@ -57,4 +57,7 @@ public interface CaballoService {
      */
     public List<Caballo> buscarCaballosConFiltros(String nombre, Boolean disponible, Tipo tipo);
 
+    /// Método para buscar un caballo junto con sus alumnos propietarios
+    public Optional<Caballo> buscarCaballoConAlumnosPorId(Long id);
+
 }

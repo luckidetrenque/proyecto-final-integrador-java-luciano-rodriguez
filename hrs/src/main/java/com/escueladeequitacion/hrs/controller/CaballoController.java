@@ -45,7 +45,7 @@ public class CaballoController {
     @GetMapping(Constantes.RESOURCE_CABALLOS + "/{id}")
     public ResponseEntity<?> obtenerCaballoPorId(@PathVariable("id") Long id) {
 
-        Caballo caballo = caballoService.buscarCaballoPorId(id)
+        Caballo caballo = caballoService.buscarCaballoConAlumnosPorId(id)
                 .orElseThrow(
                         () -> new com.escueladeequitacion.hrs.exception.ResourceNotFoundException("Caballo", "ID", id));
         return ResponseEntity.status(HttpStatus.OK).body(caballo);

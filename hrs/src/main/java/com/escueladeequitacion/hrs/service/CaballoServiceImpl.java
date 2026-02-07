@@ -131,7 +131,7 @@ public class CaballoServiceImpl implements CaballoService {
         Caballo caballo = new Caballo(
                 caballoDto.getNombre(),
                 caballoDto.isDisponible(),
-                caballoDto.gettipo());
+                caballoDto.getTipo());
 
         return caballoRepository.save(caballo);
     }
@@ -156,7 +156,7 @@ public class CaballoServiceImpl implements CaballoService {
         Caballo caballoNuevo = new Caballo();
         caballoNuevo.setNombre(caballoDto.getNombre());
         caballoNuevo.setDisponible(caballoDto.isDisponible());
-        caballoNuevo.settipo(caballoDto.gettipo());
+        caballoNuevo.setTipo(caballoDto.getTipo());
 
         // 4. Actualizar usando método auxiliar
         actualizarCamposDesdeDto(caballoExistente, caballoNuevo);
@@ -185,6 +185,11 @@ public class CaballoServiceImpl implements CaballoService {
         return new ArrayList<>();
     }
 
+    @Override
+    public Optional<Caballo> buscarCaballoConAlumnosPorId(Long id) {
+        return caballoRepository.findCaballoConAlumnos(id);
+    }
+
     /**
      * Método auxiliar para validar que un caballo existe
      */
@@ -200,6 +205,6 @@ public class CaballoServiceImpl implements CaballoService {
     private void actualizarCamposDesdeDto(Caballo caballoExistente, Caballo caballoNuevo) {
         caballoExistente.setNombre(caballoNuevo.getNombre());
         caballoExistente.setDisponible(caballoNuevo.isDisponible());
-        caballoExistente.settipo(caballoNuevo.gettipo());
+        caballoExistente.setTipo(caballoNuevo.getTipo());
     }
 }

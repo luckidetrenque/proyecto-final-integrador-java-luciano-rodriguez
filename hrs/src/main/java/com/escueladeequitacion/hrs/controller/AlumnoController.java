@@ -49,7 +49,7 @@ public class AlumnoController {
     @GetMapping(Constantes.RESOURCE_ALUMNOS + "/{id}")
     public ResponseEntity<?> obtenerAlumnoPorId(@PathVariable("id") Long id) {
 
-        Alumno alumno = alumnoService.buscarAlumnoPorId(id)
+        Alumno alumno = alumnoService.buscarAlumnoConCaballoPorId(id)
                 .orElseThrow(
                         () -> new com.escueladeequitacion.hrs.exception.ResourceNotFoundException("Alumno", "ID", id));
         return ResponseEntity.status(HttpStatus.OK).body(alumno);

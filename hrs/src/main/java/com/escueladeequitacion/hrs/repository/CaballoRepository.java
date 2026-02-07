@@ -8,6 +8,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
+
 import com.escueladeequitacion.hrs.enums.Tipo;
 
 // Repositorio para la entidad Caballo
@@ -26,4 +28,8 @@ public interface CaballoRepository extends JpaRepository<Caballo, Long> {
 
     // Método para eliminar un caballo por su nombre
     public void deleteByNombre(String nombre);
+
+    // Método para buscar un caballo junto con sus alumnos propietarios
+    @Query("SELECT c FROM Caballo c LEFT JOIN FETCH c.propietarios WHERE c.id = :caballoId")
+    public Optional<Caballo> findCaballoConAlumnos(@Param("caballoId") Long caballoId);
 }

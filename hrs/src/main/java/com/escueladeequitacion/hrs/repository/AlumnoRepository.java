@@ -53,4 +53,7 @@ public interface AlumnoRepository extends JpaRepository<Alumno, Long> {
                         @Param("alumnoId") Long alumnoId,
                         @Param("estados") List<Estado> estados);
 
+        @Query("SELECT a FROM Alumno a LEFT JOIN FETCH a.caballoPropio WHERE a.id = :alumnoId")
+        public Optional<Alumno> findAlumnoConCaballo(@Param("alumnoId") Long alumnoId);
+
 }

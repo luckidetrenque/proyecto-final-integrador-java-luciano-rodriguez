@@ -44,11 +44,12 @@ public class CaballoDto {
         this.disponible = disponible;
     }
 
-    public Tipo gettipo() {
+    public Tipo getTipo() {
         return tipo;
     }
 
-    public void settipo(Tipo tipo) {
+    public void setTipo(Tipo tipo) {
         this.tipo = tipo;
     }
+
 }

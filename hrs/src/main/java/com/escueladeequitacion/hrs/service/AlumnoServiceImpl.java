@@ -42,7 +42,12 @@ public class AlumnoServiceImpl implements AlumnoService {
     @Override
     public Optional<Alumno> buscarAlumnoPorId(Long id) {
         return alumnoRepository.findById(id);
-    };
+    }
+
+    @Override
+    public Optional<Alumno> buscarAlumnoConCaballoPorId(Long id) {
+        return alumnoRepository.findAlumnoConCaballo(id);
+    }
 
     @Override
     public Optional<Alumno> buscarAlumnoPorDni(String dni) {
@@ -197,20 +202,23 @@ public class AlumnoServiceImpl implements AlumnoService {
                 alumnoDto.getFechaInscripcion(),
                 alumnoDto.getCantidadClases(),
                 alumnoDto.isActivo(),
-                alumnoDto.isPropietario());
+                alumnoDto.isPropietario(),
+                null); // Caballo asignado más abajo
 
         // 4. Asignar caballo si corresponde
         if (alumnoDto.isPropietario()) {
             if (alumnoDto.getCaballoId() != null) {
                 Caballo caballo = caballoRepository.findById(alumnoDto.getCaballoId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Caballo", "ID", alumnoDto.getCaballoId()));
+                        .orElseThrow(
+                                () -> new ResourceNotFoundException("Caballo", "ID", alumnoDto.getCaballoId()));
                 alumno.setCaballoPropio(caballo);
             } else {
                 throw new ValidationException("caballoId", "Debe especificar un caballo si es propietario");
             }
         }
 
-        return alumnoRepository.save(alumno);
+        Alumno alumnoGuardado = alumnoRepository.save(alumno);
+        return alumnoGuardado;
     }
 
     /**
@@ -251,7 +259,8 @@ public class AlumnoServiceImpl implements AlumnoService {
         if (alumnoDto.isPropietario()) {
             if (alumnoDto.getCaballoId() != null) {
                 Caballo caballo = caballoRepository.findById(alumnoDto.getCaballoId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Caballo", "ID", alumnoDto.getCaballoId()));
+                        .orElseThrow(
+                                () -> new ResourceNotFoundException("Caballo", "ID", alumnoDto.getCaballoId()));
                 alumnoNuevo.setCaballoPropio(caballo);
             } else {
                 throw new ValidationException("caballoId", "Debe especificar un caballo si es propietario");
@@ -343,6 +352,7 @@ public class AlumnoServiceImpl implements AlumnoService {
         alumnoRepository.save(alumno);
     }
 
+    // DESPUÉS:
     @Override
     public Alumno crearAlumnoDePrueba(AlumnoPruebaDto alumnoDto) {
         // 1. Validar DNI duplicado
@@ -361,7 +371,16 @@ public class AlumnoServiceImpl implements AlumnoService {
                 null, // Sin fecha de inscripción
                 0, // Sin clases
                 false, // Inactivo
-                alumnoDto.isPropietario());
+                alumnoDto.isPropietario(),
+                null); // Sin caballo inicialmente
+
+        // 3. Asignar caballo si corresponde
+        if (alumnoDto.isPropietario() && alumnoDto.getCaballoId() != null) {
+            Caballo caballo = caballoRepository.findById(alumnoDto.getCaballoId())
+                    .orElseThrow(
+                            () -> new ResourceNotFoundException("Caballo", "ID", alumnoDto.getCaballoId()));
+            alumno.setCaballoPropio(caballo);
+        }
 
         return alumnoRepository.save(alumno);
     }
