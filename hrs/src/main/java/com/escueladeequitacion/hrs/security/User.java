@@ -41,6 +41,9 @@ public class User {
     @Column(name = "persona_tipo", length = 20)
     private String personaTipo; // "ALUMNO" o "INSTRUCTOR" (opcional)
 
+    @Column(name = "avatar_url", length = 255)
+    private String avatarUrl; // URL del avatar del usuario
+
     // Constructores
     public User() {
         this.fechaCreacion = LocalDateTime.now();
@@ -126,5 +129,13 @@ public class User {
 
     public void setPersonaTipo(String personaTipo) {
         this.personaTipo = personaTipo;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
     }
 }

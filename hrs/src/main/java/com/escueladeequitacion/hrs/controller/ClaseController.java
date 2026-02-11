@@ -3,6 +3,7 @@ package com.escueladeequitacion.hrs.controller;
 import com.escueladeequitacion.hrs.dto.ClaseDto;
 import com.escueladeequitacion.hrs.dto.ClaseDto.AlActualizar;
 import com.escueladeequitacion.hrs.dto.ClaseResponseDto;
+import com.escueladeequitacion.hrs.enums.Especialidad;
 import com.escueladeequitacion.hrs.enums.Estado;
 import com.escueladeequitacion.hrs.model.Clase;
 
@@ -17,6 +18,7 @@ import jakarta.validation.Valid;
 import com.escueladeequitacion.hrs.utility.Constantes;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -209,6 +211,39 @@ public class ClaseController {
 
         List<ClaseResponseDto> clases = claseService.buscarClasePorEstadoConDetalles(estado);
         return ResponseEntity.status(HttpStatus.OK).body(clases);
+    }
+
+    // Endpoint GET para buscar por diferentes filtros
+    /**
+     * GET /api/v1/alumnos/buscar
+     * Busca alumnos por múltiples criterios.
+     */
+    @GetMapping(Constantes.RESOURCE_CLASES + "/buscar")
+    public ResponseEntity<?> buscarAlumno(
+
+            @RequestParam(required = false) LocalDate dia,
+            @RequestParam(required = false) LocalTime hora,
+            @RequestParam(required = false) Long alumno,
+            @RequestParam(required = false) Long instructor,
+            @RequestParam(required = false) Long caballo,
+            @RequestParam(required = false) Especialidad especialidad,
+            @RequestParam(required = false) Estado estado) {
+
+        List<Clase> clases = claseService.buscarClasesConFiltros(
+                dia, hora, alumno, instructor, caballo, especialidad, estado);
+
+        if (!clases.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.OK).body(clases);
+        }
+
+        // Si no hay resultados, devolver todos con mensaje
+        clases = claseService.listarClases();
+        Map<String, Object> respuesta = new LinkedHashMap<>();
+        respuesta.put("mensaje",
+                "No existen clases con los filtros de búsqueda ingresados, se retorna el listado completo.");
+        respuesta.put("clases", clases);
+
+        return ResponseEntity.status(HttpStatus.OK).body(respuesta);
     }
 
     // ============================================================

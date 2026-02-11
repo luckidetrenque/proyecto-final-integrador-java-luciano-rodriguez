@@ -143,7 +143,7 @@ public class AlumnoServiceImpl implements AlumnoService {
         if (!alumnoExistente.getDni().equals(alumno.getDni())) {
             Optional<Alumno> alumnoConNuevoDni = alumnoRepository.findByDni(alumno.getDni());
             if (alumnoConNuevoDni.isPresent()) {
-                throw new ConflictException("Ya existe otro alumno con el DNI " + alumno.getDni());
+                throw new ConflictException("Alumno", "DNI", alumno.getDni());
             }
         }
 
@@ -167,7 +167,7 @@ public class AlumnoServiceImpl implements AlumnoService {
 
         // 2. Verificar que está activo (lanza BusinessException si ya está inactivo)
         if (!alumno.isActivo()) {
-            throw new BusinessException("El alumno con ID " + id + " ya está inactivo");
+            throw new BusinessException("El alumno " + alumno.getNombreCompleto() + " ya está inactivo");
         }
 
         // 3. Inactivar

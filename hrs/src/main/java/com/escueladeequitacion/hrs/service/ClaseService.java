@@ -134,6 +134,14 @@ public interface ClaseService {
 
     public void actualizarEstadosDeClases();
 
+    public List<Clase> buscarClasesConFiltros(LocalDate dia,
+            LocalTime hora,
+            Long alumno,
+            Long instructor,
+            Long caballo,
+            Especialidad especialidad,
+            Estado estado);
+
     // ============================================================
     // MÉTODOS PARA CLASES DE PRUEBA
     // ============================================================

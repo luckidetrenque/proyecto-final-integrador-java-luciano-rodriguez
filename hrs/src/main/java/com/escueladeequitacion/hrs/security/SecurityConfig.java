@@ -32,6 +32,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Endpoints públicos
                         .requestMatchers("/api/v1/auth/**").permitAll() // Login/registro
+                        .requestMatchers("/uploads/**").permitAll() // carpeta de avatares
                         // .requestMatchers(HttpMethod.GET, "/api/v1/alumnos").permitAll()
 
                         // Solo ADMIN

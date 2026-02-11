@@ -13,6 +13,7 @@ import com.escueladeequitacion.hrs.model.Instructor;
 import com.escueladeequitacion.hrs.repository.ClaseRepository;
 
 import jakarta.transaction.Transactional;
+import jakarta.persistence.criteria.Predicate;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -392,6 +394,34 @@ public class ClaseServiceImpl implements ClaseService {
                 claseRepository.save(clase);
             }
         }
+    }
+
+    /**
+     * Busca clases con múltiples filtros.
+     */
+    @Override
+    public List<Clase> buscarClasesConFiltros(LocalDate dia, LocalTime hora, Long alumnoId, Long instructorId,
+            Long caballoId, Especialidad especialidad, Estado estado) {
+        return claseRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (dia != null)
+                predicates.add(cb.equal(root.get("dia"), dia));
+            if (hora != null)
+                predicates.add(cb.equal(root.get("hora"), hora));
+            if (alumnoId != null)
+                predicates.add(cb.equal(root.get("alumno").get("id"), alumnoId));
+            if (instructorId != null)
+                predicates.add(cb.equal(root.get("instructor").get("id"), instructorId));
+            if (caballoId != null)
+                predicates.add(cb.equal(root.get("caballo").get("id"), caballoId));
+            if (especialidad != null)
+                predicates.add(cb.equal(root.get("especialidad"), especialidad));
+            if (estado != null)
+                predicates.add(cb.equal(root.get("estado"), estado));
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        });
     }
 
     /**

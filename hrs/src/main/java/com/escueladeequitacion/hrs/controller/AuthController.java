@@ -4,6 +4,7 @@ import com.escueladeequitacion.hrs.exception.ConflictException;
 import com.escueladeequitacion.hrs.exception.ResourceNotFoundException;
 import com.escueladeequitacion.hrs.exception.UnauthorizedException;
 import com.escueladeequitacion.hrs.security.RolSeguridad;
+import com.escueladeequitacion.hrs.security.StorageService;
 import com.escueladeequitacion.hrs.security.User;
 import com.escueladeequitacion.hrs.security.UserRepository;
 import com.escueladeequitacion.hrs.security.WhitelistService;
@@ -21,9 +22,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Controlador para gestión de usuarios (registro, listar).
@@ -38,6 +42,9 @@ public class AuthController {
 
     @Autowired
     WhitelistService whitelistService;
+
+    @Autowired
+    private StorageService storageService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -63,6 +70,8 @@ public class AuthController {
         private RolSeguridad rol;
 
         private Integer personaDni; // Opcional: vincular con Alumno/Instructor
+
+        private String avatarUrl; // Opcional: URL del avatar del usuario
 
         // Getters y Setters
         public String getUsername() {
@@ -103,6 +112,14 @@ public class AuthController {
 
         public void setPersonaDni(Integer personaDni) {
             this.personaDni = personaDni;
+        }
+
+        public String getAvatarUrl() {
+            return avatarUrl;
+        }
+
+        public void setAvatarUrl(String avatarUrl) {
+            this.avatarUrl = avatarUrl;
         }
     }
 
@@ -152,7 +169,7 @@ public class AuthController {
         // Vincular con persona si se proporciona DNI
         if (request.getPersonaDni() != null) {
             user.setPersonaDni(request.getPersonaDni());
-            user.setPersonaTipo(request.getRol().name()); // ALUMNO o INSTRUCTOR
+            user.setPersonaTipo(request.getRol().name());
         }
 
         userRepository.save(user);
@@ -254,5 +271,32 @@ public class AuthController {
                 .anyMatch(allowedEmail -> allowedEmail.trim().equalsIgnoreCase(email.trim()));
 
         return isAllowed ? ResponseEntity.ok().build() : ResponseEntity.status(403).build();
+    }
+
+    /**
+     * POST /api/v1/auth/users/{id}/avatar
+     * Carga un archivo avatar para un usuario.
+     */
+    @PostMapping("/users/{id}/avatar")
+    public ResponseEntity<?> uploadAvatar(@PathVariable Long id, @RequestParam("avatar") MultipartFile file) {
+        // 1. Buscar usuario
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario con ID " + id + " no encontrado"));
+
+        // 2. Definir nombre de archivo y guardar físicamente
+        String fileName = "avatar_" + id + "_" + System.currentTimeMillis() + ".jpg";
+        storageService.store(file, fileName);
+
+        // 3. GENERACIÓN DINÁMICA DE LA URL (localhost:8080 o dominio real)
+        String avatarUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/uploads/")
+                .path(fileName)
+                .toUriString();
+
+        // 4. Persistir en Base de Datos
+        user.setAvatarUrl(avatarUrl);
+        userRepository.save(user);
+
+        return ResponseEntity.ok(Map.of("avatarUrl", avatarUrl));
     }
 }
