@@ -2,6 +2,7 @@ package com.escueladeequitacion.hrs.model;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.ZoneId;
 
 import com.escueladeequitacion.hrs.enums.Rol;
 
@@ -101,7 +102,8 @@ public abstract class Persona {
 
     // Método para calcular la edad a partir de la fecha de nacimiento
     public Integer getEdad() {
-        LocalDate fechaActual = LocalDate.now();
+        ZoneId zonaArgentina = ZoneId.of("America/Argentina/Buenos_Aires");
+        LocalDate fechaActual = LocalDate.now(zonaArgentina);
         Period periodo = Period.between(fechaNacimiento, fechaActual);
         int edad = periodo.getYears();
         return edad;

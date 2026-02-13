@@ -428,14 +428,15 @@ public class ClaseServiceImpl implements ClaseService {
      * Método auxiliar para validar fecha y hora.
      */
     private void validarFechaYHora(LocalDate dia, LocalTime hora) {
-        LocalDate hoy = LocalDate.now();
+        ZoneId zonaArgentina = ZoneId.of("America/Argentina/Buenos_Aires");
+        LocalDate hoy = LocalDate.now(zonaArgentina);
 
         if (dia.isBefore(hoy)) {
             throw new BusinessException("La fecha de la clase no puede ser anterior a hoy");
         }
 
         if (dia.isEqual(hoy)) {
-            LocalTime ahora = LocalTime.now();
+            LocalTime ahora = LocalTime.now(zonaArgentina);
             if (hora.isBefore(ahora.plusMinutes(60))) {
                 throw new BusinessException("La clase debe programarse con al menos 60 minutos de anticipación");
             }
