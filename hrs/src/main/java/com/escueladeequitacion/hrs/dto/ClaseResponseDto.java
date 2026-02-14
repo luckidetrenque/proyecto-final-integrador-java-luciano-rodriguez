@@ -15,6 +15,7 @@ public class ClaseResponseDto {
     private Especialidad especialidad;
     private LocalDate dia;
     private LocalTime hora;
+    private Integer duracion;
     private Estado estado;
     private String observaciones;
     private Boolean esPrueba;
@@ -48,6 +49,7 @@ public class ClaseResponseDto {
         this.especialidad = clase.getEspecialidad();
         this.dia = clase.getDia();
         this.hora = clase.getHora();
+        this.duracion = clase.getDuracion();
         this.estado = clase.getEstado();
         this.observaciones = clase.getObservaciones();
         this.esPrueba = clase.isEsPrueba();
@@ -107,6 +109,14 @@ public class ClaseResponseDto {
 
     public void setHora(LocalTime hora) {
         this.hora = hora;
+    }
+
+    public Integer getDuracion() {
+        return duracion;
+    }
+
+    public void setDuracion(Integer duracion) {
+        this.duracion = duracion;
     }
 
     public Estado getEstado() {

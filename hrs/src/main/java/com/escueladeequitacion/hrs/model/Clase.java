@@ -47,6 +47,8 @@ public class Clase {
     private LocalDate dia;
     @Column(name = "hora", nullable = false)
     private LocalTime hora;
+    @Column(name = "duracion", nullable = false)
+    private Integer duracion = 30;
     @Column(name = "estado", nullable = false, length = 10)
     @Enumerated(EnumType.STRING)
     private Estado estado;
@@ -76,13 +78,14 @@ public class Clase {
 
     // Constructor con parámetros
     public Clase(Instructor instructor, Alumno alumno, Caballo caballo, Especialidad especialidad,
-            LocalDate dia, LocalTime hora, Estado estado, Boolean esPrueba) {
+            LocalDate dia, LocalTime hora, Integer duracion, Estado estado, Boolean esPrueba) {
         this.instructor = instructor;
         this.alumno = alumno;
         this.caballo = caballo;
         this.especialidad = especialidad;
         this.dia = dia;
         this.hora = hora;
+        this.duracion = duracion != null ? duracion : 30;
         this.estado = estado;
         this.esPrueba = esPrueba != null ? esPrueba : false;
     }
@@ -142,6 +145,14 @@ public class Clase {
 
     public void setHora(LocalTime hora) {
         this.hora = hora;
+    }
+
+    public Integer getDuracion() {
+        return duracion;
+    }
+
+    public void setDuracion(Integer duracion) {
+        this.duracion = duracion;
     }
 
     public Estado getEstado() {

@@ -31,6 +31,9 @@ public class ClaseDto {
     @NotNull(message = "La hora no puede estar vacía")
     // @FutureOrPresent(message = "La hora debe ser en el futuro")
     private LocalTime hora;
+    @NotNull(message = "La duración no puede estar vacía")
+    @Min(value = 30, message = "La duración mínima es 30 minutos")
+    private Integer duracion = 30;
     @NotNull(message = "El estado de la clase no puede estar vacío, debe ser Programada, Iniciada, Completada o Cancelada")
     private Estado estado;
     private String observaciones;
@@ -52,11 +55,12 @@ public class ClaseDto {
 
     }
 
-    public ClaseDto(Especialidad especialidad, LocalDate dia, LocalTime hora, Estado estado,
+    public ClaseDto(Especialidad especialidad, LocalDate dia, LocalTime hora, Integer duracion, Estado estado,
             String observaciones, Long instructorId, Long alumnoId, Long caballoId, Boolean esPrueba) {
         this.especialidad = especialidad;
         this.dia = dia;
         this.hora = hora;
+        this.duracion = duracion;
         this.estado = estado;
         this.observaciones = observaciones;
         this.instructorId = instructorId;
@@ -87,6 +91,14 @@ public class ClaseDto {
 
     public void setHora(LocalTime hora) {
         this.hora = hora;
+    }
+
+    public Integer getDuracion() {
+        return duracion;
+    }
+
+    public void setDuracion(Integer duracion) {
+        this.duracion = duracion;
     }
 
     public Estado getEstado() {

@@ -262,6 +262,8 @@ public class ClaseServiceImpl implements ClaseService {
             validarFechaYHora(claseDto.getDia(), claseDto.getHora());
         }
 
+        validarDuracionSegunHorario(claseDto.getHora(), claseDto.getDuracion());
+
         validarConflictoDeHorario(
                 null,
                 claseDto.getDia(),
@@ -325,6 +327,9 @@ public class ClaseServiceImpl implements ClaseService {
         if ((dto.getDia() != null || dto.getHora() != null) &&
                 clase.getDia().isAfter(LocalDate.now(ZoneId.of("America/Argentina/Buenos_Aires")))) {
             validarFechaYHora(dto.getDia(), dto.getHora());
+            validarDuracionSegunHorario(
+                    dto.getHora() != null ? dto.getHora() : clase.getHora(),
+                    dto.getDuracion() != null ? dto.getDuracion() : clase.getDuracion());
         }
 
         aplicarCamposSimples(clase, dto);
@@ -371,8 +376,9 @@ public class ClaseServiceImpl implements ClaseService {
      */
     @Scheduled(cron = "0 0/30 9-18 * * TUE-SAT", zone = "America/Argentina/Buenos_Aires")
     public void actualizarEstadosDeClases() {
-        LocalDate hoy = LocalDate.now(ZoneId.of("America/Buenos_Aires"));
-        LocalTime ahora = LocalTime.now(ZoneId.of("America/Buenos_Aires"));
+        ZoneId zona = ZoneId.of("America/Argentina/Buenos_Aires");
+        LocalDate hoy = LocalDate.now(zona);
+        LocalTime ahora = LocalTime.now(zona);
 
         // 1. Cambiar clases PROGRAMADA → INICIADA (cuando llega la hora de inicio)
         List<Clase> clasesPorIniciar = claseRepository.findByDiaAndEstado(hoy, Estado.PROGRAMADA);
@@ -440,6 +446,22 @@ public class ClaseServiceImpl implements ClaseService {
             if (hora.isBefore(ahora.plusMinutes(60))) {
                 throw new BusinessException("La clase debe programarse con al menos 60 minutos de anticipación");
             }
+        }
+    }
+
+    /**
+     * Método auxiliar para validar duración según horario.
+     * Solo se permite duración de 30 minutos a las 18:00 o después.
+     * 
+     * @throws BusinessException si hay conflicto de horario
+     */
+    private void validarDuracionSegunHorario(LocalTime hora, Integer duracion) {
+        LocalTime horaFin = hora.plusMinutes(duracion != null ? duracion : 30);
+        LocalTime horaLimite = LocalTime.of(18, 30);
+        if (horaFin.isAfter(horaLimite)) {
+            throw new BusinessException(
+                    "La clase no puede terminar después de las 18:30. " +
+                            "A las " + hora + " solo se permite duración de 30 minutos.");
         }
     }
 
@@ -514,6 +536,9 @@ public class ClaseServiceImpl implements ClaseService {
 
         if (dto.getHora() != null)
             clase.setHora(dto.getHora());
+
+        if (dto.getDuracion() != null)
+            clase.setDuracion(dto.getDuracion());
 
         if (dto.getEstado() != null)
             clase.setEstado(dto.getEstado());
