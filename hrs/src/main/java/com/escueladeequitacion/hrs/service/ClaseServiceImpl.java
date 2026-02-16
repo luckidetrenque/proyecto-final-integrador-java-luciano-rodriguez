@@ -10,7 +10,9 @@ import com.escueladeequitacion.hrs.model.Alumno;
 import com.escueladeequitacion.hrs.model.Caballo;
 import com.escueladeequitacion.hrs.model.Clase;
 import com.escueladeequitacion.hrs.model.Instructor;
+import com.escueladeequitacion.hrs.model.PersonaPrueba;
 import com.escueladeequitacion.hrs.repository.ClaseRepository;
+import com.escueladeequitacion.hrs.repository.PersonaPruebaRepository;
 
 import jakarta.transaction.Transactional;
 import jakarta.persistence.criteria.Predicate;
@@ -36,6 +38,9 @@ public class ClaseServiceImpl implements ClaseService {
 
     @Autowired
     ClaseRepository claseRepository;
+
+    @Autowired
+    PersonaPruebaRepository personaPruebaRepository;
 
     @Autowired
     AlumnoService alumnoService;
@@ -249,10 +254,25 @@ public class ClaseServiceImpl implements ClaseService {
         Instructor instructor = obtenerInstructorValido(claseDto.getInstructorId());
 
         // ⚠️ CAMBIO AQUÍ: Usar método sin validar estado si es clase de prueba
-        Alumno alumno;
+        Alumno alumno = null;
+        PersonaPrueba personaPrueba = null;
+
         if (claseDto.isEsPrueba() != null && claseDto.isEsPrueba()) {
-            alumno = obtenerAlumnoSinValidarEstado(claseDto.getAlumnoId());
+            if (claseDto.getPersonaPruebaId() != null) {
+                // Prueba de persona nueva (sin cuenta de alumno)
+                personaPrueba = personaPruebaRepository.findById(claseDto.getPersonaPruebaId())
+                        .orElseThrow(() -> new ResourceNotFoundException("PersonaPrueba", "ID",
+                                claseDto.getPersonaPruebaId()));
+            } else if (claseDto.getAlumnoId() != null) {
+                // Prueba de alumno existente en otra especialidad
+                alumno = obtenerAlumnoSinValidarEstado(claseDto.getAlumnoId());
+            } else {
+                throw new BusinessException("Una clase de prueba requiere alumnoId o personaPruebaId");
+            }
         } else {
+            if (claseDto.getAlumnoId() == null) {
+                throw new BusinessException("Una clase regular requiere alumnoId");
+            }
             alumno = obtenerAlumnoValido(claseDto.getAlumnoId());
         }
 
@@ -264,30 +284,33 @@ public class ClaseServiceImpl implements ClaseService {
 
         validarDuracionSegunHorario(claseDto.getHora(), claseDto.getDuracion());
 
+        Long alumnoIdParaConflicto = alumno != null ? alumno.getId() : null;
         validarConflictoDeHorario(
                 null,
                 claseDto.getDia(),
                 claseDto.getHora(),
-                alumno.getId(),
+                alumnoIdParaConflicto,
                 caballo.getId());
 
         Clase clase = new Clase();
         aplicarCamposSimples(clase, claseDto);
         clase.setInstructor(instructor);
         clase.setAlumno(alumno);
+        clase.setPersonaPrueba(personaPrueba);
         clase.setCaballo(caballo);
 
         // Validar reglas de clase de prueba
         if (claseDto.isEsPrueba() != null && claseDto.isEsPrueba()) {
             // Verificar que el alumno no haya tomado clase de prueba DE ESTA ESPECIALIDAD
-            if (claseRepository.alumnoTieneClaseDePruebaEnEspecialidad(
-                    alumno.getId(),
-                    claseDto.getEspecialidad())) {
-                throw new BusinessException(
-                        "El alumno ya ha tomado una clase de prueba de " + claseDto.getEspecialidad());
+            // Por esto:
+            if (claseDto.isEsPrueba() != null && claseDto.isEsPrueba() && alumno != null) {
+                if (claseRepository.alumnoTieneClaseDePruebaEnEspecialidad(
+                        alumno.getId(),
+                        claseDto.getEspecialidad())) {
+                    throw new BusinessException(
+                            "El alumno ya ha tomado una clase de prueba de " + claseDto.getEspecialidad());
+                }
             }
-
-            // NO validar que esté inactivo - puede estar activo en otra especialidad
         }
         clase.setEsPrueba(claseDto.isEsPrueba() != null ? claseDto.isEsPrueba() : false);
 
@@ -311,11 +334,21 @@ public class ClaseServiceImpl implements ClaseService {
             clase.setInstructor(obtenerInstructorValido(dto.getInstructorId()));
         }
 
-        if (dto.getAlumnoId() != null) {
-            // ⚠️ Si es clase de prueba, no validar estado activo
-            if (clase.isEsPrueba()) {
+        if (clase.isEsPrueba()) {
+            if (dto.getPersonaPruebaId() != null) {
+                // Cambiar a personaPrueba → limpiar alumno
+                PersonaPrueba pp = personaPruebaRepository.findById(dto.getPersonaPruebaId())
+                        .orElseThrow(
+                                () -> new ResourceNotFoundException("PersonaPrueba", "ID", dto.getPersonaPruebaId()));
+                clase.setPersonaPrueba(pp);
+                clase.setAlumno(null);
+            } else if (dto.getAlumnoId() != null) {
+                // Cambiar a alumno existente → limpiar personaPrueba
                 clase.setAlumno(obtenerAlumnoSinValidarEstado(dto.getAlumnoId()));
-            } else {
+                clase.setPersonaPrueba(null);
+            }
+        } else {
+            if (dto.getAlumnoId() != null) {
                 clase.setAlumno(obtenerAlumnoValido(dto.getAlumnoId()));
             }
         }
@@ -334,11 +367,12 @@ public class ClaseServiceImpl implements ClaseService {
 
         aplicarCamposSimples(clase, dto);
 
+        Long alumnoIdConflicto = clase.getAlumno() != null ? clase.getAlumno().getId() : null;
         validarConflictoDeHorario(
                 clase.getId(),
                 clase.getDia(),
                 clase.getHora(),
-                clase.getAlumno().getId(),
+                alumnoIdConflicto,
                 clase.getCaballo().getId());
 
         claseRepository.save(clase);

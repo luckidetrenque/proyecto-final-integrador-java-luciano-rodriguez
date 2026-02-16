@@ -1,7 +1,6 @@
 package com.escueladeequitacion.hrs.controller;
 
 import com.escueladeequitacion.hrs.dto.AlumnoDto;
-import com.escueladeequitacion.hrs.dto.AlumnoPruebaDto;
 import com.escueladeequitacion.hrs.dto.ConversionAPlanRequest;
 import com.escueladeequitacion.hrs.model.Alumno;
 import com.escueladeequitacion.hrs.service.AlumnoService;
@@ -209,21 +208,6 @@ public class AlumnoController {
     public ResponseEntity<List<Alumno>> listarAlumnosDePrueba() {
         List<Alumno> alumnosPrueba = alumnoService.buscarAlumnoPorEstado(false);
         return ResponseEntity.ok(alumnosPrueba);
-    }
-
-    /**
-     * Crea un alumno para clase de prueba (con valores por defecto).
-     * 
-     * POST /api/v1/alumnos/prueba
-     * 
-     * @param alumnoDto - Datos básicos del alumno (sin fechaInscripcion ni
-     *                  cantidadClases)
-     * @return Alumno creado
-     */
-    @PostMapping(Constantes.RESOURCE_ALUMNOS + "/prueba")
-    public ResponseEntity<Alumno> crearAlumnoDePrueba(@RequestBody @Valid AlumnoPruebaDto alumnoDto) {
-        Alumno alumno = alumnoService.crearAlumnoDePrueba(alumnoDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(alumno);
     }
 
 }

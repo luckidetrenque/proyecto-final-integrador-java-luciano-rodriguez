@@ -32,6 +32,12 @@ public class ClaseResponseDto {
     private String alumnoApellido;
     private String alumnoNombreCompleto;
 
+    // Datos de persona de prueba (si es una clase de prueba)
+    private Long personaPruebaId;
+    private String personaPruebaNombre;
+    private String personaPruebaApellido;
+    private String personaPruebaNombreCompleto;
+
     // Datos del caballo
     private Long caballoId;
     private String caballoNombre;
@@ -68,6 +74,14 @@ public class ClaseResponseDto {
             this.alumnoNombre = clase.getAlumno().getNombre();
             this.alumnoApellido = clase.getAlumno().getApellido();
             this.alumnoNombreCompleto = clase.getAlumno().getNombreCompleto();
+        }
+
+        // Extraer datos de persona de prueba
+        if (clase.getPersonaPrueba() != null) {
+            this.personaPruebaId = clase.getPersonaPrueba().getId();
+            this.personaPruebaNombre = clase.getPersonaPrueba().getNombre();
+            this.personaPruebaApellido = clase.getPersonaPrueba().getApellido();
+            this.personaPruebaNombreCompleto = clase.getPersonaPrueba().getNombreCompleto();
         }
 
         // Extraer datos del caballo
@@ -232,6 +246,38 @@ public class ClaseResponseDto {
 
     public void setEsPrueba(Boolean esPrueba) {
         this.esPrueba = esPrueba;
+    }
+
+    public Long getPersonaPruebaId() {
+        return personaPruebaId;
+    }
+
+    public void setPersonaPruebaId(Long personaPruebaId) {
+        this.personaPruebaId = personaPruebaId;
+    }
+
+    public String getPersonaPruebaNombre() {
+        return personaPruebaNombre;
+    }
+
+    public void setPersonaPruebaNombre(String personaPruebaNombre) {
+        this.personaPruebaNombre = personaPruebaNombre;
+    }
+
+    public String getPersonaPruebaApellido() {
+        return personaPruebaApellido;
+    }
+
+    public void setPersonaPruebaApellido(String personaPruebaApellido) {
+        this.personaPruebaApellido = personaPruebaApellido;
+    }
+
+    public String getPersonaPruebaNombreCompleto() {
+        return personaPruebaNombreCompleto;
+    }
+
+    public void setPersonaPruebaNombreCompleto(String personaPruebaNombreCompleto) {
+        this.personaPruebaNombreCompleto = personaPruebaNombreCompleto;
     }
 
     /**

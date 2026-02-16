@@ -1,8 +1,8 @@
 package com.escueladeequitacion.hrs.service;
 
 import com.escueladeequitacion.hrs.dto.AlumnoDto;
-import com.escueladeequitacion.hrs.dto.AlumnoPruebaDto;
 import com.escueladeequitacion.hrs.enums.Estado;
+import com.escueladeequitacion.hrs.enums.TipoPension;
 import com.escueladeequitacion.hrs.exception.BusinessException;
 import com.escueladeequitacion.hrs.exception.ConflictException;
 import com.escueladeequitacion.hrs.exception.ResourceNotFoundException;
@@ -203,18 +203,20 @@ public class AlumnoServiceImpl implements AlumnoService {
                 alumnoDto.getCantidadClases(),
                 alumnoDto.isActivo(),
                 alumnoDto.isPropietario(),
-                null); // Caballo asignado más abajo
+                null, // Sin caballo inicialmente, se asigna después de validar la pensión
+                alumnoDto.getTipoPension(),
+                alumnoDto.getCuotaPension());
 
-        // 4. Asignar caballo si corresponde
-        if (alumnoDto.isPropietario()) {
-            if (alumnoDto.getCaballoId() != null) {
-                Caballo caballo = caballoRepository.findById(alumnoDto.getCaballoId())
-                        .orElseThrow(
-                                () -> new ResourceNotFoundException("Caballo", "ID", alumnoDto.getCaballoId()));
-                alumno.setCaballoPropio(caballo);
-            } else {
-                throw new ValidationException("caballoId", "Debe especificar un caballo si es propietario");
-            }
+        // 4. Asignar caballo si corresponde y validar pensión
+        validarPension(alumnoDto);
+
+        alumno.setTipoPension(alumnoDto.getTipoPension());
+        alumno.setCuotaPension(alumnoDto.getCuotaPension());
+
+        if (alumnoDto.getTipoPension() != TipoPension.SIN_CABALLO) {
+            Caballo caballo = caballoRepository.findById(alumnoDto.getCaballoId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Caballo", "ID", alumnoDto.getCaballoId()));
+            alumno.setCaballoPropio(caballo);
         }
 
         Alumno alumnoGuardado = alumnoRepository.save(alumno);
@@ -256,15 +258,16 @@ public class AlumnoServiceImpl implements AlumnoService {
         alumnoNuevo.setPropietario(alumnoDto.isPropietario());
 
         // 5. Asignar caballo si corresponde
-        if (alumnoDto.isPropietario()) {
-            if (alumnoDto.getCaballoId() != null) {
-                Caballo caballo = caballoRepository.findById(alumnoDto.getCaballoId())
-                        .orElseThrow(
-                                () -> new ResourceNotFoundException("Caballo", "ID", alumnoDto.getCaballoId()));
-                alumnoNuevo.setCaballoPropio(caballo);
-            } else {
-                throw new ValidationException("caballoId", "Debe especificar un caballo si es propietario");
-            }
+        // Reemplazar bloque completo de validación de caballo por:
+        validarPension(alumnoDto);
+
+        alumnoNuevo.setTipoPension(alumnoDto.getTipoPension());
+        alumnoNuevo.setCuotaPension(alumnoDto.getCuotaPension());
+
+        if (alumnoDto.getTipoPension() != TipoPension.SIN_CABALLO) {
+            Caballo caballo = caballoRepository.findById(alumnoDto.getCaballoId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Caballo", "ID", alumnoDto.getCaballoId()));
+            alumnoNuevo.setCaballoPropio(caballo);
         } else {
             alumnoNuevo.setCaballoPropio(null);
         }
@@ -352,39 +355,6 @@ public class AlumnoServiceImpl implements AlumnoService {
         alumnoRepository.save(alumno);
     }
 
-    // DESPUÉS:
-    @Override
-    public Alumno crearAlumnoDePrueba(AlumnoPruebaDto alumnoDto) {
-        // 1. Validar DNI duplicado
-        if (alumnoRepository.existsByDni(alumnoDto.getDni())) {
-            throw new ConflictException("Alumno", "DNI", alumnoDto.getDni());
-        }
-
-        // 2. Crear el alumno de prueba
-        Alumno alumno = new Alumno(
-                alumnoDto.getDni(),
-                alumnoDto.getNombre(),
-                alumnoDto.getApellido(),
-                alumnoDto.getFechaNacimiento(),
-                alumnoDto.getTelefono(),
-                alumnoDto.getEmail(),
-                null, // Sin fecha de inscripción
-                0, // Sin clases
-                false, // Inactivo
-                alumnoDto.isPropietario(),
-                null); // Sin caballo inicialmente
-
-        // 3. Asignar caballo si corresponde
-        if (alumnoDto.isPropietario() && alumnoDto.getCaballoId() != null) {
-            Caballo caballo = caballoRepository.findById(alumnoDto.getCaballoId())
-                    .orElseThrow(
-                            () -> new ResourceNotFoundException("Caballo", "ID", alumnoDto.getCaballoId()));
-            alumno.setCaballoPropio(caballo);
-        }
-
-        return alumnoRepository.save(alumno);
-    }
-
     /**
      * Método auxiliar para validar existencia
      */
@@ -409,5 +379,37 @@ public class AlumnoServiceImpl implements AlumnoService {
         alumnoExistente.setActivo(alumnoNuevo.isActivo());
         alumnoExistente.setPropietario(alumnoNuevo.isPropietario());
         alumnoExistente.setCaballoPropio(alumnoNuevo.getCaballoPropio());
+        alumnoExistente.setTipoPension(alumnoNuevo.getTipoPension());
+        alumnoExistente.setCuotaPension(alumnoNuevo.getCuotaPension());
+    }
+
+    /**
+     * Valida que la configuración de pensión sea coherente:
+     * - Si no tiene caballo, no debe tener cuota ni caballoId
+     * 
+     * @param dto
+     */
+    private void validarPension(AlumnoDto dto) {
+        if (dto.getTipoPension() == TipoPension.SIN_CABALLO) {
+            // Si no tiene caballo, no debe tener cuota ni caballoId
+            if (dto.getCuotaPension() != null) {
+                throw new ValidationException("cuotaPension",
+                        "No debe especificar cuota de pensión si no tiene caballo asignado");
+            }
+            if (dto.getCaballoId() != null) {
+                throw new ValidationException("caballoId",
+                        "No debe especificar caballo si el tipo de pensión es SIN_CABALLO");
+            }
+        } else {
+            // Si tiene caballo (propio o de escuela), la cuota es obligatoria
+            if (dto.getCuotaPension() == null) {
+                throw new ValidationException("cuotaPension",
+                        "Debe especificar la cuota de pensión (ENTERA, MEDIA o TERCIO)");
+            }
+            if (dto.getCaballoId() == null) {
+                throw new ValidationException("caballoId",
+                        "Debe especificar el caballo asociado a la pensión");
+            }
+        }
     }
 }

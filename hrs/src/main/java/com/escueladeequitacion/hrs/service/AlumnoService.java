@@ -1,7 +1,6 @@
 package com.escueladeequitacion.hrs.service;
 
 import com.escueladeequitacion.hrs.dto.AlumnoDto;
-import com.escueladeequitacion.hrs.dto.AlumnoPruebaDto;
 import com.escueladeequitacion.hrs.enums.Estado;
 import com.escueladeequitacion.hrs.model.Alumno;
 
@@ -83,8 +82,4 @@ public interface AlumnoService {
 
     public void convertirAlumnoAPlan(Long alumnoId, Integer cantidadClases);
 
-    /**
-     * Crea un alumno para clase de prueba (activo=false, cantidadClases=0).
-     */
-    Alumno crearAlumnoDePrueba(AlumnoPruebaDto alumnoDto);
 }

@@ -64,13 +64,18 @@ public class Clase {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
-    @JoinColumn(name = "alumno_id", nullable = false)
+    @JoinColumn(name = "alumno_id", nullable = true)
     private Alumno alumno;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
     @JoinColumn(name = "caballo_id", nullable = false)
     private Caballo caballo;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
+    @JoinColumn(name = "persona_prueba_id", nullable = true)
+    private PersonaPrueba personaPrueba;
 
     // Constructor vacío
     public Clase() {
@@ -121,6 +126,14 @@ public class Clase {
 
     public void setCaballo(Caballo caballo) {
         this.caballo = caballo;
+    }
+
+    public PersonaPrueba getPersonaPrueba() {
+        return personaPrueba;
+    }
+
+    public void setPersonaPrueba(PersonaPrueba personaPrueba) {
+        this.personaPrueba = personaPrueba;
     }
 
     public Especialidad getEspecialidad() {
@@ -193,6 +206,15 @@ public class Clase {
             return null;
         }
         return OffsetDateTime.of(dia, hora, ZoneOffset.UTC);
+    }
+
+    // Útil para mostrar el nombre sin importar el tipo
+    public String getNombreParticipante() {
+        if (alumno != null)
+            return alumno.getNombreCompleto();
+        if (personaPrueba != null)
+            return personaPrueba.getNombreCompleto();
+        return "Sin asignar";
     }
 
 }

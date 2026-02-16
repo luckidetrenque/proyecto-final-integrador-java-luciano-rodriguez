@@ -37,17 +37,13 @@ public class ClaseDto {
     @NotNull(message = "El estado de la clase no puede estar vacío, debe ser Programada, Iniciada, Completada o Cancelada")
     private Estado estado;
     private String observaciones;
-    @NotNull(message = "El instructorId no puede estar vacío")
-    @Min(value = 1, message = "El instructorId debe ser un número positivo")
+
     private Long instructorId;
-    @NotNull(message = "El alumnoId no puede estar vacío")
-    @Min(value = 1, message = "El alumnoId debe ser un número positivo")
+    private Long personaPruebaId;
     private Long alumnoId;
     @NotNull(message = "El caballoId no puede estar vacío")
     @Min(value = 1, message = "El caballoId debe ser un número positivo")
     private Long caballoId;
-    // Si ClaseDto ya existe, solo agrégale el campo esPrueba
-    // Si no, crea este DTO simplificado para clases de prueba
     private Boolean esPrueba;
 
     // Constructores, getters y setters
@@ -147,6 +143,14 @@ public class ClaseDto {
 
     public void setEsPrueba(Boolean esPrueba) {
         this.esPrueba = esPrueba;
+    }
+
+    public Long getPersonaPruebaId() {
+        return personaPruebaId;
+    }
+
+    public void setPersonaPruebaId(Long personaPruebaId) {
+        this.personaPruebaId = personaPruebaId;
     }
 
     /**

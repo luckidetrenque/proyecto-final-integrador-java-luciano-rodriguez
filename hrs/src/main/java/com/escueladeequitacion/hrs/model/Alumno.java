@@ -4,7 +4,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.escueladeequitacion.hrs.enums.CuotaPension;
 import com.escueladeequitacion.hrs.enums.Rol;
+import com.escueladeequitacion.hrs.enums.TipoPension;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -12,6 +14,8 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -51,6 +55,12 @@ public class Alumno extends Persona {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "caballo_id", nullable = true)
     private Caballo caballoPropio;
+    @Column(name = "tipo_pension", nullable = false, length = 20)
+    @Enumerated(EnumType.STRING)
+    private TipoPension tipoPension = TipoPension.SIN_CABALLO;
+    @Column(name = "cuota_pension", nullable = true, length = 10)
+    @Enumerated(EnumType.STRING)
+    private CuotaPension cuotaPension; // null si tipoPension = SIN_CABALLO
 
     @OneToMany(mappedBy = "alumno", cascade = CascadeType.ALL, orphanRemoval = false)
     @JsonIgnore
@@ -65,12 +75,14 @@ public class Alumno extends Persona {
     public Alumno(String dni, String nombre, String apellido, LocalDate fechaNacimiento, String telefono,
             String email,
             LocalDate fechaInscripcion, Integer cantidadClases, Boolean activo, Boolean propietario,
-            Caballo caballoPropio) {
+            Caballo caballoPropio, TipoPension tipoPension, CuotaPension cuotaPension) {
         super(dni, nombre, apellido, fechaNacimiento, telefono, email);
         this.fechaInscripcion = fechaInscripcion;
         this.cantidadClases = cantidadClases != null ? cantidadClases : 0;
         this.activo = activo != null ? activo : false;
         this.propietario = propietario;
+        this.tipoPension = tipoPension;
+        this.cuotaPension = cuotaPension;
         this.caballoPropio = null;
     }
 
@@ -123,6 +135,22 @@ public class Alumno extends Persona {
         this.caballoPropio = caballoPropio;
     }
 
+    public TipoPension getTipoPension() {
+        return tipoPension;
+    }
+
+    public void setTipoPension(TipoPension tipoPension) {
+        this.tipoPension = tipoPension;
+    }
+
+    public CuotaPension getCuotaPension() {
+        return cuotaPension;
+    }
+
+    public void setCuotaPension(CuotaPension cuotaPension) {
+        this.cuotaPension = cuotaPension;
+    }
+
     // Métodos para la lista de clases
     public void agregarClase(Clase clase) {
         clases.add(clase);
@@ -141,11 +169,9 @@ public class Alumno extends Persona {
     }
 
     @Override
-    public double calcularPago() {// Cuota base mensual
+    public double calcularPago() {
         double cuotaBase = 1000.0;
 
-        // Cálculo proporcional según cantidad de clases
-        // 4 clases = 1x, 8 clases = 1.5x, 12 clases = 2x, 16 clases = 2.5x
         double multiplicador = switch (cantidadClases) {
             case 4 -> 1.0;
             case 8 -> 1.5;
@@ -154,10 +180,18 @@ public class Alumno extends Persona {
             default -> 1.0;
         };
 
-        // Si tiene caballo propio, se cobra mantenimiento adicional
-        double cargoMantenimiento = propietario ? 500.0 : 0.0;
+        // Pensión solo aplica si tiene caballo asignado
+        double pension = 0.0;
+        if (tipoPension != TipoPension.SIN_CABALLO && cuotaPension != null) {
+            double pensionBase = 500.0; // valor entera, definilo según negocio
+            pension = switch (cuotaPension) {
+                case ENTERA -> pensionBase;
+                case MEDIA -> pensionBase / 2;
+                case TERCIO -> pensionBase / 3;
+            };
+        }
 
-        return (cuotaBase * multiplicador) + cargoMantenimiento;
+        return (cuotaBase * multiplicador) + pension;
     }
 
 }

@@ -2,6 +2,9 @@ package com.escueladeequitacion.hrs.dto;
 
 import java.time.LocalDate;
 
+import com.escueladeequitacion.hrs.enums.CuotaPension;
+import com.escueladeequitacion.hrs.enums.TipoPension;
+
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 
@@ -18,6 +21,9 @@ public class AlumnoDto extends PersonaDto {
     @NotNull(message = "El estado del alumno no puede estar vacío")
     private Boolean propietario = false;
     private Long caballoId;
+    @NotNull(message = "El tipo de pensión no puede estar vacío")
+    private TipoPension tipoPension = TipoPension.SIN_CABALLO;
+    private CuotaPension cuotaPension; // opcional, requerido si tipoPension != SIN_CABALLO
 
     // Constructores, getters y setters
     public AlumnoDto() {
@@ -26,12 +32,15 @@ public class AlumnoDto extends PersonaDto {
 
     public AlumnoDto(String dni, String nombre, String apellido, LocalDate fechaNacimiento, String telefono,
             String email,
-            LocalDate fechaInscripcion, Integer cantidadClases, Boolean activo, Boolean propietario, Long caballoId) {
+            LocalDate fechaInscripcion, Integer cantidadClases, Boolean activo, Boolean propietario, Long caballoId,
+            TipoPension tipoPension, CuotaPension cuotaPension) {
         super(dni, nombre, apellido, fechaNacimiento, telefono, email);
         this.fechaInscripcion = fechaInscripcion;
         this.cantidadClases = cantidadClases;
         this.activo = activo;
         this.propietario = propietario;
+        this.tipoPension = tipoPension;
+        this.cuotaPension = cuotaPension;
         this.caballoId = caballoId;
     }
 
@@ -73,5 +82,21 @@ public class AlumnoDto extends PersonaDto {
 
     public void setCaballoId(Long caballoId) {
         this.caballoId = caballoId;
+    }
+
+    public TipoPension getTipoPension() {
+        return tipoPension;
+    }
+
+    public void setTipoPension(TipoPension tipoPension) {
+        this.tipoPension = tipoPension;
+    }
+
+    public CuotaPension getCuotaPension() {
+        return cuotaPension;
+    }
+
+    public void setCuotaPension(CuotaPension cuotaPension) {
+        this.cuotaPension = cuotaPension;
     }
 }
