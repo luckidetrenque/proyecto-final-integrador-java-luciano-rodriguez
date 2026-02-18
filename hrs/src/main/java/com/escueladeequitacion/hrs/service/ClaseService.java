@@ -189,4 +189,7 @@ public interface ClaseService {
      * Verifica si un alumno ya tomó clase de prueba de una especialidad específica.
      */
     boolean alumnoTieneClaseDePruebaEnEspecialidad(Long alumnoId, String especialidad);
+
+    // Método para cambiar el estado de una clase
+    ClaseResponseDto cambiarEstado(Long id, Estado nuevoEstado);
 }

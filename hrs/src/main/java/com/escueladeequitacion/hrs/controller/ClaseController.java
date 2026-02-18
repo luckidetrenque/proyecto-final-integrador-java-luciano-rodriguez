@@ -137,6 +137,31 @@ public class ClaseController {
                 .body(new Mensaje("Clase con ID " + id + " actualizada correctamente"));
     }
 
+    /**
+     * PATCH /api/v1/clases/{id}/estado
+     * Cambia solo el estado de una clase (sin tocar otros campos ni validaciones).
+     */
+    @PatchMapping(Constantes.RESOURCE_CLASES + "/{id}/estado")
+    public ResponseEntity<ClaseResponseDto> cambiarEstadoClase(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
+
+        String estadoStr = body.get("estado");
+        if (estadoStr == null || estadoStr.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Estado nuevoEstado;
+        try {
+            nuevoEstado = Estado.valueOf(estadoStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        ClaseResponseDto resultado = claseService.cambiarEstado(id, nuevoEstado);
+        return ResponseEntity.ok(resultado);
+    }
+
     // ============================================================
     // ENDPOINTS CON DETALLES (relaciones cargadas)
     // ============================================================

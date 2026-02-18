@@ -659,4 +659,17 @@ public class ClaseServiceImpl implements ClaseService {
         return claseRepository.alumnoTieneClaseDePruebaEnEspecialidad(alumnoId, esp);
     }
 
+    /**
+     * Cambia solo el estado de una clase, sin validaciones de negocio.
+     * Usado por el endpoint PATCH /clases/{id}/estado
+     */
+    @Override
+    public ClaseResponseDto cambiarEstado(Long id, Estado nuevoEstado) {
+        Clase clase = claseRepository.findByIdWithDetails(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Clase", "ID", id));
+        clase.setEstado(nuevoEstado);
+        claseRepository.save(clase);
+        return new ClaseResponseDto(clase);
+    }
+
 }
