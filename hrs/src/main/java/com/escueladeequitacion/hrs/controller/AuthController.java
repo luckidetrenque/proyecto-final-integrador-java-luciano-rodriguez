@@ -49,7 +49,7 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Value("${app.whitelist.emails:claumarnavarro@gmail.com,luckidetrenque@gmail.com}")
+    @Value("${app.whitelist.emails:claumarnavarro@gmail.com,luckidetrenque@gmail.com,santiagomatheu@gmail.com}")
     private String whitelistEmails;
 
     /**
