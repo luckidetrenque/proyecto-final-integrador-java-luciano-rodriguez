@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,6 +35,25 @@ public class PersonaPruebaController {
         PersonaPrueba p = new PersonaPrueba(dto.getNombre(), dto.getApellido());
         PersonaPrueba guardada = personaPruebaRepository.save(p);
         return ResponseEntity.status(HttpStatus.CREATED).body(guardada);
+    }
+
+    @PutMapping("/personas-prueba/{id}")
+    public ResponseEntity<PersonaPrueba> actualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody PersonaPruebaDto dto) {
+
+        // Buscar la persona por ID
+        PersonaPrueba existente = personaPruebaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("PersonaPrueba", "ID", id));
+
+        // Actualizar campos
+        existente.setNombre(dto.getNombre());
+        existente.setApellido(dto.getApellido());
+
+        // Guardar cambios
+        PersonaPrueba actualizado = personaPruebaRepository.save(existente);
+
+        return ResponseEntity.ok(actualizado);
     }
 
     @GetMapping("/personas-prueba")
