@@ -5,9 +5,10 @@ import com.escueladeequitacion.hrs.enums.Estado;
 import com.escueladeequitacion.hrs.model.Clase;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
+// import java.time.OffsetDateTime;
+// import java.time.ZoneOffset;
 
 // DTO para la respuesta de Clase con datos relacionados de Instructor, Alumno y Caballo.
 public class ClaseResponseDto {
@@ -284,10 +285,19 @@ public class ClaseResponseDto {
      * Retorna la fecha y hora combinadas en formato ISO-8601 UTC.
      * Ejemplo: "2026-03-15T10:00:00Z"
      */
-    public OffsetDateTime getDiaHoraCompleto() {
+    // public OffsetDateTime getDiaHoraCompleto() {
+    // if (dia == null || hora == null) {
+    // return null;
+    // }
+    // // Combinar LocalDate + LocalTime y convertir a UTC
+    // return OffsetDateTime.of(dia, hora, ZoneOffset.UTC);
+    // }
+    public LocalDateTime getDiaHoraCompleto() {
         if (dia == null || hora == null) {
             return null;
         }
-        return OffsetDateTime.of(dia, hora, ZoneOffset.UTC);
+        // Combinar LocalDate + LocalTime y convertir a UTC
+        return LocalDateTime.of(dia, hora);
+
     }
 }

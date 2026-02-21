@@ -32,7 +32,22 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .username(user.getUsername())
                 .password(user.getPassword())
                 .authorities(Collections.singletonList(
-                        new SimpleGrantedAuthority("ROLE_" + user.getRol().name())))
+                        // new SimpleGrantedAuthority("ROLE_" + user.getRol().name())))
+                        new SimpleGrantedAuthority(user.getRol().name())))
                 .build();
     }
 }
+
+// @Override
+// public UserDetails loadUserByUsername(String email) throws
+// UsernameNotFoundException {
+
+// Usuario user = usuarioRepository.findByEmail(email)
+// .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+
+// return new org.springframework.security.core.userdetails.User(
+// user.getEmail(),
+// user.getPassword(),
+// List.of(new SimpleGrantedAuthority(user.getRol().name()))
+// );
+// }

@@ -1,9 +1,10 @@
 package com.escueladeequitacion.hrs.model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
+// import java.time.OffsetDateTime;
+// import java.time.ZoneOffset;
 
 import com.escueladeequitacion.hrs.enums.Especialidad;
 import com.escueladeequitacion.hrs.enums.Estado;
@@ -201,11 +202,20 @@ public class Clase {
      * 
      * @return OffsetDateTime en UTC, o null si dia u hora son null
      */
-    public OffsetDateTime getDiaHoraCompleto() {
+    // public OffsetDateTime getDiaHoraCompleto() {
+    // if (dia == null || hora == null) {
+    // return null;
+    // }
+    // // Combinar LocalDate + LocalTime y convertir a UTC
+    // return OffsetDateTime.of(dia, hora, ZoneOffset.UTC);
+    // }
+    public LocalDateTime getDiaHoraCompleto() {
         if (dia == null || hora == null) {
             return null;
         }
-        return OffsetDateTime.of(dia, hora, ZoneOffset.UTC);
+        // Combinar LocalDate + LocalTime y convertir a UTC
+        return LocalDateTime.of(dia, hora);
+
     }
 
     // Útil para mostrar el nombre sin importar el tipo
