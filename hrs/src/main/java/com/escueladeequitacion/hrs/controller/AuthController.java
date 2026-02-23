@@ -190,6 +190,13 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/validate")
+    public ResponseEntity<Void> validate() {
+        // No hace nada. Spring Security ya validó las credenciales
+        // antes de llegar acá. Si llegamos aquí, son válidas.
+        return ResponseEntity.ok().build();
+    }
+
     /**
      * GET /api/v1/auth/users
      * Lista todos los usuarios (solo ADMIN).
