@@ -20,6 +20,8 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+        private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
         /**
          * Maneja errores de validación de DTOs (@Valid).
          * Se ejecuta cuando fallan las validaciones de @NotNull, @Min, @Email, etc.
@@ -178,10 +180,14 @@ public class GlobalExceptionHandler {
                         Exception ex,
                         HttpServletRequest request) {
 
+                // Log interno
+                logger.error("Error inesperado en {}: {}", request.getRequestURI(), ex.getMessage(), ex);
+
+                // Log cliente
                 ErrorResponseDto errorResponseDto = new ErrorResponseDto(
                                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                                 "Internal Server Error",
-                                "Ocurrió un error inesperado en el servidor: " + ex.getMessage(),
+                                "Ocurrió un error inesperado. Contacte al administrador.",
                                 request.getRequestURI());
 
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponseDto);

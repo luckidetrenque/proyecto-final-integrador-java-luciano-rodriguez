@@ -3,11 +3,13 @@ package com.escueladeequitacion.hrs.security;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,7 +24,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
  */
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
+
+    @Value("${cors.allowed-origins:http://localhost:5173}")
+    private String allowedOrigins;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -30,15 +36,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        // Endpoints públicos
-                        .requestMatchers("/api/v1/auth/**").permitAll() // Login/registro
-                        .requestMatchers("/uploads/**").permitAll() // carpeta de avatares
-                        // .requestMatchers(HttpMethod.GET, "/api/v1/alumnos").permitAll()
-
-                        // Solo ADMIN
-                        .requestMatchers("/").hasRole("ADMIN")
-                        // .requestMatchers(HttpMethod.POST, "/api/v1/alumnos/**").hasRole("ADMIN")
-
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
+                        .requestMatchers("/").hasRole("ROLE_ADMIN")
                         .anyRequest().authenticated())
 
                 .httpBasic(basic -> {
@@ -71,10 +71,15 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // Puerto de React
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
-        configuration.setAllowCredentials(true); // Muy importante para Basic Auth
+
+        // Soporta múltiples orígenes separados por coma
+        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
+
+        configuration.setAllowedMethods(Arrays.asList(
+                "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList(
+                "Authorization", "Content-Type", "Accept"));
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

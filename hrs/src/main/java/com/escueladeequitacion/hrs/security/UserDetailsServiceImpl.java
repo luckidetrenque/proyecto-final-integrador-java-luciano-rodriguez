@@ -32,8 +32,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .username(user.getUsername())
                 .password(user.getPassword())
                 .authorities(Collections.singletonList(
-                        // new SimpleGrantedAuthority("ROLE_" + user.getRol().name())))
-                        new SimpleGrantedAuthority(user.getRol().name())))
+                        new SimpleGrantedAuthority("ROLE_" + user.getRol().name())))
                 .build();
     }
 }
