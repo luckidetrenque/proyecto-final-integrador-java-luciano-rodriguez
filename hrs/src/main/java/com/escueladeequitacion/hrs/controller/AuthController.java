@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -263,6 +264,7 @@ public class AuthController {
                 .body(new Mensaje("Usuario actualizado correctamente: " + user.getUsername()));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/check-email/{email}")
     public ResponseEntity<Void> checkEmailWhitelist(@PathVariable String email) {
         List<String> allowedEmails = Arrays.asList(whitelistEmails.split(","));

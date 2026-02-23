@@ -2,6 +2,8 @@ package com.escueladeequitacion.hrs.exception;
 
 import com.escueladeequitacion.hrs.dto.ErrorResponseDto;
 import jakarta.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -19,6 +21,9 @@ import java.util.Map;
  */
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+        @Value("${app.show-error-details:false}")
+        private boolean showErrorDetails;
 
         private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
@@ -180,14 +185,18 @@ public class GlobalExceptionHandler {
                         Exception ex,
                         HttpServletRequest request) {
 
-                // Log interno
-                logger.error("Error inesperado en {}: {}", request.getRequestURI(), ex.getMessage(), ex);
+                logger.error("Error inesperado en [{}]: {}",
+                                request.getRequestURI(), ex.getMessage(), ex);
 
-                // Log cliente
+                // En dev muestra detalles, en prod mensaje genérico
+                String mensaje = showErrorDetails
+                                ? "Error: " + ex.getMessage()
+                                : "Ocurrió un error inesperado. Contacte al administrador.";
+
                 ErrorResponseDto errorResponseDto = new ErrorResponseDto(
                                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                                 "Internal Server Error",
-                                "Ocurrió un error inesperado. Contacte al administrador.",
+                                mensaje,
                                 request.getRequestURI());
 
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponseDto);

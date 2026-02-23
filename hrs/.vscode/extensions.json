@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "redhat.java",
+    "vmware.vscode-boot-dev-pack",
+    "vscjava.vscode-java-pack",
+    "humao.rest-client"
+  ]
+}

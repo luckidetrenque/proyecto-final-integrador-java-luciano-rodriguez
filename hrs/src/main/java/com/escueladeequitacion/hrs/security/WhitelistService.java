@@ -11,6 +11,10 @@ public class WhitelistService {
     private List<String> whitelistedEmails;
 
     public boolean isEmailAllowed(String email) {
-        return whitelistedEmails.contains(email.toLowerCase());
+        if (email == null || email.isBlank())
+            return false;
+
+        return whitelistedEmails.stream()
+                .anyMatch(allowed -> allowed.trim().equalsIgnoreCase(email.trim()));
     }
 }

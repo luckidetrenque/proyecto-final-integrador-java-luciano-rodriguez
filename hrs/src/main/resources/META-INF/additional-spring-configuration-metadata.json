@@ -1,5 +1,17 @@
-{"properties": [{
-  "name": "app.whitelist.emails",
-  "type": "java.lang.String",
-  "description": "A description for 'app.whitelist.emails'"
-}]}
+{"properties": [
+  {
+    "name": "app.whitelist.emails",
+    "type": "java.lang.String",
+    "description": "Emails permitidos para registro"
+  },
+  {
+    "name": "cors.allowed-origins",
+    "type": "java.lang.String",
+    "description": "Orígenes permitidos para CORS, separados por coma"
+  },
+  {
+    "name": "app.show-error-details",
+    "type": "java.lang.Boolean",
+    "description": "Muestra detalles de errores internos en la respuesta HTTP"
+  }
+]}

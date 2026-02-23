@@ -5,7 +5,7 @@ package com.escueladeequitacion.hrs.security;
  * negocio).
  */
 public enum RolSeguridad {
-    ROLE_ADMIN, // Gestiona todo el sistema
-    ROLE_INSTRUCTOR, // Gestiona sus clases
-    ROLE_ALUMNO // Ve sus propias clases
+    ADMIN, // Gestiona todo el sistema
+    INSTRUCTOR, // Gestiona sus clases
+    ALUMNO // Ve sus propias clases
 }
