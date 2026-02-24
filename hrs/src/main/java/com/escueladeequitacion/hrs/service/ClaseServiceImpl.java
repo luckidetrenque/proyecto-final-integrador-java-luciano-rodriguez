@@ -245,15 +245,9 @@ public class ClaseServiceImpl implements ClaseService {
      */
     @Override
     public Clase crearClase(ClaseDto claseDto) {
-        /**
-         * TODO Validar para el caso de MONTA
-         * TODO crear alumnno comodin para que sea por defecto cuando se selecciona
-         * MONTA
-         */
 
         Instructor instructor = obtenerInstructorValido(claseDto.getInstructorId());
 
-        // ⚠️ CAMBIO AQUÍ: Usar método sin validar estado si es clase de prueba
         Alumno alumno = null;
         PersonaPrueba personaPrueba = null;
 
@@ -270,7 +264,7 @@ public class ClaseServiceImpl implements ClaseService {
                 throw new BusinessException("Una clase de prueba requiere alumnoId o personaPruebaId");
             }
         } else {
-            if (claseDto.getAlumnoId() == null) {
+            if (claseDto.getAlumnoId() == null && claseDto.getEspecialidad() != Especialidad.MONTA) {
                 throw new BusinessException("Una clase regular requiere alumnoId");
             }
             alumno = obtenerAlumnoValido(claseDto.getAlumnoId());

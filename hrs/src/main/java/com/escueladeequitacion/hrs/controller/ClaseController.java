@@ -115,9 +115,6 @@ public class ClaseController {
 
         Clase clase = claseService.crearClase(claseDto);
 
-        System.out.println(">>> Hora recibida en controller: " + claseDto.getHora());
-        System.out.println(">>> Dia recibido en controller: " + claseDto.getDia());
-
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new Mensaje("Clase creada correctamente con ID: " + clase.getId()));
     }

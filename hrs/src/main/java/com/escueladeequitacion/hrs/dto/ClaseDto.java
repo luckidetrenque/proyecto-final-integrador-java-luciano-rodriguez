@@ -38,7 +38,7 @@ public class ClaseDto {
     @NotNull(message = "El estado de la clase no puede estar vacío, debe ser Programada, Iniciada, Completada o Cancelada")
     private Estado estado;
     private String observaciones;
-
+    @NotNull(message = "El instructorId no puede estar vacío")
     private Long instructorId;
     private Long personaPruebaId;
     private Long alumnoId;

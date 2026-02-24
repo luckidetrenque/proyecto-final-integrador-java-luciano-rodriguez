@@ -36,10 +36,12 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/auth/validate").authenticated()
-                        .requestMatchers("/uploads/**").permitAll()
-                        .requestMatchers("/").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/auth/login").authenticated() // Login requiere Basic Auth
+                        .requestMatchers("/api/v1/auth/validate").authenticated() // Validate requiere auth
+                        .requestMatchers("/api/v1/auth/register").permitAll() // Registro público
+                        .requestMatchers("/api/v1/auth/logout").permitAll() // Logout público (limpia frontend)
+                        .requestMatchers("/uploads/**", "/error").permitAll() // Recursos públicos
+                        .requestMatchers("/").hasRole("ADMIN") // Root solo ADMIN
                         .anyRequest().authenticated())
 
                 .httpBasic(basic -> {
