@@ -260,14 +260,20 @@ public class ClaseServiceImpl implements ClaseService {
             } else if (claseDto.getAlumnoId() != null) {
                 // Prueba de alumno existente en otra especialidad
                 alumno = obtenerAlumnoSinValidarEstado(claseDto.getAlumnoId());
+                validarClaseDePrueba(alumno, claseDto.getEspecialidad());
             } else {
                 throw new BusinessException("Una clase de prueba requiere alumnoId o personaPruebaId");
             }
         } else {
-            if (claseDto.getAlumnoId() == null && claseDto.getEspecialidad() != Especialidad.MONTA) {
-                throw new BusinessException("Una clase regular requiere alumnoId");
+            if (claseDto.getEspecialidad() == Especialidad.MONTA) {
+                // MONTA es solo para instructores, no lleva alumno
+                alumno = null;
+            } else {
+                if (claseDto.getAlumnoId() == null) {
+                    throw new BusinessException("Una clase regular requiere alumnoId");
+                }
+                alumno = obtenerAlumnoValido(claseDto.getAlumnoId());
             }
-            alumno = obtenerAlumnoValido(claseDto.getAlumnoId());
         }
 
         Caballo caballo = obtenerCaballoValido(claseDto.getCaballoId());
@@ -276,6 +282,7 @@ public class ClaseServiceImpl implements ClaseService {
             validarFechaYHora(claseDto.getDia(), claseDto.getHora());
         }
 
+        validarDuracion(claseDto.getDuracion());
         validarDuracionSegunHorario(claseDto.getHora(), claseDto.getDuracion());
 
         Long alumnoIdParaConflicto = alumno != null ? alumno.getId() : null;
@@ -354,6 +361,8 @@ public class ClaseServiceImpl implements ClaseService {
         if ((dto.getDia() != null || dto.getHora() != null) &&
                 clase.getDia().isAfter(LocalDate.now(ZoneId.of("America/Argentina/Buenos_Aires")))) {
             validarFechaYHora(dto.getDia(), dto.getHora());
+            Integer duracionAValidar = dto.getDuracion() != null ? dto.getDuracion() : clase.getDuracion();
+            validarDuracion(duracionAValidar); // ← agregar
             validarDuracionSegunHorario(
                     dto.getHora() != null ? dto.getHora() : clase.getHora(),
                     dto.getDuracion() != null ? dto.getDuracion() : clase.getDuracion());
@@ -467,6 +476,11 @@ public class ClaseServiceImpl implements ClaseService {
 
         if (dia.isBefore(hoy)) {
             throw new BusinessException("La fecha de la clase no puede ser anterior a hoy");
+        }
+
+        LocalTime apertura = LocalTime.of(9, 0);
+        if (hora.isBefore(apertura)) {
+            throw new BusinessException("La escuela abre a las 09:00, no se pueden programar clases antes de esa hora");
         }
 
         if (dia.isEqual(hoy)) {
@@ -664,6 +678,28 @@ public class ClaseServiceImpl implements ClaseService {
         clase.setEstado(nuevoEstado);
         claseRepository.save(clase);
         return new ClaseResponseDto(clase);
+    }
+
+    private void validarDuracion(Integer duracion) {
+        if (duracion == null || (!duracion.equals(30) && !duracion.equals(60))) {
+            throw new BusinessException("La duración debe ser 30 o 60 minutos");
+        }
+    }
+
+    private void validarClaseDePrueba(Alumno alumno, Especialidad especialidad) {
+        if (alumno == null || especialidad == null)
+            return;
+
+        boolean tieneClasesDeEsaEspecialidad = claseRepository.findByAlumnoId(alumno.getId()).stream()
+                .anyMatch(c -> c.getEspecialidad() == especialidad
+                        && (c.getEstado() == Estado.PROGRAMADA || c.getEstado() == Estado.COMPLETADA)
+                        && !c.isEsPrueba());
+
+        if (tieneClasesDeEsaEspecialidad) {
+            throw new BusinessException(
+                    "El alumno ya tiene clases de " + especialidad +
+                            ". Las clases de prueba son solo para especialidades nuevas");
+        }
     }
 
 }
