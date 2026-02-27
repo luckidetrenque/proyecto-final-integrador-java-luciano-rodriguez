@@ -191,5 +191,5 @@ public interface ClaseService {
     boolean alumnoTieneClaseDePruebaEnEspecialidad(Long alumnoId, String especialidad);
 
     // Método para cambiar el estado de una clase
-    ClaseResponseDto cambiarEstado(Long id, Estado nuevoEstado);
+    ClaseResponseDto cambiarEstado(Long id, Estado nuevoEstado, String observaciones);
 }

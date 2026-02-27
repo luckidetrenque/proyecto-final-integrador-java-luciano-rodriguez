@@ -271,7 +271,7 @@ public class AuthController {
                 .body(new Mensaje("Usuario actualizado correctamente: " + user.getUsername()));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    /* @PreAuthorize("hasRole('ADMIN')") */
     @GetMapping("/check-email/{email}")
     public ResponseEntity<Void> checkEmailWhitelist(@PathVariable String email) {
         List<String> allowedEmails = Arrays.asList(whitelistEmails.split(","));

@@ -144,6 +144,7 @@ public class ClaseController {
             @RequestBody Map<String, String> body) {
 
         String estadoStr = body.get("estado");
+        String observaciones = body.getOrDefault("observaciones", null);
         if (estadoStr == null || estadoStr.isBlank()) {
             return ResponseEntity.badRequest().build();
         }
@@ -155,7 +156,7 @@ public class ClaseController {
             return ResponseEntity.badRequest().build();
         }
 
-        ClaseResponseDto resultado = claseService.cambiarEstado(id, nuevoEstado);
+        ClaseResponseDto resultado = claseService.cambiarEstado(id, nuevoEstado, observaciones);
         return ResponseEntity.ok(resultado);
     }
 

@@ -672,10 +672,11 @@ public class ClaseServiceImpl implements ClaseService {
      * Usado por el endpoint PATCH /clases/{id}/estado
      */
     @Override
-    public ClaseResponseDto cambiarEstado(Long id, Estado nuevoEstado) {
+    public ClaseResponseDto cambiarEstado(Long id, Estado nuevoEstado, String observaciones) {
         Clase clase = claseRepository.findByIdWithDetails(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Clase", "ID", id));
         clase.setEstado(nuevoEstado);
+        clase.setObservaciones(observaciones);
         claseRepository.save(clase);
         return new ClaseResponseDto(clase);
     }

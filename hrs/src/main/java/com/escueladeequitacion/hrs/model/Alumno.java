@@ -182,7 +182,7 @@ public class Alumno extends Persona {
 
         // Pensión solo aplica si tiene caballo asignado
         double pension = 0.0;
-        if (tipoPension != TipoPension.SIN_CABALLO && cuotaPension != null) {
+        if (tipoPension == TipoPension.CABALLO_PROPIO && cuotaPension != null) {
             double pensionBase = 500.0; // valor entera, definilo según negocio
             pension = switch (cuotaPension) {
                 case ENTERA -> pensionBase;
