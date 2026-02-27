@@ -19,9 +19,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-/**
- * Configuración de seguridad usando usuarios de la BD.
- */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -36,16 +33,16 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/login").authenticated() // Login requiere Basic Auth
-                        .requestMatchers("/api/v1/auth/validate").authenticated() // Validate requiere auth
-                        .requestMatchers("/api/v1/auth/register").permitAll() // Registro público
-                        .requestMatchers("/api/v1/auth/logout").permitAll() // Logout público (limpia frontend)
-                        .requestMatchers("/uploads/**", "/error").permitAll() // Recursos públicos
-                        .requestMatchers("/").hasRole("ADMIN") // Root solo ADMIN
+                        .requestMatchers("/api/v1/auth/login").authenticated()
+                        .requestMatchers("/api/v1/auth/validate").authenticated()
+                        .requestMatchers("/api/v1/auth/register").permitAll()
+                        .requestMatchers("/api/v1/auth/logout").permitAll()
+                        .requestMatchers("/uploads/**", "/error").permitAll()
+                        .requestMatchers("/").hasRole("ADMIN")
                         .anyRequest().authenticated())
-
                 .httpBasic(basic -> {
-                }).exceptionHandling(exceptions -> exceptions
+                })
+                .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpStatus.UNAUTHORIZED.value());
                             response.setContentType("application/json");
@@ -67,7 +64,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
 
@@ -75,9 +73,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Soporta múltiples orígenes separados por coma
         configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
-
         configuration.setAllowedMethods(Arrays.asList(
                 "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList(

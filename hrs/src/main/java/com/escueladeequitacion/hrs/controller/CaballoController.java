@@ -5,7 +5,6 @@ import com.escueladeequitacion.hrs.enums.Tipo;
 import com.escueladeequitacion.hrs.model.Caballo;
 import com.escueladeequitacion.hrs.service.CaballoService;
 import com.escueladeequitacion.hrs.utility.Mensaje;
-import com.escueladeequitacion.hrs.utility.Constantes;
 
 import jakarta.validation.Valid;
 
@@ -19,8 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(Constantes.API_VERSION)
-@CrossOrigin(origins = { Constantes.ORIGINS })
+@RequestMapping("/api/v1/caballos")
 
 // Controlador REST para gestionar los caballos
 public class CaballoController {
@@ -32,7 +30,7 @@ public class CaballoController {
     /**
      * GET /api/v1/caballos
      */
-    @GetMapping(Constantes.RESOURCE_CABALLOS)
+    @GetMapping()
     public ResponseEntity<List<Caballo>> listarCaballos() {
         List<Caballo> caballos = caballoService.listarCaballos();
         return ResponseEntity.status(HttpStatus.OK).body(caballos);
@@ -42,7 +40,7 @@ public class CaballoController {
     /**
      * GET /api/v1/caballos/{id}
      */
-    @GetMapping(Constantes.RESOURCE_CABALLOS + "/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> obtenerCaballoPorId(@PathVariable("id") Long id) {
 
         Caballo caballo = caballoService.buscarCaballoConAlumnosPorId(id)
@@ -55,7 +53,7 @@ public class CaballoController {
     /**
      * POST /api/v1/caballos
      */
-    @PostMapping(Constantes.RESOURCE_CABALLOS)
+    @PostMapping()
     public ResponseEntity<?> crearCaballo(@Valid @RequestBody CaballoDto caballoDto) {
 
         Caballo caballo = caballoService.crearCaballoDesdeDto(caballoDto);
@@ -68,7 +66,7 @@ public class CaballoController {
     /**
      * PUT /api/v1/caballos/{id}
      */
-    @PutMapping(Constantes.RESOURCE_CABALLOS + "/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<?> actualizarCaballo(@PathVariable("id") Long id,
             @Valid @RequestBody CaballoDto caballoDto) {
 
@@ -82,7 +80,7 @@ public class CaballoController {
     /**
      * DELETE /api/v1/caballos/{id}
      */
-    @DeleteMapping(Constantes.RESOURCE_CABALLOS + "/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarCaballo(@PathVariable Long id) {
 
         caballoService.eliminarCaballo(id);
@@ -95,7 +93,7 @@ public class CaballoController {
     /**
      * DELETE /api/v1/caballos/{id}/inactivar
      */
-    @DeleteMapping(Constantes.RESOURCE_CABALLOS + "/{id}/inactivar")
+    @DeleteMapping("/{id}/inactivar")
     public ResponseEntity<?> eliminarCaballoTemporalmente(@PathVariable Long id) {
         // El Service maneja todas las validaciones
         caballoService.eliminarcaballoTemporalmente(id);
@@ -108,7 +106,7 @@ public class CaballoController {
     /**
      * GET /api/v1/caballos/buscar
      */
-    @GetMapping(Constantes.RESOURCE_CABALLOS + "/buscar")
+    @GetMapping("/buscar")
     public ResponseEntity<?> buscarCaballo(
             @RequestParam(required = false) String nombre,
             @RequestParam(required = false) Boolean disponible,

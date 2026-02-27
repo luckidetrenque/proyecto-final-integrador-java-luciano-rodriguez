@@ -15,8 +15,6 @@ import com.escueladeequitacion.hrs.utility.Mensaje;
 
 import jakarta.validation.Valid;
 
-import com.escueladeequitacion.hrs.utility.Constantes;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -31,8 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(Constantes.API_VERSION)
-@CrossOrigin(origins = { Constantes.ORIGINS })
+@RequestMapping("/api/v1/clases")
 
 // Controlador REST para gestionar las clases
 public class ClaseController {
@@ -58,7 +55,7 @@ public class ClaseController {
      * GET /api/v1/clases
      * Lista todas las clases (sin detalles de relaciones).
      */
-    @GetMapping(Constantes.RESOURCE_CLASES)
+    @GetMapping()
     public ResponseEntity<List<Clase>> listarClases() {
         List<Clase> clases = claseService.listarClases();
         return ResponseEntity.status(HttpStatus.OK).body(clases);
@@ -69,7 +66,7 @@ public class ClaseController {
      * GET /api/v1/clases/{id}
      * Obtiene una clase por ID.
      */
-    @GetMapping(Constantes.RESOURCE_CLASES + "/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> obtenerClasePorId(@PathVariable("id") Long id) {
 
         Clase clase = claseService.buscarClasePorId(id).get();
@@ -77,7 +74,7 @@ public class ClaseController {
     }
 
     // Endpoint GET para buscar una clase por fecha
-    @GetMapping(Constantes.RESOURCE_CLASES + "/dia/{dia}")
+    @GetMapping("/dia/{dia}")
     public ResponseEntity<?> obtenerClasePorDia(@PathVariable("dia") LocalDate dia) {
         List<Clase> clases = claseService.buscarClasePorDia(dia);
 
@@ -94,7 +91,7 @@ public class ClaseController {
      * DELETE /api/v1/clases/{id}
      * Elimina una clase (eliminación física).
      */
-    @DeleteMapping(Constantes.RESOURCE_CLASES + "/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarClase(@PathVariable Long id) {
         // El Service valida que existe antes de eliminar
         claseService.eliminarClase(id);
@@ -108,7 +105,7 @@ public class ClaseController {
      * POST /api/v1/clases
      * Crea una nueva clase.
      */
-    @PostMapping(Constantes.RESOURCE_CLASES)
+    @PostMapping()
     // public ResponseEntity<?> crearClase(@Validated(AlCrear.class) @RequestBody
     // ClaseDto claseDto) {
     public ResponseEntity<?> crearClase(@Valid @RequestBody ClaseDto claseDto) {
@@ -124,7 +121,7 @@ public class ClaseController {
      * PUT /api/v1/clases/{id}
      * Actualiza una clase existente.
      */
-    @PutMapping(Constantes.RESOURCE_CLASES + "/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<?> actualizarClase(@PathVariable Long id,
             @Validated(AlActualizar.class) @RequestBody ClaseDto claseDto) {
         // El Service maneja todas las validaciones
@@ -138,7 +135,7 @@ public class ClaseController {
      * PATCH /api/v1/clases/{id}/estado
      * Cambia solo el estado de una clase (sin tocar otros campos ni validaciones).
      */
-    @PatchMapping(Constantes.RESOURCE_CLASES + "/{id}/estado")
+    @PatchMapping("/{id}/estado")
     public ResponseEntity<ClaseResponseDto> cambiarEstadoClase(
             @PathVariable Long id,
             @RequestBody Map<String, String> body) {
@@ -168,7 +165,7 @@ public class ClaseController {
      * GET /api/v1/clases/detalles
      * Lista todas las clases con información de instructor, alumno y caballo.
      */
-    @GetMapping(Constantes.RESOURCE_CLASES + "/detalles")
+    @GetMapping("/detalles")
     public ResponseEntity<List<ClaseResponseDto>> listarClasesConDetalles() {
         List<ClaseResponseDto> clases = claseService.listarClasesConDetalles();
         return ResponseEntity.status(HttpStatus.OK).body(clases);
@@ -178,7 +175,7 @@ public class ClaseController {
      * GET /api/v1/clases/{id}/detalles
      * Obtiene una clase específica con todos sus detalles.
      */
-    @GetMapping(Constantes.RESOURCE_CLASES + "/{id}/detalles")
+    @GetMapping("/{id}/detalles")
     public ResponseEntity<ClaseResponseDto> obtenerClaseConDetalles(@PathVariable Long id) {
         ClaseResponseDto clase = claseService.buscarClasePorIdConDetalles(id)
                 .orElseThrow(
@@ -191,7 +188,7 @@ public class ClaseController {
      * GET /api/v1/clases/dia/{dia}/detalles
      * Busca clases por fecha con detalles.
      */
-    @GetMapping(Constantes.RESOURCE_CLASES + "/dia/{dia}/detalles")
+    @GetMapping("/dia/{dia}/detalles")
     public ResponseEntity<List<ClaseResponseDto>> obtenerClasesPorDiaConDetalles(@PathVariable LocalDate dia) {
         List<ClaseResponseDto> clases = claseService.buscarClasePorDiaConDetalles(dia);
         return ResponseEntity.status(HttpStatus.OK).body(clases);
@@ -201,7 +198,7 @@ public class ClaseController {
      * GET /api/v1/clases/instructor/{instructorId}/detalles
      * Obtiene todas las clases de un instructor específico.
      */
-    @GetMapping(Constantes.RESOURCE_CLASES + "/instructor/{instructorId}/detalles")
+    @GetMapping("/instructor/{instructorId}/detalles")
     public ResponseEntity<List<ClaseResponseDto>> obtenerClasesPorInstructorConDetalles(
             @PathVariable Long instructorId) {
         List<ClaseResponseDto> clases = claseService.buscarClasePorInstructorConDetalles(instructorId);
@@ -212,7 +209,7 @@ public class ClaseController {
      * GET /api/v1/clases/alumno/{alumnoId}/detalles
      * Obtiene todas las clases de un alumno específico.
      */
-    @GetMapping(Constantes.RESOURCE_CLASES + "/alumno/{alumnoId}/detalles")
+    @GetMapping("/alumno/{alumnoId}/detalles")
     public ResponseEntity<List<ClaseResponseDto>> obtenerClasesPorAlumnoConDetalles(@PathVariable Long alumnoId) {
         List<ClaseResponseDto> clases = claseService.buscarClasePorAlumnoConDetalles(alumnoId);
         return ResponseEntity.status(HttpStatus.OK).body(clases);
@@ -222,13 +219,13 @@ public class ClaseController {
      * GET /api/v1/clases/alumno/{alumnoId}/detalles
      * Obtiene todas las clases de un alumno específico.
      */
-    @GetMapping(Constantes.RESOURCE_CLASES + "/caballo/{caballoId}/detalles")
+    @GetMapping("/caballo/{caballoId}/detalles")
     public ResponseEntity<?> obtenerClasesPorCaballoConDetalles(@PathVariable Long caballoId) {
         List<ClaseResponseDto> clases = claseService.buscarClasePorCaballoConDetalles(caballoId);
         return ResponseEntity.status(HttpStatus.OK).body(clases);
     }
 
-    @GetMapping(Constantes.RESOURCE_CLASES + "/estado/{estado}/detalles")
+    @GetMapping("/estado/{estado}/detalles")
     public ResponseEntity<?> obtenerClasesPorEstadoConDetalles(@PathVariable Estado estado) {
         if (!claseService.existeClasePorEstado(estado)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -244,7 +241,7 @@ public class ClaseController {
      * GET /api/v1/alumnos/buscar
      * Busca alumnos por múltiples criterios.
      */
-    @GetMapping(Constantes.RESOURCE_CLASES + "/buscar")
+    @GetMapping("/buscar")
     public ResponseEntity<?> buscarAlumno(
 
             @RequestParam(required = false) LocalDate dia,
@@ -280,7 +277,7 @@ public class ClaseController {
      * GET /api/v1/clases/alumno/{alumnoId}/completadas/count
      * Cuenta las clases completadas de un alumno.
      */
-    @GetMapping(Constantes.RESOURCE_CLASES + "/alumno/{alumnoId}/completadas/count")
+    @GetMapping("/alumno/{alumnoId}/completadas/count")
     public ResponseEntity<Map<String, Object>> contarClasesCompletadasPorAlumno(@PathVariable Long alumnoId) {
         long count = claseService.contarClasesCompletadasPorAlumno(alumnoId);
         Map<String, Object> response = new LinkedHashMap<>();
@@ -293,7 +290,7 @@ public class ClaseController {
      * GET /api/v1/clases/instructor/{instructorId}/completadas/count
      * Cuenta las clases completadas de un instructor.
      */
-    @GetMapping(Constantes.RESOURCE_CLASES + "/instructor/{instructorId}/completadas/count")
+    @GetMapping("/instructor/{instructorId}/completadas/count")
     public ResponseEntity<Map<String, Object>> contarClasesCompletadasPorInstructor(@PathVariable Long instructorId) {
         long count = claseService.contarClasesCompletadasPorInstructor(instructorId);
         Map<String, Object> response = new LinkedHashMap<>();

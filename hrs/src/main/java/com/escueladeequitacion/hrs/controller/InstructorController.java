@@ -4,7 +4,6 @@ import com.escueladeequitacion.hrs.dto.InstructorDto;
 import com.escueladeequitacion.hrs.model.Instructor;
 import com.escueladeequitacion.hrs.service.InstructorService;
 import com.escueladeequitacion.hrs.utility.Mensaje;
-import com.escueladeequitacion.hrs.utility.Constantes;
 
 import jakarta.validation.Valid;
 
@@ -19,8 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(Constantes.API_VERSION)
-@CrossOrigin(origins = { Constantes.ORIGINS })
+@RequestMapping("/api/v1/instructores")
 
 // Controlador REST para gestionar los instructores
 public class InstructorController {
@@ -32,7 +30,7 @@ public class InstructorController {
     /**
      * GET /api/v1/instructores
      */
-    @GetMapping(Constantes.RESOURCE_INSTRUCTORES)
+    @GetMapping()
     public ResponseEntity<List<Instructor>> listarInstructores() {
         List<Instructor> instructores = instructorService.listarInstructores();
         return ResponseEntity.status(HttpStatus.OK).body(instructores);
@@ -42,7 +40,7 @@ public class InstructorController {
     /**
      * GET /api/v1/instructores/{id}
      */
-    @GetMapping(Constantes.RESOURCE_INSTRUCTORES + "/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> obtenerInstructorPorId(@PathVariable("id") Long id) {
 
         Instructor instructor = instructorService.buscarInstructorPorId(id)
@@ -55,7 +53,7 @@ public class InstructorController {
     /**
      * GET /api/v1/instructores/dni/{dni}
      */
-    @GetMapping(Constantes.RESOURCE_INSTRUCTORES + "/dni/{dni}")
+    @GetMapping("/dni/{dni}")
     public ResponseEntity<?> obtenerInstructorPorDni(@PathVariable("dni") String dni) {
 
         Instructor instructor = instructorService.buscarInstructorPorDni(dni)
@@ -68,7 +66,7 @@ public class InstructorController {
     /**
      * POST /api/v1/instructores
      */
-    @PostMapping(Constantes.RESOURCE_INSTRUCTORES)
+    @PostMapping()
     public ResponseEntity<?> crearInstructor(@Valid @RequestBody InstructorDto instructorDto) {
 
         Instructor instructor = instructorService.crearInstructorDesdeDto(instructorDto);
@@ -81,7 +79,7 @@ public class InstructorController {
     /**
      * PUT /api/v1/instructores/{id}
      */
-    @PutMapping(Constantes.RESOURCE_INSTRUCTORES + "/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<?> actualizarInstructor(@PathVariable("id") Long id,
             @Valid @RequestBody InstructorDto instructorDto) {
 
@@ -96,7 +94,7 @@ public class InstructorController {
     /**
      * DELETE /api/v1/instructores/{id}
      */
-    @DeleteMapping(Constantes.RESOURCE_INSTRUCTORES + "/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarInstructor(@PathVariable Long id) {
 
         instructorService.eliminarInstructor(id);
@@ -109,7 +107,7 @@ public class InstructorController {
     /**
      * DELETE /api/v1/instructores/{id}/inactivar
      */
-    @DeleteMapping(Constantes.RESOURCE_INSTRUCTORES + "/{id}/inactivar")
+    @DeleteMapping("/{id}/inactivar")
     public ResponseEntity<?> eliminarInstructorTemporalmente(@PathVariable Long id) {
         instructorService.eliminarInstructorTemporalmente(id);
 
@@ -121,7 +119,7 @@ public class InstructorController {
     /**
      * GET /api/v1/instructores/buscar
      */
-    @GetMapping(Constantes.RESOURCE_INSTRUCTORES + "/buscar")
+    @GetMapping("/buscar")
     public ResponseEntity<?> buscarInstructor(
             @RequestParam(required = false) String nombre,
             @RequestParam(required = false) String apellido,

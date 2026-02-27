@@ -8,7 +8,6 @@ import com.escueladeequitacion.hrs.security.StorageService;
 import com.escueladeequitacion.hrs.security.User;
 import com.escueladeequitacion.hrs.security.UserRepository;
 import com.escueladeequitacion.hrs.security.WhitelistService;
-import com.escueladeequitacion.hrs.utility.Constantes;
 import com.escueladeequitacion.hrs.utility.Mensaje;
 
 import jakarta.validation.Valid;
@@ -20,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+// import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,7 +34,6 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/v1/auth")
-@CrossOrigin(origins = { Constantes.ORIGINS })
 public class AuthController {
 
     @Autowired

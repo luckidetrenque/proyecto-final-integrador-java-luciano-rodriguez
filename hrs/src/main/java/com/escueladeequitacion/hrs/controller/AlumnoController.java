@@ -5,8 +5,6 @@ import com.escueladeequitacion.hrs.dto.ConversionAPlanRequest;
 import com.escueladeequitacion.hrs.model.Alumno;
 import com.escueladeequitacion.hrs.service.AlumnoService;
 import com.escueladeequitacion.hrs.utility.Mensaje;
-import com.escueladeequitacion.hrs.utility.Constantes;
-
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(Constantes.API_VERSION)
-@CrossOrigin(origins = { Constantes.ORIGINS })
+@RequestMapping("/api/v1/alumnos")
 
 // Controlador REST para gestionar los alumnos
 public class AlumnoController {
@@ -34,7 +31,7 @@ public class AlumnoController {
      * GET /api/v1/alumnos
      * Lista todos los alumnos.
      */
-    @GetMapping(Constantes.RESOURCE_ALUMNOS)
+    @GetMapping()
     public ResponseEntity<List<Alumno>> listarAlumnos() {
         List<Alumno> alumnos = alumnoService.listarAlumnos();
         return ResponseEntity.status(HttpStatus.OK).body(alumnos);
@@ -45,7 +42,7 @@ public class AlumnoController {
      * GET /api/v1/alumnos/{id}
      * Obtiene un alumno por ID.
      */
-    @GetMapping(Constantes.RESOURCE_ALUMNOS + "/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> obtenerAlumnoPorId(@PathVariable("id") Long id) {
 
         Alumno alumno = alumnoService.buscarAlumnoConCaballoPorId(id)
@@ -59,7 +56,7 @@ public class AlumnoController {
      * GET /api/v1/alumnos/dni/{dni}
      * Obtiene un alumno por DNI.
      */
-    @GetMapping(Constantes.RESOURCE_ALUMNOS + "/dni/{dni}")
+    @GetMapping("/dni/{dni}")
     public ResponseEntity<?> obtenerAlumnoPorDni(@PathVariable("dni") String dni) {
 
         Alumno alumno = alumnoService.buscarAlumnoPorDni(dni)
@@ -73,7 +70,7 @@ public class AlumnoController {
      * POST /api/v1/alumnos
      * Crea un nuevo alumno.
      */
-    @PostMapping(Constantes.RESOURCE_ALUMNOS)
+    @PostMapping()
     public ResponseEntity<?> crearAlumno(@Valid @RequestBody AlumnoDto alumnoDto) {
         // El Service valida:
         // 1. DNI duplicado
@@ -89,7 +86,7 @@ public class AlumnoController {
      * PUT /api/v1/alumnos/{id}
      * Actualiza un alumno existente.
      */
-    @PutMapping(Constantes.RESOURCE_ALUMNOS + "/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<?> actualizarAlumno(@PathVariable("id") Long id, @Valid @RequestBody AlumnoDto alumnoDto) {
         // El Service valida:
         // 1. Alumno existe
@@ -106,7 +103,7 @@ public class AlumnoController {
      * DELETE /api/v1/alumnos/{id}
      * Elimina un alumno (eliminación física).
      */
-    @DeleteMapping(Constantes.RESOURCE_ALUMNOS + "/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarAlumno(@PathVariable Long id) {
         // El Service valida que existe antes de eliminar
         alumnoService.eliminarAlumno(id);
@@ -120,7 +117,7 @@ public class AlumnoController {
      * DELETE /api/v1/alumnos/{id}/inactivar
      * Inactiva un alumno (eliminación lógica).
      */
-    @DeleteMapping(Constantes.RESOURCE_ALUMNOS + "/{id}/inactivar")
+    @DeleteMapping("/{id}/inactivar")
     public ResponseEntity<?> eliminarAlumnoTemporalmente(@PathVariable Long id) {
         // El Service valida:
         // 1. Alumno existe
@@ -132,7 +129,7 @@ public class AlumnoController {
     }
 
     // Endpoint GET para contar las clases completadas de un alumno
-    @GetMapping(Constantes.RESOURCE_ALUMNOS + "/{id}/clases/completadas/count")
+    @GetMapping("/{id}/clases/completadas/count")
     public ResponseEntity<?> contarClasesCompletadas(@PathVariable Long id) {
 
         long count = alumnoService.contarClasesCompletadas(id);
@@ -149,7 +146,7 @@ public class AlumnoController {
      * GET /api/v1/alumnos/buscar
      * Busca alumnos por múltiples criterios.
      */
-    @GetMapping(Constantes.RESOURCE_ALUMNOS + "/buscar")
+    @GetMapping("/buscar")
     public ResponseEntity<?> buscarAlumno(
             @RequestParam(required = false) String nombre,
             @RequestParam(required = false) String apellido,
@@ -184,7 +181,7 @@ public class AlumnoController {
      * @param request - Contiene cantidadClases (4, 8, 12 o 16)
      * @return ResponseEntity con mensaje de éxito
      */
-    @PutMapping(Constantes.RESOURCE_ALUMNOS + "/{id}/convertir-a-plan")
+    @PutMapping("/{id}/convertir-a-plan")
     public ResponseEntity<?> convertirAlumnoAPlan(
             @PathVariable Long id,
             @RequestBody @Valid ConversionAPlanRequest request) {
@@ -204,7 +201,7 @@ public class AlumnoController {
      * 
      * @return Lista de alumnos inactivos (potenciales clases de prueba)
      */
-    @GetMapping(Constantes.RESOURCE_ALUMNOS + "/prueba")
+    @GetMapping("/prueba")
     public ResponseEntity<List<Alumno>> listarAlumnosDePrueba() {
         List<Alumno> alumnosPrueba = alumnoService.buscarAlumnoPorEstado(false);
         return ResponseEntity.ok(alumnosPrueba);
