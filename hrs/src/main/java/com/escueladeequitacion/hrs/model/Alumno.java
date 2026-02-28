@@ -60,7 +60,7 @@ public class Alumno extends Persona {
     private TipoPension tipoPension = TipoPension.SIN_CABALLO;
     @Column(name = "cuota_pension", nullable = true, length = 10)
     @Enumerated(EnumType.STRING)
-    private CuotaPension cuotaPension; // null si tipoPension = SIN_CABALLO
+    private CuotaPension cuotaPension; // null si tipoPension = SIN_CABALLO o RESERVA_ESCUELA
 
     @OneToMany(mappedBy = "alumno", cascade = CascadeType.ALL, orphanRemoval = false)
     @JsonIgnore
@@ -180,7 +180,7 @@ public class Alumno extends Persona {
             default -> 1.0;
         };
 
-        // Pensión solo aplica si tiene caballo asignado
+        // Pensión solo aplica si tiene caballo propio
         double pension = 0.0;
         if (tipoPension == TipoPension.CABALLO_PROPIO && cuotaPension != null) {
             double pensionBase = 500.0; // valor entera, definilo según negocio
