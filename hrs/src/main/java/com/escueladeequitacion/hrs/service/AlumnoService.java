@@ -1,6 +1,7 @@
 package com.escueladeequitacion.hrs.service;
 
 import com.escueladeequitacion.hrs.dto.AlumnoDto;
+import com.escueladeequitacion.hrs.dto.AlumnoListadoDto;
 import com.escueladeequitacion.hrs.enums.Estado;
 import com.escueladeequitacion.hrs.model.Alumno;
 
@@ -14,8 +15,14 @@ public interface AlumnoService {
     // Método para listar todos los alumnos
     public List<Alumno> listarAlumnos();
 
+    // Método para listar alumnos sin la información detallada del caballo
+    // (propietarios)
+    public List<AlumnoListadoDto> listarAlumnosListado();
+
     // Métodos para buscar alumnos por diferentes criterios
     public Optional<Alumno> buscarAlumnoPorId(Long id);
+
+    public Optional<AlumnoListadoDto> buscarAlumnoPorIdResumido(Long id);
 
     public Optional<Alumno> buscarAlumnoPorDni(String dni);
 
