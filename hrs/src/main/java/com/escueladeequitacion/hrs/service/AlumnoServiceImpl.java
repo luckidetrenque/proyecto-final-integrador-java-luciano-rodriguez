@@ -1,6 +1,7 @@
 package com.escueladeequitacion.hrs.service;
 
 import com.escueladeequitacion.hrs.dto.AlumnoDto;
+import com.escueladeequitacion.hrs.dto.AlumnoListadoDto;
 import com.escueladeequitacion.hrs.enums.Estado;
 import com.escueladeequitacion.hrs.enums.TipoPension;
 import com.escueladeequitacion.hrs.exception.BusinessException;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 // Implementación de la interfaz AlumnoService
 @Service
@@ -40,8 +42,59 @@ public class AlumnoServiceImpl implements AlumnoService {
     };
 
     @Override
+    public List<AlumnoListadoDto> listarAlumnosListado() {
+        List<Alumno> alumnos = alumnoRepository.findAll();
+
+        return alumnos.stream().map(alumno -> {
+            AlumnoListadoDto dto = new AlumnoListadoDto();
+            dto.setId(alumno.getId());
+            dto.setNombre(alumno.getNombre());
+            dto.setApellido(alumno.getApellido());
+            dto.setDni(alumno.getDni());
+            dto.setEmail(alumno.getEmail());
+            dto.setTelefono(alumno.getTelefono());
+            dto.setActivo(alumno.isActivo());
+            dto.setPropietario(alumno.isPropietario());
+            dto.setCantidadClases(alumno.getCantidadClases());
+            dto.setTipoPension(alumno.getTipoPension() != null ? alumno.getTipoPension().name() : null);
+            dto.setCuotaPension(alumno.getCuotaPension() != null ? alumno.getCuotaPension().name() : null);
+
+            if (alumno.getCaballoPropio() != null) {
+                dto.setCaballoId(alumno.getCaballoPropio().getId());
+                dto.setCaballoNombre(alumno.getCaballoPropio().getNombre());
+            }
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
     public Optional<Alumno> buscarAlumnoPorId(Long id) {
         return alumnoRepository.findById(id);
+    }
+
+    @Override
+    public Optional<AlumnoListadoDto> buscarAlumnoPorIdResumido(Long id) {
+        return alumnoRepository.findById(id)
+                .map(alumno -> {
+                    AlumnoListadoDto dto = new AlumnoListadoDto();
+                    dto.setId(alumno.getId());
+                    dto.setNombre(alumno.getNombre());
+                    dto.setApellido(alumno.getApellido());
+                    dto.setDni(alumno.getDni());
+                    dto.setEmail(alumno.getEmail());
+                    dto.setTelefono(alumno.getTelefono());
+                    dto.setActivo(alumno.isActivo());
+                    dto.setPropietario(alumno.isPropietario());
+                    dto.setCantidadClases(alumno.getCantidadClases());
+                    dto.setTipoPension(alumno.getTipoPension() != null ? alumno.getTipoPension().name() : null);
+                    dto.setCuotaPension(alumno.getCuotaPension() != null ? alumno.getCuotaPension().name() : null);
+
+                    if (alumno.getCaballoPropio() != null) {
+                        dto.setCaballoId(alumno.getCaballoPropio().getId());
+                        dto.setCaballoNombre(alumno.getCaballoPropio().getNombre());
+                    }
+                    return dto;
+                });
     }
 
     @Override
@@ -399,6 +452,16 @@ public class AlumnoServiceImpl implements AlumnoService {
             if (dto.getCaballoId() != null) {
                 throw new ValidationException("caballoId",
                         "No debe especificar caballo si el tipo de pensión es SIN_CABALLO");
+            }
+        } else if (dto.getTipoPension() == TipoPension.RESERVA_ESCUELA) {
+            // Si tiene reserva en escuela, no debe tener cuota pero sí caballoId
+            if (dto.getCuotaPension() != null) {
+                throw new ValidationException("cuotaPension",
+                        "No debe especificar cuota de pensión si tiene reserva en escuela");
+            }
+            if (dto.getCaballoId() == null) {
+                throw new ValidationException("caballoId",
+                        "Debe especificar el caballo asociado a la reserva en escuela");
             }
         } else {
             // Si tiene caballo (propio o de escuela), la cuota es obligatoria

@@ -1,12 +1,14 @@
 package com.escueladeequitacion.hrs.controller;
 
 import com.escueladeequitacion.hrs.dto.AlumnoDto;
+import com.escueladeequitacion.hrs.dto.AlumnoListadoDto;
 import com.escueladeequitacion.hrs.dto.ConversionAPlanRequest;
 import com.escueladeequitacion.hrs.model.Alumno;
 import com.escueladeequitacion.hrs.service.AlumnoService;
 import com.escueladeequitacion.hrs.utility.Mensaje;
 import jakarta.validation.Valid;
 
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,10 +33,23 @@ public class AlumnoController {
      * GET /api/v1/alumnos
      * Lista todos los alumnos.
      */
+    /*
+     * @GetMapping()
+     * public ResponseEntity<List<Alumno>> listarAlumnos() {
+     * List<Alumno> alumnos = alumnoService.listarAlumnos();
+     * return ResponseEntity.status(HttpStatus.OK).body(alumnos);
+     * }
+     */
+
+    // Endpoint GET para listar alumnos con información resumida (DTO)
+    /**
+     * GET /api/v1/alumnos/listado
+     * Lista todos los alumnos con información resumida (DTO).
+     */
     @GetMapping()
-    public ResponseEntity<List<Alumno>> listarAlumnos() {
-        List<Alumno> alumnos = alumnoService.listarAlumnos();
-        return ResponseEntity.status(HttpStatus.OK).body(alumnos);
+    public ResponseEntity<List<AlumnoListadoDto>> listarAlumnos() {
+        List<AlumnoListadoDto> alumnos = alumnoService.listarAlumnosListado();
+        return ResponseEntity.ok(alumnos);
     }
 
     // Endpoint GET para buscar un alumno por ID
@@ -42,13 +57,28 @@ public class AlumnoController {
      * GET /api/v1/alumnos/{id}
      * Obtiene un alumno por ID.
      */
+    /*
+     * @GetMapping("/{id}")
+     * public ResponseEntity<?> obtenerAlumnoPorId(@PathVariable("id") Long id) {
+     * 
+     * Alumno alumno = alumnoService.buscarAlumnoConCaballoPorId(id)
+     * .orElseThrow(
+     * () -> new
+     * com.escueladeequitacion.hrs.exception.ResourceNotFoundException("Alumno",
+     * "ID", id));
+     * return ResponseEntity.status(HttpStatus.OK).body(alumno);
+     * }
+     */
     @GetMapping("/{id}")
     public ResponseEntity<?> obtenerAlumnoPorId(@PathVariable("id") Long id) {
-
-        Alumno alumno = alumnoService.buscarAlumnoConCaballoPorId(id)
-                .orElseThrow(
-                        () -> new com.escueladeequitacion.hrs.exception.ResourceNotFoundException("Alumno", "ID", id));
-        return ResponseEntity.status(HttpStatus.OK).body(alumno);
+        Optional<AlumnoListadoDto> alumno = alumnoService.buscarAlumnoPorIdResumido(id);
+        if (alumno.isPresent()) {
+            return ResponseEntity.ok(alumno.get());
+        } else {
+            // Manejo de error si no existe
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("No se encontró el alumno con ID " + id);
+        }
     }
 
     // Endpoint GET para buscar un alumno por DNI
