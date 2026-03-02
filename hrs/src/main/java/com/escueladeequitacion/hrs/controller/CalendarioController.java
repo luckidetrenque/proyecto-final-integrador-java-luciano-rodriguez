@@ -34,11 +34,19 @@ public class CalendarioController {
 
         @DeleteMapping("/eliminar-clases")
         public ResponseEntity<Mensaje> eliminarPeriodo(@Valid @RequestBody CalendarioDto request) {
-                calendarioService.eliminarClases(request.getDiaInicioOrigen(), request.getDiaInicioDestino());
-                return ResponseEntity
-                                .ok(new Mensaje("Clases eliminadas exitosamente desde " + request.getDiaInicioOrigen()
-                                                + " hasta "
-                                                + request.getDiaInicioDestino()));
-        }
+                calendarioService.eliminarClases(
+                                request.getDiaInicioOrigen(),
+                                request.getDiaInicioDestino(),
+                                request.getHoraInicio(),
+                                request.getHoraFin());
 
+                String mensaje = request.getHoraInicio() != null && request.getHoraFin() != null
+                                ? String.format("Clases eliminadas exitosamente el %s de %s a %s",
+                                                request.getDiaInicioOrigen(), request.getHoraInicio(),
+                                                request.getHoraFin())
+                                : String.format("Clases eliminadas exitosamente desde %s hasta %s",
+                                                request.getDiaInicioOrigen(), request.getDiaInicioDestino());
+
+                return ResponseEntity.ok(new Mensaje(mensaje));
+        }
 }
