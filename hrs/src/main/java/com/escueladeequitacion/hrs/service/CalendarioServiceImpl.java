@@ -11,6 +11,7 @@ import com.escueladeequitacion.hrs.model.Clase;
 import com.escueladeequitacion.hrs.repository.ClaseRepository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
@@ -83,7 +84,7 @@ public class CalendarioServiceImpl implements CalendarioService {
     }
 
     @Transactional
-    public void eliminarClases(LocalDate fechaInicio, LocalDate fechaFin) {
+    public void eliminarClases(LocalDate fechaInicio, LocalDate fechaFin, LocalTime horaInicio, LocalTime horaFin) {
         if (fechaInicio == null || fechaFin == null) {
             throw new ValidationException("fechas", "Las fechas de origen y destino no pueden estar vacías");
         }
@@ -92,7 +93,21 @@ public class CalendarioServiceImpl implements CalendarioService {
             throw new ValidationException("fechaInicio", "La fecha de inicio no puede ser posterior a la fecha de fin");
         }
 
-        // Solo eliminamos lo que aún no ha sucedido o no se ha procesado
-        claseRepository.deleteByDiaBetweenAndEstado(fechaInicio, fechaFin, Estado.PROGRAMADA);
+        // Si se especifican horarios, validar
+        if (horaInicio != null && horaFin != null) {
+            if (horaInicio.isAfter(horaFin)) {
+                throw new ValidationException("horaInicio", "La hora de inicio debe ser anterior a la hora de fin");
+            }
+
+            // Cancelar solo en el rango horario para UN DÍA
+            if (fechaInicio.equals(fechaFin)) {
+                claseRepository.deleteByDiaAndHoraBetweenAndEstado(fechaInicio, horaInicio, horaFin, Estado.PROGRAMADA);
+            } else {
+                throw new ValidationException("fechas", "La cancelación por horario solo aplica para un mismo día");
+            }
+        } else {
+            // Sin horarios = cancelar días completos
+            claseRepository.deleteByDiaBetweenAndEstado(fechaInicio, fechaFin, Estado.PROGRAMADA);
+        }
     }
 }
