@@ -1,19 +1,23 @@
 package com.escueladeequitacion.hrs.dto;
 
-public class AlumnoListadoDto {
+import java.time.LocalDate;
+
+public class AlumnoListadoDto extends PersonaDto {
     private Long id;
     private String nombre;
     private String apellido;
     private String dni;
     private String email;
     private String telefono;
+    private LocalDate fechaNacimiento;
+    private LocalDate fechaInscripcion;
     private Boolean activo;
     private Boolean propietario;
     private Integer cantidadClases;
     private String tipoPension;
     private String cuotaPension;
     private Long caballoId;
-    private String caballoNombre; // CaballoDto sin lista de propietarios
+    private String caballoNombre;
 
     // Getters y setters
     public Long getId() {
@@ -119,4 +123,21 @@ public class AlumnoListadoDto {
     public void setCaballoNombre(String caballoNombre) {
         this.caballoNombre = caballoNombre;
     }
+
+    public LocalDate getFechaInscripcion() {
+        return fechaInscripcion;
+    }
+
+    public void setFechaInscripcion(LocalDate fechaInscripcion) {
+        this.fechaInscripcion = fechaInscripcion;
+    }
+
+    public LocalDate getFechaNacimiento() {
+        return fechaNacimiento;
+    }
+
+    public void setFechaNacimiento(LocalDate fechaNacimiento) {
+        this.fechaNacimiento = fechaNacimiento;
+    }
+
 }

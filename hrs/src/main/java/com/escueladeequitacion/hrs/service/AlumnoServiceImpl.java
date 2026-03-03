@@ -53,6 +53,8 @@ public class AlumnoServiceImpl implements AlumnoService {
             dto.setDni(alumno.getDni());
             dto.setEmail(alumno.getEmail());
             dto.setTelefono(alumno.getTelefono());
+            dto.setFechaNacimiento(alumno.getFechaNacimiento());
+            dto.setFechaInscripcion(alumno.getFechaInscripcion());
             dto.setActivo(alumno.isActivo());
             dto.setPropietario(alumno.isPropietario());
             dto.setCantidadClases(alumno.getCantidadClases());
@@ -83,6 +85,8 @@ public class AlumnoServiceImpl implements AlumnoService {
                     dto.setDni(alumno.getDni());
                     dto.setEmail(alumno.getEmail());
                     dto.setTelefono(alumno.getTelefono());
+                    dto.setFechaNacimiento(alumno.getFechaNacimiento());
+                    dto.setFechaInscripcion(alumno.getFechaInscripcion());
                     dto.setActivo(alumno.isActivo());
                     dto.setPropietario(alumno.isPropietario());
                     dto.setCantidadClases(alumno.getCantidadClases());
