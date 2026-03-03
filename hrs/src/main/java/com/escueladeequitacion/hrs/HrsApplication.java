@@ -11,13 +11,28 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class HrsApplication {
 
 	public static void main(String[] args) {
-		Dotenv dotenv = Dotenv.load();
-		System.setProperty("DB_HOST", dotenv.get("DB_HOST"));
-		System.setProperty("DB_NAME", dotenv.get("DB_NAME"));
-		System.setProperty("DB_USER", dotenv.get("DB_USER"));
-		System.setProperty("DB_PASSWORD", dotenv.get("DB_PASSWORD"));
+		Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+
+		setIfPresent(dotenv, "SPRING_PROFILE");
+		setIfPresent(dotenv, "DB_HOST");
+		setIfPresent(dotenv, "DB_NAME");
+		setIfPresent(dotenv, "DB_USER");
+		setIfPresent(dotenv, "DB_PASSWORD");
+		setIfPresent(dotenv, "DB_NAME_NEON");
+		setIfPresent(dotenv, "DB_USER_NEON");
+		setIfPresent(dotenv, "DB_PASSWORD_NEON");
+		setIfPresent(dotenv, "WHITELIST_EMAILS");
+		setIfPresent(dotenv, "CORS_ALLOWED_ORIGINS");
+		setIfPresent(dotenv, "SERVER_PORT");
+
 		TimeZone.setDefault(TimeZone.getTimeZone("America/Argentina/Buenos_Aires"));
 		SpringApplication.run(HrsApplication.class, args);
 	}
 
+	private static void setIfPresent(Dotenv dotenv, String key) {
+		String value = dotenv.get(key, null);
+		if (value != null) {
+			System.setProperty(key, value);
+		}
+	}
 }
