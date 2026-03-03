@@ -10,6 +10,7 @@ target/
 # CONFIGURACIÓN
 # ==========================================
 application-local.properties
+application-neon.properties
 .env
 .env.local
 .env.production
@@ -20,6 +21,7 @@ docker-compose.override.yml
 # ==========================================
 .vscode/settings.json
 .vscode/*.code-profile
+.vscode/launch.json
 .idea/
 *.iml
 *.ipr
