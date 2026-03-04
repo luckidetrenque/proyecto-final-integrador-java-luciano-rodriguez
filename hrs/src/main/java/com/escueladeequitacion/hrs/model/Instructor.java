@@ -47,10 +47,11 @@ public class Instructor extends Persona {
     }
 
     // Constructor con parámetros
-    public Instructor(String dni, String nombre, String apellido, LocalDate fechaNacimiento, String telefono,
+    public Instructor(String dni, String nombre, String apellido, LocalDate fechaNacimiento, String codigoArea,
+            String telefono,
             String email,
             Boolean activo, String color) {
-        super(dni, nombre, apellido, fechaNacimiento, telefono, email);
+        super(dni, nombre, apellido, fechaNacimiento, codigoArea, telefono, email);
         this.activo = activo;
         this.color = color;
     }

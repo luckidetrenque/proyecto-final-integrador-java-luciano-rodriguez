@@ -72,11 +72,12 @@ public class Alumno extends Persona {
     }
 
     // Constructor con parámetros
-    public Alumno(String dni, String nombre, String apellido, LocalDate fechaNacimiento, String telefono,
+    public Alumno(String dni, String nombre, String apellido, LocalDate fechaNacimiento, String codigoArea,
+            String telefono,
             String email,
             LocalDate fechaInscripcion, Integer cantidadClases, Boolean activo, Boolean propietario,
             Caballo caballoPropio, TipoPension tipoPension, CuotaPension cuotaPension) {
-        super(dni, nombre, apellido, fechaNacimiento, telefono, email);
+        super(dni, nombre, apellido, fechaNacimiento, codigoArea, telefono, email);
         this.fechaInscripcion = fechaInscripcion;
         this.cantidadClases = cantidadClases != null ? cantidadClases : 0;
         this.activo = activo != null ? activo : false;

@@ -160,6 +160,7 @@ public class InstructorServiceImpl implements InstructorService {
                 instructorDto.getNombre(),
                 instructorDto.getApellido(),
                 instructorDto.getFechaNacimiento(),
+                instructorDto.getCodigoArea(),
                 instructorDto.getTelefono(),
                 instructorDto.getEmail(),
                 instructorDto.isActivo(),
@@ -190,6 +191,7 @@ public class InstructorServiceImpl implements InstructorService {
         instructorNuevo.setNombre(instructorDto.getNombre());
         instructorNuevo.setApellido(instructorDto.getApellido());
         instructorNuevo.setFechaNacimiento(instructorDto.getFechaNacimiento());
+        instructorNuevo.setCodigoArea(instructorDto.getCodigoArea());
         instructorNuevo.setTelefono(instructorDto.getTelefono());
         instructorNuevo.setEmail(instructorDto.getEmail());
         instructorNuevo.setActivo(instructorDto.isActivo());
@@ -248,6 +250,7 @@ public class InstructorServiceImpl implements InstructorService {
         instructorExistente.setNombre(instructorNuevo.getNombre());
         instructorExistente.setApellido(instructorNuevo.getApellido());
         instructorExistente.setFechaNacimiento(instructorNuevo.getFechaNacimiento());
+        instructorExistente.setCodigoArea(instructorNuevo.getCodigoArea());
         instructorExistente.setTelefono(instructorNuevo.getTelefono());
         instructorExistente.setEmail(instructorNuevo.getEmail());
         instructorExistente.setActivo(instructorNuevo.isActivo());

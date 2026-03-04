@@ -30,11 +30,12 @@ public class AlumnoDto extends PersonaDto {
         super();
     }
 
-    public AlumnoDto(String dni, String nombre, String apellido, LocalDate fechaNacimiento, String telefono,
+    public AlumnoDto(String dni, String nombre, String apellido, LocalDate fechaNacimiento, String codigoArea,
+            String telefono,
             String email,
             LocalDate fechaInscripcion, Integer cantidadClases, Boolean activo, Boolean propietario, Long caballoId,
             TipoPension tipoPension, CuotaPension cuotaPension) {
-        super(dni, nombre, apellido, fechaNacimiento, telefono, email);
+        super(dni, nombre, apellido, fechaNacimiento, codigoArea, telefono, email);
         this.fechaInscripcion = fechaInscripcion;
         this.cantidadClases = cantidadClases;
         this.activo = activo;

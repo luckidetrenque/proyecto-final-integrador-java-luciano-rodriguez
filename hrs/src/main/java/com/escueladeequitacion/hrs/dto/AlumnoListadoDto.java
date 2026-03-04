@@ -8,6 +8,7 @@ public class AlumnoListadoDto extends PersonaDto {
     private String apellido;
     private String dni;
     private String email;
+    private String codigoArea;
     private String telefono;
     private LocalDate fechaNacimiento;
     private LocalDate fechaInscripcion;
@@ -58,6 +59,14 @@ public class AlumnoListadoDto extends PersonaDto {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getCodigoArea() {
+        return codigoArea;
+    }
+
+    public void setCodigoArea(String codigoArea) {
+        this.codigoArea = codigoArea;
     }
 
     public String getTelefono() {

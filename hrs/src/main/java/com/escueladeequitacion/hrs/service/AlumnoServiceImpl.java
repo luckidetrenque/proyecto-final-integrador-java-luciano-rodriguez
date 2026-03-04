@@ -52,6 +52,7 @@ public class AlumnoServiceImpl implements AlumnoService {
             dto.setApellido(alumno.getApellido());
             dto.setDni(alumno.getDni());
             dto.setEmail(alumno.getEmail());
+            dto.setCodigoArea(alumno.getCodigoArea());
             dto.setTelefono(alumno.getTelefono());
             dto.setFechaNacimiento(alumno.getFechaNacimiento());
             dto.setFechaInscripcion(alumno.getFechaInscripcion());
@@ -84,6 +85,7 @@ public class AlumnoServiceImpl implements AlumnoService {
                     dto.setApellido(alumno.getApellido());
                     dto.setDni(alumno.getDni());
                     dto.setEmail(alumno.getEmail());
+                    dto.setCodigoArea(alumno.getCodigoArea());
                     dto.setTelefono(alumno.getTelefono());
                     dto.setFechaNacimiento(alumno.getFechaNacimiento());
                     dto.setFechaInscripcion(alumno.getFechaInscripcion());
@@ -254,6 +256,7 @@ public class AlumnoServiceImpl implements AlumnoService {
                 alumnoDto.getNombre(),
                 alumnoDto.getApellido(),
                 alumnoDto.getFechaNacimiento(),
+                alumnoDto.getCodigoArea(),
                 alumnoDto.getTelefono(),
                 alumnoDto.getEmail(),
                 alumnoDto.getFechaInscripcion(),
@@ -307,6 +310,7 @@ public class AlumnoServiceImpl implements AlumnoService {
         alumnoNuevo.setNombre(alumnoDto.getNombre());
         alumnoNuevo.setApellido(alumnoDto.getApellido());
         alumnoNuevo.setFechaNacimiento(alumnoDto.getFechaNacimiento());
+        alumnoNuevo.setCodigoArea(alumnoDto.getCodigoArea());
         alumnoNuevo.setTelefono(alumnoDto.getTelefono());
         alumnoNuevo.setEmail(alumnoDto.getEmail());
         alumnoNuevo.setFechaInscripcion(alumnoDto.getFechaInscripcion());
@@ -429,6 +433,7 @@ public class AlumnoServiceImpl implements AlumnoService {
         alumnoExistente.setNombre(alumnoNuevo.getNombre());
         alumnoExistente.setApellido(alumnoNuevo.getApellido());
         alumnoExistente.setFechaNacimiento(alumnoNuevo.getFechaNacimiento());
+        alumnoExistente.setCodigoArea(alumnoNuevo.getCodigoArea());
         alumnoExistente.setTelefono(alumnoNuevo.getTelefono());
         alumnoExistente.setEmail(alumnoNuevo.getEmail());
         alumnoExistente.setFechaInscripcion(alumnoNuevo.getFechaInscripcion());
