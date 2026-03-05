@@ -28,7 +28,7 @@ import jakarta.persistence.Index;
 @Table(name = "caballos", indexes = {
         @Index(name = "idx_caballo_nombre", columnList = "nombre"),
         @Index(name = "idx_caballo_disponible", columnList = "disponible"),
-        @Index(name = "idx_caballo_tipo", columnList = "tipoCaballo")
+        @Index(name = "idx_caballo_tipo", columnList = "tipo")
 })
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Caballo {
