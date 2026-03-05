@@ -48,6 +48,7 @@ public class AlumnoController {
      */
     @GetMapping()
     public ResponseEntity<List<AlumnoListadoDto>> listarAlumnos() {
+        // TODO - Agregar paginación y ordenamiento
         List<AlumnoListadoDto> alumnos = alumnoService.listarAlumnosListado();
         return ResponseEntity.ok(alumnos);
     }

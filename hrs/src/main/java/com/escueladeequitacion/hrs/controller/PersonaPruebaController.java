@@ -21,7 +21,7 @@ import com.escueladeequitacion.hrs.repository.PersonaPruebaRepository;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/personas-prueba")
 public class PersonaPruebaController {
 
     @Autowired
