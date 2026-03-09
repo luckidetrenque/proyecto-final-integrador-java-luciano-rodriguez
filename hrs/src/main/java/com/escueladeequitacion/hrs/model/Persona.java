@@ -121,9 +121,7 @@ public abstract class Persona {
         return edad;
     }
 
-    // Métodos abstractos que deben implementar las subclases Alumno e Instructor
+    // Método abstracto que debe implementar las subclases Alumno e Instructor
     public abstract Rol getRol();
-
-    public abstract double calcularPago();
 
 }

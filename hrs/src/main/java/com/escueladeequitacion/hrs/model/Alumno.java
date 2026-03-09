@@ -169,30 +169,4 @@ public class Alumno extends Persona {
         return Rol.ALUMNO;
     }
 
-    @Override
-    public double calcularPago() {
-        double cuotaBase = 1000.0;
-
-        double multiplicador = switch (cantidadClases) {
-            case 4 -> 1.0;
-            case 8 -> 1.5;
-            case 12 -> 2.0;
-            case 16 -> 2.5;
-            default -> 1.0;
-        };
-
-        // Pensión solo aplica si tiene caballo propio
-        double pension = 0.0;
-        if (tipoPension == TipoPension.CABALLO_PROPIO && cuotaPension != null) {
-            double pensionBase = 500.0; // valor entera, definilo según negocio
-            pension = switch (cuotaPension) {
-                case ENTERA -> pensionBase;
-                case MEDIA -> pensionBase / 2;
-                case TERCIO -> pensionBase / 3;
-            };
-        }
-
-        return (cuotaBase * multiplicador) + pension;
-    }
-
 }

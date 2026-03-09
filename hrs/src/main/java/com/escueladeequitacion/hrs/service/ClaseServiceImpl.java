@@ -434,6 +434,8 @@ public class ClaseServiceImpl implements ClaseService {
             LocalTime horaFinalizacion = clase.getHora().plusMinutes(60);
             if (!horaFinalizacion.isAfter(ahora)) {
                 clase.setEstado(Estado.COMPLETADA);
+                // TODO Al cambiar estado a COMPLETADA, agregar esto:
+                // abonoService.descontarClaseDeAbono(clase.getAlumno().getId());
                 claseRepository.save(clase);
             }
         }

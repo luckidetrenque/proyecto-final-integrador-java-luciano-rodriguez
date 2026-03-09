@@ -97,20 +97,4 @@ public class Instructor extends Persona {
     public Rol getRol() {
         return Rol.INSTRUCTOR;
     }
-
-    @Override
-    public double calcularPago() {
-        // Salario base mensual para instructores
-        double salarioBase = 2000.0;
-
-        // Bono por clase impartida ($50 por clase)
-        long clasesDelMes = clases.stream()
-                .filter(c -> c.getDia().getMonth() == LocalDate.now().getMonth()
-                        && c.getDia().getYear() == LocalDate.now().getYear())
-                .count();
-
-        double bonoPorClases = clasesDelMes * 50.0;
-
-        return salarioBase + bonoPorClases;
-    }
 }
