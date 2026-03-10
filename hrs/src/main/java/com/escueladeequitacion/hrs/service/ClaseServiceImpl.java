@@ -46,6 +46,9 @@ public class ClaseServiceImpl implements ClaseService {
     AlumnoService alumnoService;
 
     @Autowired
+    AbonoService abonoService;
+
+    @Autowired
     InstructorService instructorService;
 
     @Autowired
@@ -434,8 +437,10 @@ public class ClaseServiceImpl implements ClaseService {
             LocalTime horaFinalizacion = clase.getHora().plusMinutes(60);
             if (!horaFinalizacion.isAfter(ahora)) {
                 clase.setEstado(Estado.COMPLETADA);
-                // TODO Al cambiar estado a COMPLETADA, agregar esto:
-                // abonoService.descontarClaseDeAbono(clase.getAlumno().getId());
+                if (clase.getAlumno() != null) {
+                    abonoService.obtenerAbonoActivo(clase.getAlumno().getId())
+                            .ifPresent(abono -> abonoService.descontarClase(abono.getId()));
+                }
                 claseRepository.save(clase);
             }
         }
@@ -680,6 +685,11 @@ public class ClaseServiceImpl implements ClaseService {
         clase.setEstado(nuevoEstado);
         clase.setObservaciones(observaciones);
         claseRepository.save(clase);
+
+        if ((nuevoEstado == Estado.COMPLETADA || nuevoEstado == Estado.ASA) && clase.getAlumno() != null) {
+            abonoService.obtenerAbonoActivo(clase.getAlumno().getId())
+                    .ifPresent(abono -> abonoService.descontarClase(abono.getId()));
+        }
         return new ClaseResponseDto(clase);
     }
 
