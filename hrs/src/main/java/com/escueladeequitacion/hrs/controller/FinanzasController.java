@@ -22,8 +22,8 @@ public class FinanzasController {
      */
     @GetMapping("/resumen")
     public ResponseEntity<ResumenFinancieroDto> getResumen(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fin) {
+            @RequestParam("inicio") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
+            @RequestParam("fin") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fin) {
         return ResponseEntity.ok(finanzasService.calcularResumen(inicio, fin));
     }
 
@@ -33,8 +33,8 @@ public class FinanzasController {
      */
     @GetMapping("/alumnos")
     public ResponseEntity<CuotasAlumnosDto> getCuotasAlumnos(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fin) {
+            @RequestParam("inicio") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
+            @RequestParam("fin") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fin) {
         return ResponseEntity.ok(finanzasService.calcularCuotasAlumnos(inicio, fin));
     }
 
@@ -48,13 +48,13 @@ public class FinanzasController {
     }
 
     /**
-     * GET /api/v1/finanzas/instructores?inicio=&fin=
+     * GET /api/v1/finanzas/honorarios?inicio=&fin=
      * Honorarios proyectados por instructor (clases dictadas × tarifa).
      */
-    @GetMapping("/instructores")
+    @GetMapping("/honorarios")
     public ResponseEntity<HonorariosDto> getHonorarios(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fin) {
+            @RequestParam("inicio") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
+            @RequestParam("fin") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fin) {
         return ResponseEntity.ok(finanzasService.calcularHonorarios(inicio, fin));
     }
 

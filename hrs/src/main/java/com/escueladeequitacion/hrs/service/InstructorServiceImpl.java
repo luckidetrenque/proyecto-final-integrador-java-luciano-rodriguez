@@ -9,11 +9,12 @@ import com.escueladeequitacion.hrs.repository.InstructorRepository;
 
 import jakarta.transaction.Transactional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -204,33 +205,12 @@ public class InstructorServiceImpl implements InstructorService {
         instructorRepository.save(instructorExistente);
     }
 
-    /**
-     * Busca instructores con múltiples filtros.
-     */
     @Override
-    public List<Instructor> buscarInstructoresConFiltros(String nombre, String apellido,
-            Boolean activo, LocalDate fechaNacimiento) {
-        if (nombre != null && apellido != null) {
-            return instructorRepository.findByNombreAndApellidoIgnoreCase(nombre, apellido);
-        }
-
-        if (nombre != null) {
-            return instructorRepository.findByNombreIgnoreCase(nombre);
-        }
-
-        if (apellido != null) {
-            return instructorRepository.findByApellidoIgnoreCase(apellido);
-        }
-
+    public Page<Instructor> listarInstructoresPaginado(Pageable pageable, Boolean activo) {
         if (activo != null) {
-            return instructorRepository.findByActivo(activo);
+            return instructorRepository.findByActivo(activo, pageable);
         }
-
-        if (fechaNacimiento != null) {
-            return instructorRepository.findByFechaNacimiento(fechaNacimiento);
-        }
-
-        return new ArrayList<>();
+        return instructorRepository.findAll(pageable);
     }
 
     /**

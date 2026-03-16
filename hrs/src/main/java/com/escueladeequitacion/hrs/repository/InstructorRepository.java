@@ -5,6 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -36,5 +39,9 @@ public interface InstructorRepository extends JpaRepository<Instructor, Long> {
 
     // Método para eliminar un instructor por su DNI
     public void deleteByDni(String dni);
+
+    public Page<Instructor> findAll(Pageable pageable);
+
+    public Page<Instructor> findByActivo(Boolean activo, Pageable pageable);
 
 }

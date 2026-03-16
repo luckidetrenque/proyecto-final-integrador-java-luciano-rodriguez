@@ -3,6 +3,8 @@ package com.escueladeequitacion.hrs.repository;
 import com.escueladeequitacion.hrs.enums.Estado;
 import com.escueladeequitacion.hrs.model.Alumno;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -55,5 +57,25 @@ public interface AlumnoRepository extends JpaRepository<Alumno, Long> {
 
         @Query("SELECT a FROM Alumno a LEFT JOIN FETCH a.caballoPropio WHERE a.id = :alumnoId")
         public Optional<Alumno> findAlumnoConCaballo(@Param("alumnoId") Long alumnoId);
+
+        // Agregar estos métodos al final de la interfaz, antes del cierre }
+
+        public Page<Alumno> findAll(Pageable pageable);
+
+        public Page<Alumno> findByActivo(Boolean activo, Pageable pageable);
+
+        public Page<Alumno> findByPropietario(Boolean propietario, Pageable pageable);
+
+        public Page<Alumno> findByCantidadClases(Integer cantidadClases, Pageable pageable);
+
+        public Page<Alumno> findByActivoAndPropietario(Boolean activo, Boolean propietario, Pageable pageable);
+
+        public Page<Alumno> findByActivoAndCantidadClases(Boolean activo, Integer cantidadClases, Pageable pageable);
+
+        public Page<Alumno> findByPropietarioAndCantidadClases(Boolean propietario, Integer cantidadClases,
+                        Pageable pageable);
+
+        public Page<Alumno> findByActivoAndPropietarioAndCantidadClases(Boolean activo, Boolean propietario,
+                        Integer cantidadClases, Pageable pageable);
 
 }

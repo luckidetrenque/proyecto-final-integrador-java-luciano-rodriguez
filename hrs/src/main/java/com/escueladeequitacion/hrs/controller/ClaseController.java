@@ -16,13 +16,15 @@ import com.escueladeequitacion.hrs.utility.Mensaje;
 import jakarta.validation.Valid;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -56,9 +58,12 @@ public class ClaseController {
      * Lista todas las clases (sin detalles de relaciones).
      */
     @GetMapping()
-    public ResponseEntity<List<Clase>> listarClases() {
-        List<Clase> clases = claseService.listarClases();
-        return ResponseEntity.status(HttpStatus.OK).body(clases);
+    public ResponseEntity<Page<ClaseResponseDto>> listarClases(
+            @PageableDefault(size = 20, sort = "dia", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(name = "estado", required = false) Estado estado,
+            @RequestParam(name = "especialidad", required = false) Especialidad especialidad) {
+        Page<ClaseResponseDto> clases = claseService.listarClasesPaginado(pageable, estado, especialidad);
+        return ResponseEntity.ok(clases);
     }
 
     // Endpoint GET para buscar una clase por ID
@@ -92,7 +97,7 @@ public class ClaseController {
      * Elimina una clase (eliminación física).
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminarClase(@PathVariable Long id) {
+    public ResponseEntity<?> eliminarClase(@PathVariable("id") Long id) {
         // El Service valida que existe antes de eliminar
         claseService.eliminarClase(id);
 
@@ -122,7 +127,7 @@ public class ClaseController {
      * Actualiza una clase existente.
      */
     @PutMapping("/{id}")
-    public ResponseEntity<?> actualizarClase(@PathVariable Long id,
+    public ResponseEntity<?> actualizarClase(@PathVariable("id") Long id,
             @Validated(AlActualizar.class) @RequestBody ClaseDto claseDto) {
         // El Service maneja todas las validaciones
         claseService.actualizarClase(id, claseDto);
@@ -137,7 +142,7 @@ public class ClaseController {
      */
     @PatchMapping("/{id}/estado")
     public ResponseEntity<ClaseResponseDto> cambiarEstadoClase(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @RequestBody Map<String, String> body) {
 
         String estadoStr = body.get("estado");
@@ -176,7 +181,7 @@ public class ClaseController {
      * Obtiene una clase específica con todos sus detalles.
      */
     @GetMapping("/{id}/detalles")
-    public ResponseEntity<ClaseResponseDto> obtenerClaseConDetalles(@PathVariable Long id) {
+    public ResponseEntity<ClaseResponseDto> obtenerClaseConDetalles(@PathVariable("id") Long id) {
         ClaseResponseDto clase = claseService.buscarClasePorIdConDetalles(id)
                 .orElseThrow(
                         () -> new com.escueladeequitacion.hrs.exception.ResourceNotFoundException("Clase", "ID", id));
@@ -189,7 +194,7 @@ public class ClaseController {
      * Busca clases por fecha con detalles.
      */
     @GetMapping("/dia/{dia}/detalles")
-    public ResponseEntity<List<ClaseResponseDto>> obtenerClasesPorDiaConDetalles(@PathVariable LocalDate dia) {
+    public ResponseEntity<List<ClaseResponseDto>> obtenerClasesPorDiaConDetalles(@PathVariable("dia") LocalDate dia) {
         List<ClaseResponseDto> clases = claseService.buscarClasePorDiaConDetalles(dia);
         return ResponseEntity.status(HttpStatus.OK).body(clases);
     }
@@ -200,7 +205,7 @@ public class ClaseController {
      */
     @GetMapping("/instructor/{instructorId}/detalles")
     public ResponseEntity<List<ClaseResponseDto>> obtenerClasesPorInstructorConDetalles(
-            @PathVariable Long instructorId) {
+            @PathVariable("instructorId") Long instructorId) {
         List<ClaseResponseDto> clases = claseService.buscarClasePorInstructorConDetalles(instructorId);
         return ResponseEntity.status(HttpStatus.OK).body(clases);
     }
@@ -210,7 +215,8 @@ public class ClaseController {
      * Obtiene todas las clases de un alumno específico.
      */
     @GetMapping("/alumno/{alumnoId}/detalles")
-    public ResponseEntity<List<ClaseResponseDto>> obtenerClasesPorAlumnoConDetalles(@PathVariable Long alumnoId) {
+    public ResponseEntity<List<ClaseResponseDto>> obtenerClasesPorAlumnoConDetalles(
+            @PathVariable("alumnoId") Long alumnoId) {
         List<ClaseResponseDto> clases = claseService.buscarClasePorAlumnoConDetalles(alumnoId);
         return ResponseEntity.status(HttpStatus.OK).body(clases);
     }
@@ -220,13 +226,13 @@ public class ClaseController {
      * Obtiene todas las clases de un alumno específico.
      */
     @GetMapping("/caballo/{caballoId}/detalles")
-    public ResponseEntity<?> obtenerClasesPorCaballoConDetalles(@PathVariable Long caballoId) {
+    public ResponseEntity<?> obtenerClasesPorCaballoConDetalles(@PathVariable("caballoId") Long caballoId) {
         List<ClaseResponseDto> clases = claseService.buscarClasePorCaballoConDetalles(caballoId);
         return ResponseEntity.status(HttpStatus.OK).body(clases);
     }
 
     @GetMapping("/estado/{estado}/detalles")
-    public ResponseEntity<?> obtenerClasesPorEstadoConDetalles(@PathVariable Estado estado) {
+    public ResponseEntity<?> obtenerClasesPorEstadoConDetalles(@PathVariable("estado") Estado estado) {
         if (!claseService.existeClasePorEstado(estado)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new Mensaje("No existen clases " + estado));
@@ -234,39 +240,6 @@ public class ClaseController {
 
         List<ClaseResponseDto> clases = claseService.buscarClasePorEstadoConDetalles(estado);
         return ResponseEntity.status(HttpStatus.OK).body(clases);
-    }
-
-    // Endpoint GET para buscar por diferentes filtros
-    /**
-     * GET /api/v1/alumnos/buscar
-     * Busca alumnos por múltiples criterios.
-     */
-    @GetMapping("/buscar")
-    public ResponseEntity<?> buscarAlumno(
-
-            @RequestParam(required = false) LocalDate dia,
-            @RequestParam(required = false) LocalTime hora,
-            @RequestParam(required = false) Long alumno,
-            @RequestParam(required = false) Long instructor,
-            @RequestParam(required = false) Long caballo,
-            @RequestParam(required = false) Especialidad especialidad,
-            @RequestParam(required = false) Estado estado) {
-
-        List<Clase> clases = claseService.buscarClasesConFiltros(
-                dia, hora, alumno, instructor, caballo, especialidad, estado);
-
-        if (!clases.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.OK).body(clases);
-        }
-
-        // Si no hay resultados, devolver todos con mensaje
-        clases = claseService.listarClases();
-        Map<String, Object> respuesta = new LinkedHashMap<>();
-        respuesta.put("mensaje",
-                "No existen clases con los filtros de búsqueda ingresados, se retorna el listado completo.");
-        respuesta.put("clases", clases);
-
-        return ResponseEntity.status(HttpStatus.OK).body(respuesta);
     }
 
     // ============================================================
@@ -278,7 +251,8 @@ public class ClaseController {
      * Cuenta las clases completadas de un alumno.
      */
     @GetMapping("/alumno/{alumnoId}/completadas/count")
-    public ResponseEntity<Map<String, Object>> contarClasesCompletadasPorAlumno(@PathVariable Long alumnoId) {
+    public ResponseEntity<Map<String, Object>> contarClasesCompletadasPorAlumno(
+            @PathVariable("alumnoId") Long alumnoId) {
         long count = claseService.contarClasesCompletadasPorAlumno(alumnoId);
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("alumnoId", alumnoId);
@@ -291,7 +265,8 @@ public class ClaseController {
      * Cuenta las clases completadas de un instructor.
      */
     @GetMapping("/instructor/{instructorId}/completadas/count")
-    public ResponseEntity<Map<String, Object>> contarClasesCompletadasPorInstructor(@PathVariable Long instructorId) {
+    public ResponseEntity<Map<String, Object>> contarClasesCompletadasPorInstructor(
+            @PathVariable("instructorId") Long instructorId) {
         long count = claseService.contarClasesCompletadasPorInstructor(instructorId);
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("instructorId", instructorId);
@@ -343,7 +318,7 @@ public class ClaseController {
      */
     @GetMapping("/alumno/{alumnoId}/prueba")
     public ResponseEntity<List<ClaseResponseDto>> obtenerClasesDePruebaPorAlumno(
-            @PathVariable Long alumnoId) {
+            @PathVariable("alumnoId") Long alumnoId) {
 
         List<ClaseResponseDto> clases = claseService.listarClasesDePruebaPorAlumno(alumnoId);
         return ResponseEntity.ok(clases);
@@ -358,7 +333,7 @@ public class ClaseController {
      * @return {alumnoId: N, tienePrueba: true/false, cantidadClasesPrueba: N}
      */
     @GetMapping("/alumno/{alumnoId}/tiene-prueba")
-    public ResponseEntity<Map<String, Object>> verificarClaseDePrueba(@PathVariable Long alumnoId) {
+    public ResponseEntity<Map<String, Object>> verificarClaseDePrueba(@PathVariable("alumnoId") Long alumnoId) {
         Map<String, Object> info = claseService.obtenerInfoClasesDePrueba(alumnoId);
         return ResponseEntity.ok(info);
     }

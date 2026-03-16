@@ -16,11 +16,13 @@ import com.escueladeequitacion.hrs.utility.Constantes;
 
 import jakarta.transaction.Transactional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -340,44 +342,54 @@ public class AlumnoServiceImpl implements AlumnoService {
         alumnoRepository.save(alumnoExistente);
     }
 
-    /**
-     * Busca alumnos con múltiples filtros.
-     */
     @Override
-    public List<Alumno> buscarAlumnosConFiltros(String nombre, String apellido, Boolean activo,
-            Boolean propietario, LocalDate fechaInscripcion,
-            LocalDate fechaNacimiento) {
-        // Aplicar filtros en orden de especificidad
-        if (nombre != null && apellido != null) {
-            return alumnoRepository.findByNombreAndApellidoIgnoreCase(nombre, apellido);
+    public Page<AlumnoListadoDto> listarAlumnosPaginado(Pageable pageable, Boolean activo, Boolean propietario,
+            Integer cantidadClases) {
+        Page<Alumno> page;
+
+        if (activo != null && propietario != null && cantidadClases != null) {
+            page = alumnoRepository.findByActivoAndPropietarioAndCantidadClases(activo, propietario, cantidadClases,
+                    pageable);
+        } else if (activo != null && propietario != null) {
+            page = alumnoRepository.findByActivoAndPropietario(activo, propietario, pageable);
+        } else if (activo != null && cantidadClases != null) {
+            page = alumnoRepository.findByActivoAndCantidadClases(activo, cantidadClases, pageable);
+        } else if (propietario != null && cantidadClases != null) {
+            page = alumnoRepository.findByPropietarioAndCantidadClases(propietario, cantidadClases, pageable);
+        } else if (activo != null) {
+            page = alumnoRepository.findByActivo(activo, pageable);
+        } else if (propietario != null) {
+            page = alumnoRepository.findByPropietario(propietario, pageable);
+        } else if (cantidadClases != null) {
+            page = alumnoRepository.findByCantidadClases(cantidadClases, pageable);
+        } else {
+            page = alumnoRepository.findAll(pageable);
         }
 
-        if (nombre != null) {
-            return alumnoRepository.findByNombreIgnoreCase(nombre);
-        }
+        List<AlumnoListadoDto> dtos = page.getContent().stream().map(alumno -> {
+            AlumnoListadoDto dto = new AlumnoListadoDto();
+            dto.setId(alumno.getId());
+            dto.setNombre(alumno.getNombre());
+            dto.setApellido(alumno.getApellido());
+            dto.setDni(alumno.getDni());
+            dto.setEmail(alumno.getEmail());
+            dto.setCodigoArea(alumno.getCodigoArea());
+            dto.setTelefono(alumno.getTelefono());
+            dto.setFechaNacimiento(alumno.getFechaNacimiento());
+            dto.setFechaInscripcion(alumno.getFechaInscripcion());
+            dto.setActivo(alumno.isActivo());
+            dto.setPropietario(alumno.isPropietario());
+            dto.setCantidadClases(alumno.getCantidadClases());
+            dto.setTipoPension(alumno.getTipoPension() != null ? alumno.getTipoPension().name() : null);
+            dto.setCuotaPension(alumno.getCuotaPension() != null ? alumno.getCuotaPension().name() : null);
+            if (alumno.getCaballoPropio() != null) {
+                dto.setCaballoId(alumno.getCaballoPropio().getId());
+                dto.setCaballoNombre(alumno.getCaballoPropio().getNombre());
+            }
+            return dto;
+        }).collect(Collectors.toList());
 
-        if (apellido != null) {
-            return alumnoRepository.findByApellidoIgnoreCase(apellido);
-        }
-
-        if (activo != null) {
-            return alumnoRepository.findByActivo(activo);
-        }
-
-        if (propietario != null) {
-            return alumnoRepository.findByPropietario(propietario);
-        }
-
-        if (fechaInscripcion != null) {
-            return alumnoRepository.findByFechaInscripcion(fechaInscripcion);
-        }
-
-        if (fechaNacimiento != null) {
-            return alumnoRepository.findByFechaNacimiento(fechaNacimiento);
-        }
-
-        // Si no hay filtros, retornar lista vacía (el controller devuelve todos)
-        return new ArrayList<>();
+        return new PageImpl<>(dtos, pageable, page.getTotalElements());
     }
 
     /**

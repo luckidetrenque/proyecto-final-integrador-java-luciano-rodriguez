@@ -13,8 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 
-import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,9 +49,13 @@ public class AlumnoController {
      * Lista todos los alumnos con información resumida (DTO).
      */
     @GetMapping()
-    public ResponseEntity<List<AlumnoListadoDto>> listarAlumnos() {
-        // TODO - Agregar paginación y ordenamiento
-        List<AlumnoListadoDto> alumnos = alumnoService.listarAlumnosListado();
+    public ResponseEntity<Page<AlumnoListadoDto>> listarAlumnos(
+            @PageableDefault(size = 20, sort = "apellido") Pageable pageable,
+            @RequestParam(name = "activo", required = false) Boolean activo,
+            @RequestParam(name = "propietario", required = false) Boolean propietario,
+            @RequestParam(name = "cantidadClases", required = false) Integer cantidadClases) {
+        Page<AlumnoListadoDto> alumnos = alumnoService.listarAlumnosPaginado(pageable, activo, propietario,
+                cantidadClases);
         return ResponseEntity.ok(alumnos);
     }
 
@@ -135,7 +141,7 @@ public class AlumnoController {
      * Elimina un alumno (eliminación física).
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminarAlumno(@PathVariable Long id) {
+    public ResponseEntity<?> eliminarAlumno(@PathVariable("id") Long id) {
         // El Service valida que existe antes de eliminar
         alumnoService.eliminarAlumno(id);
 
@@ -149,7 +155,7 @@ public class AlumnoController {
      * Inactiva un alumno (eliminación lógica).
      */
     @DeleteMapping("/{id}/inactivar")
-    public ResponseEntity<?> eliminarAlumnoTemporalmente(@PathVariable Long id) {
+    public ResponseEntity<?> eliminarAlumnoTemporalmente(@PathVariable("id") Long id) {
         // El Service valida:
         // 1. Alumno existe
         // 2. Alumno está activo
@@ -161,7 +167,7 @@ public class AlumnoController {
 
     // Endpoint GET para contar las clases completadas de un alumno
     @GetMapping("/{id}/clases/completadas/count")
-    public ResponseEntity<?> contarClasesCompletadas(@PathVariable Long id) {
+    public ResponseEntity<?> contarClasesCompletadas(@PathVariable("id") Long id) {
 
         long count = alumnoService.contarClasesCompletadas(id);
 
@@ -170,37 +176,6 @@ public class AlumnoController {
         response.put("clasesCompletadas", count);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
-
-    // Endpoint GET para buscar por diferentes filtros
-    /**
-     * GET /api/v1/alumnos/buscar
-     * Busca alumnos por múltiples criterios.
-     */
-    @GetMapping("/buscar")
-    public ResponseEntity<?> buscarAlumno(
-            @RequestParam(required = false) String nombre,
-            @RequestParam(required = false) String apellido,
-            @RequestParam(required = false) Boolean activo,
-            @RequestParam(required = false) Boolean propietario,
-            @RequestParam(required = false) LocalDate fechaInscripcion,
-            @RequestParam(required = false) LocalDate fechaNacimiento) {
-
-        List<Alumno> alumnos = alumnoService.buscarAlumnosConFiltros(
-                nombre, apellido, activo, propietario, fechaInscripcion, fechaNacimiento);
-
-        if (!alumnos.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.OK).body(alumnos);
-        }
-
-        // Si no hay resultados, devolver todos con mensaje
-        alumnos = alumnoService.listarAlumnos();
-        Map<String, Object> respuesta = new LinkedHashMap<>();
-        respuesta.put("mensaje",
-                "No existen alumnos con los filtros de búsqueda ingresados, se retorna el listado completo.");
-        respuesta.put("alumnos", alumnos);
-
-        return ResponseEntity.status(HttpStatus.OK).body(respuesta);
     }
 
     /**
@@ -214,7 +189,7 @@ public class AlumnoController {
      */
     @PutMapping("/{id}/convertir-a-plan")
     public ResponseEntity<?> convertirAlumnoAPlan(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @RequestBody @Valid ConversionAPlanRequest request) {
 
         alumnoService.convertirAlumnoAPlan(id, request.getCantidadClases());

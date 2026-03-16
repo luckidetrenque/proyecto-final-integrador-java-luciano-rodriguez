@@ -6,6 +6,9 @@ import com.escueladeequitacion.hrs.enums.Especialidad;
 import com.escueladeequitacion.hrs.enums.Estado;
 import com.escueladeequitacion.hrs.model.Clase;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -134,14 +137,7 @@ public interface ClaseService {
 
     public void actualizarEstadosDeClases();
 
-    public List<Clase> buscarClasesConFiltros(LocalDate dia,
-            LocalTime hora,
-            Long alumno,
-            Long instructor,
-            Long caballo,
-            Especialidad especialidad,
-            Estado estado);
-
+    public Page<ClaseResponseDto> listarClasesPaginado(Pageable pageable, Estado estado, Especialidad especialidad);
     // ============================================================
     // MÉTODOS PARA CLASES DE PRUEBA
     // ============================================================

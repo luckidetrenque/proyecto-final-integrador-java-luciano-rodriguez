@@ -11,11 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 
 @RestController
 @RequestMapping("/api/v1/instructores")
@@ -31,9 +29,11 @@ public class InstructorController {
      * GET /api/v1/instructores
      */
     @GetMapping()
-    public ResponseEntity<List<Instructor>> listarInstructores() {
-        List<Instructor> instructores = instructorService.listarInstructores();
-        return ResponseEntity.status(HttpStatus.OK).body(instructores);
+    public ResponseEntity<Page<Instructor>> listarInstructores(
+            @PageableDefault(size = 20, sort = "apellido") Pageable pageable,
+            @RequestParam(name = "activo", required = false) Boolean activo) {
+        Page<Instructor> instructores = instructorService.listarInstructoresPaginado(pageable, activo);
+        return ResponseEntity.ok(instructores);
     }
 
     // Endpoint GET para buscar un instructor por ID
@@ -95,7 +95,7 @@ public class InstructorController {
      * DELETE /api/v1/instructores/{id}
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminarInstructor(@PathVariable Long id) {
+    public ResponseEntity<?> eliminarInstructor(@PathVariable("id") Long id) {
 
         instructorService.eliminarInstructor(id);
 
@@ -108,37 +108,11 @@ public class InstructorController {
      * DELETE /api/v1/instructores/{id}/inactivar
      */
     @DeleteMapping("/{id}/inactivar")
-    public ResponseEntity<?> eliminarInstructorTemporalmente(@PathVariable Long id) {
+    public ResponseEntity<?> eliminarInstructorTemporalmente(@PathVariable("id") Long id) {
         instructorService.eliminarInstructorTemporalmente(id);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new Mensaje("Instructor con ID " + id + " inactivado correctamente"));
     }
 
-    // Endpoint GET para buscar por diferentes filtros
-    /**
-     * GET /api/v1/instructores/buscar
-     */
-    @GetMapping("/buscar")
-    public ResponseEntity<?> buscarInstructor(
-            @RequestParam(required = false) String nombre,
-            @RequestParam(required = false) String apellido,
-            @RequestParam(required = false) Boolean activo,
-            @RequestParam(required = false) LocalDate fechaNacimiento) {
-
-        List<Instructor> instructores = instructorService.buscarInstructoresConFiltros(
-                nombre, apellido, activo, fechaNacimiento);
-
-        if (!instructores.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.OK).body(instructores);
-        }
-
-        instructores = instructorService.listarInstructores();
-        Map<String, Object> respuesta = new LinkedHashMap<>();
-        respuesta.put("mensaje",
-                "No existen instructores con los filtros de búsqueda ingresados, se retorna el listado completo.");
-        respuesta.put("instructores", instructores);
-
-        return ResponseEntity.status(HttpStatus.OK).body(respuesta);
-    }
 }

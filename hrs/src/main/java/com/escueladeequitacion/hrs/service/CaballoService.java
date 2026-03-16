@@ -7,6 +7,9 @@ import com.escueladeequitacion.hrs.model.Caballo;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 // Interfaz para el servicio de Caballo
 public interface CaballoService {
 
@@ -52,10 +55,7 @@ public interface CaballoService {
      */
     public void actualizarCaballoDesdeDto(Long id, CaballoDto caballoDto);
 
-    /**
-     * Busca caballos con múltiples filtros.
-     */
-    public List<Caballo> buscarCaballosConFiltros(String nombre, Boolean disponible, Tipo tipo);
+    public Page<Caballo> listarCaballos(Pageable pageable, Boolean disponible, Tipo tipo);
 
     /// Método para buscar un caballo junto con sus alumnos propietarios
     public Optional<Caballo> buscarCaballoConAlumnosPorId(Long id);

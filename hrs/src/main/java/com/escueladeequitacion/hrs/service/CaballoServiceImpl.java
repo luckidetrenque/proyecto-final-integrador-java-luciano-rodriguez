@@ -11,9 +11,10 @@ import com.escueladeequitacion.hrs.repository.CaballoRepository;
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -165,24 +166,18 @@ public class CaballoServiceImpl implements CaballoService {
         caballoRepository.save(caballoExistente);
     }
 
-    /**
-     * Busca caballos con múltiples filtros.
-     */
     @Override
-    public List<Caballo> buscarCaballosConFiltros(String nombre, Boolean disponible, Tipo tipo) {
-        if (nombre != null) {
-            return caballoRepository.findByNombreIgnoreCase(nombre);
+    public Page<Caballo> listarCaballos(Pageable pageable, Boolean disponible, Tipo tipo) {
+        if (disponible != null && tipo != null) {
+            return caballoRepository.findByDisponibleAndTipo(disponible, tipo, pageable);
         }
-
         if (disponible != null) {
-            return caballoRepository.findByDisponible(disponible);
+            return caballoRepository.findByDisponible(disponible, pageable);
         }
-
         if (tipo != null) {
-            return caballoRepository.findBytipo(tipo);
+            return caballoRepository.findByTipo(tipo, pageable);
         }
-
-        return new ArrayList<>();
+        return caballoRepository.findAll(pageable); // ya existe en JpaRepository
     }
 
     @Override

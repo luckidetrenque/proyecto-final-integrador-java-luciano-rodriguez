@@ -65,8 +65,8 @@ public class PagoController {
      */
     @GetMapping("/periodo")
     public ResponseEntity<Map<String, Object>> calcularTotalCobrado(
-            @RequestParam LocalDate desde,
-            @RequestParam LocalDate hasta) {
+            @RequestParam("desde") LocalDate desde,
+            @RequestParam("hasta") LocalDate hasta) {
 
         BigDecimal total = cobranzaService.calcularTotalCobradoEnPeriodo(desde, hasta);
         List<Pago> pagos = cobranzaService.listarPagosEnPeriodo(desde, hasta);

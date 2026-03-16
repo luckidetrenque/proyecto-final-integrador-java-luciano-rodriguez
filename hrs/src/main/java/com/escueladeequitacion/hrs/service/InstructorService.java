@@ -2,6 +2,8 @@ package com.escueladeequitacion.hrs.service;
 
 import com.escueladeequitacion.hrs.dto.InstructorDto;
 import com.escueladeequitacion.hrs.model.Instructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -61,9 +63,5 @@ public interface InstructorService {
      */
     public void actualizarInstructorDesdeDto(Long id, InstructorDto instructorDto);
 
-    /**
-     * Busca instructores con múltiples filtros.
-     */
-    public List<Instructor> buscarInstructoresConFiltros(String nombre, String apellido,
-            Boolean activo, LocalDate fechaNacimiento);
+    public Page<Instructor> listarInstructoresPaginado(Pageable pageable, Boolean activo);
 }

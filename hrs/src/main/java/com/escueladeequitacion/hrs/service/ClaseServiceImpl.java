@@ -14,8 +14,11 @@ import com.escueladeequitacion.hrs.model.PersonaPrueba;
 import com.escueladeequitacion.hrs.repository.ClaseRepository;
 import com.escueladeequitacion.hrs.repository.PersonaPruebaRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+
 import jakarta.transaction.Transactional;
-import jakarta.persistence.criteria.Predicate;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -24,7 +27,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -446,32 +448,25 @@ public class ClaseServiceImpl implements ClaseService {
         }
     }
 
-    /**
-     * Busca clases con múltiples filtros.
-     */
     @Override
-    public List<Clase> buscarClasesConFiltros(LocalDate dia, LocalTime hora, Long alumnoId, Long instructorId,
-            Long caballoId, Especialidad especialidad, Estado estado) {
-        return claseRepository.findAll((root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
+    public Page<ClaseResponseDto> listarClasesPaginado(Pageable pageable, Estado estado, Especialidad especialidad) {
+        Page<Clase> page;
 
-            if (dia != null)
-                predicates.add(cb.equal(root.get("dia"), dia));
-            if (hora != null)
-                predicates.add(cb.equal(root.get("hora"), hora));
-            if (alumnoId != null)
-                predicates.add(cb.equal(root.get("alumno").get("id"), alumnoId));
-            if (instructorId != null)
-                predicates.add(cb.equal(root.get("instructor").get("id"), instructorId));
-            if (caballoId != null)
-                predicates.add(cb.equal(root.get("caballo").get("id"), caballoId));
-            if (especialidad != null)
-                predicates.add(cb.equal(root.get("especialidad"), especialidad));
-            if (estado != null)
-                predicates.add(cb.equal(root.get("estado"), estado));
+        if (estado != null && especialidad != null) {
+            page = claseRepository.findByEstadoAndEspecialidad(estado, especialidad, pageable);
+        } else if (estado != null) {
+            page = claseRepository.findByEstado(estado, pageable);
+        } else if (especialidad != null) {
+            page = claseRepository.findByEspecialidad(especialidad, pageable);
+        } else {
+            page = claseRepository.findAll(pageable);
+        }
 
-            return cb.and(predicates.toArray(new Predicate[0]));
-        });
+        List<ClaseResponseDto> dtos = page.getContent().stream()
+                .map(ClaseResponseDto::new)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(dtos, pageable, page.getTotalElements());
     }
 
     /**

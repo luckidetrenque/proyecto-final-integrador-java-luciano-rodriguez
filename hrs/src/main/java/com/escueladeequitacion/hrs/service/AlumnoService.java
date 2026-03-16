@@ -5,6 +5,9 @@ import com.escueladeequitacion.hrs.dto.AlumnoListadoDto;
 import com.escueladeequitacion.hrs.enums.Estado;
 import com.escueladeequitacion.hrs.model.Alumno;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -80,12 +83,8 @@ public interface AlumnoService {
      */
     public void actualizarAlumnoDesdeDto(Long id, AlumnoDto alumnoDto);
 
-    /**
-     * Busca alumnos con múltiples filtros.
-     */
-    public List<Alumno> buscarAlumnosConFiltros(String nombre, String apellido, Boolean activo,
-            Boolean propietario, LocalDate fechaInscripcion,
-            LocalDate fechaNacimiento);
+    public Page<AlumnoListadoDto> listarAlumnosPaginado(Pageable pageable, Boolean activo, Boolean propietario,
+            Integer cantidadClases);
 
     public void convertirAlumnoAPlan(Long alumnoId, Integer cantidadClases);
 

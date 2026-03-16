@@ -9,13 +9,13 @@ import com.escueladeequitacion.hrs.utility.Mensaje;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/caballos")
@@ -31,9 +31,12 @@ public class CaballoController {
      * GET /api/v1/caballos
      */
     @GetMapping()
-    public ResponseEntity<List<Caballo>> listarCaballos() {
-        List<Caballo> caballos = caballoService.listarCaballos();
-        return ResponseEntity.status(HttpStatus.OK).body(caballos);
+    public ResponseEntity<Page<Caballo>> listarCaballos(
+            @PageableDefault(size = 20, sort = "nombre") Pageable pageable,
+            @RequestParam(name = "disponible", required = false) Boolean disponible,
+            @RequestParam(name = "tipo", required = false) Tipo tipo) {
+        Page<Caballo> caballos = caballoService.listarCaballos(pageable, disponible, tipo);
+        return ResponseEntity.ok(caballos);
     }
 
     // Endpoint GET para buscar un caballo por ID
@@ -81,7 +84,7 @@ public class CaballoController {
      * DELETE /api/v1/caballos/{id}
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminarCaballo(@PathVariable Long id) {
+    public ResponseEntity<?> eliminarCaballo(@PathVariable("id") Long id) {
 
         caballoService.eliminarCaballo(id);
 
@@ -94,7 +97,7 @@ public class CaballoController {
      * DELETE /api/v1/caballos/{id}/inactivar
      */
     @DeleteMapping("/{id}/inactivar")
-    public ResponseEntity<?> eliminarCaballoTemporalmente(@PathVariable Long id) {
+    public ResponseEntity<?> eliminarCaballoTemporalmente(@PathVariable("id") Long id) {
         // El Service maneja todas las validaciones
         caballoService.eliminarcaballoTemporalmente(id);
 
@@ -102,28 +105,4 @@ public class CaballoController {
                 .body(new Mensaje("Caballo con ID " + id + " marcado como no disponible"));
     }
 
-    // Endpoint GET para buscar por diferentes filtros
-    /**
-     * GET /api/v1/caballos/buscar
-     */
-    @GetMapping("/buscar")
-    public ResponseEntity<?> buscarCaballo(
-            @RequestParam(required = false) String nombre,
-            @RequestParam(required = false) Boolean disponible,
-            @RequestParam(required = false) Tipo tipo) {
-
-        List<Caballo> caballos = caballoService.buscarCaballosConFiltros(nombre, disponible, tipo);
-
-        if (!caballos.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.OK).body(caballos);
-        }
-
-        caballos = caballoService.listarCaballos();
-        Map<String, Object> respuesta = new LinkedHashMap<>();
-        respuesta.put("mensaje",
-                "No existen caballos con los filtros de búsqueda ingresados, se retorna el listado completo.");
-        respuesta.put("caballos", caballos);
-
-        return ResponseEntity.status(HttpStatus.OK).body(respuesta);
-    }
 }
