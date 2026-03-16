@@ -19,9 +19,9 @@ docker-compose.override.yml
 # ==========================================
 # IDE
 # ==========================================
-.vscode/settings.json
-.vscode/*.code-profile
-.vscode/launch.json
+**/.vscode/settings.json
+**/.vscode/*.code-profile
+**/.vscode/launch.json
 .idea/
 *.iml
 *.ipr
