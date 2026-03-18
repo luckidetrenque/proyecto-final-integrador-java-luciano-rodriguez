@@ -12,6 +12,7 @@ import com.escueladeequitacion.hrs.model.Alumno;
 import com.escueladeequitacion.hrs.model.Caballo;
 import com.escueladeequitacion.hrs.repository.AlumnoRepository;
 import com.escueladeequitacion.hrs.repository.CaballoRepository;
+import com.escueladeequitacion.hrs.repository.specifications.AlumnoSpecification;
 import com.escueladeequitacion.hrs.utility.Constantes;
 
 import jakarta.transaction.Transactional;
@@ -343,28 +344,16 @@ public class AlumnoServiceImpl implements AlumnoService {
     }
 
     @Override
-    public Page<AlumnoListadoDto> listarAlumnosPaginado(Pageable pageable, Boolean activo, Boolean propietario,
-            Integer cantidadClases) {
-        Page<Alumno> page;
+    public Page<AlumnoListadoDto> listarAlumnosPaginado(
+            Pageable pageable,
+            Boolean activo,
+            Boolean propietario,
+            Integer cantidadClases,
+            String nombre,
+            String apellido) {
 
-        if (activo != null && propietario != null && cantidadClases != null) {
-            page = alumnoRepository.findByActivoAndPropietarioAndCantidadClases(activo, propietario, cantidadClases,
-                    pageable);
-        } else if (activo != null && propietario != null) {
-            page = alumnoRepository.findByActivoAndPropietario(activo, propietario, pageable);
-        } else if (activo != null && cantidadClases != null) {
-            page = alumnoRepository.findByActivoAndCantidadClases(activo, cantidadClases, pageable);
-        } else if (propietario != null && cantidadClases != null) {
-            page = alumnoRepository.findByPropietarioAndCantidadClases(propietario, cantidadClases, pageable);
-        } else if (activo != null) {
-            page = alumnoRepository.findByActivo(activo, pageable);
-        } else if (propietario != null) {
-            page = alumnoRepository.findByPropietario(propietario, pageable);
-        } else if (cantidadClases != null) {
-            page = alumnoRepository.findByCantidadClases(cantidadClases, pageable);
-        } else {
-            page = alumnoRepository.findAll(pageable);
-        }
+        var spec = AlumnoSpecification.filtrar(activo, propietario, cantidadClases, nombre, apellido);
+        Page<Alumno> page = alumnoRepository.findAll(spec, pageable);
 
         List<AlumnoListadoDto> dtos = page.getContent().stream().map(alumno -> {
             AlumnoListadoDto dto = new AlumnoListadoDto();

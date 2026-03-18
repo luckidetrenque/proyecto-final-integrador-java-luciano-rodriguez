@@ -7,6 +7,7 @@ import com.escueladeequitacion.hrs.exception.ConflictException;
 import com.escueladeequitacion.hrs.exception.ResourceNotFoundException;
 import com.escueladeequitacion.hrs.model.Caballo;
 import com.escueladeequitacion.hrs.repository.CaballoRepository;
+import com.escueladeequitacion.hrs.repository.specifications.CaballoSpecification;
 
 import jakarta.transaction.Transactional;
 
@@ -167,17 +168,9 @@ public class CaballoServiceImpl implements CaballoService {
     }
 
     @Override
-    public Page<Caballo> listarCaballos(Pageable pageable, Boolean disponible, Tipo tipo) {
-        if (disponible != null && tipo != null) {
-            return caballoRepository.findByDisponibleAndTipo(disponible, tipo, pageable);
-        }
-        if (disponible != null) {
-            return caballoRepository.findByDisponible(disponible, pageable);
-        }
-        if (tipo != null) {
-            return caballoRepository.findByTipo(tipo, pageable);
-        }
-        return caballoRepository.findAll(pageable); // ya existe en JpaRepository
+    public Page<Caballo> listarCaballos(Pageable pageable, Boolean disponible, Tipo tipo, String nombre) {
+        var spec = CaballoSpecification.filtrar(disponible, tipo, nombre);
+        return caballoRepository.findAll(spec, pageable);
     }
 
     @Override

@@ -34,8 +34,10 @@ public class CaballoController {
     public ResponseEntity<Page<Caballo>> listarCaballos(
             @PageableDefault(size = 20, sort = "nombre") Pageable pageable,
             @RequestParam(name = "disponible", required = false) Boolean disponible,
-            @RequestParam(name = "tipo", required = false) Tipo tipo) {
-        Page<Caballo> caballos = caballoService.listarCaballos(pageable, disponible, tipo);
+            @RequestParam(name = "tipo", required = false) Tipo tipo,
+            @RequestParam(name = "nombre", required = false) String nombre) {
+
+        Page<Caballo> caballos = caballoService.listarCaballos(pageable, disponible, tipo, nombre);
         return ResponseEntity.ok(caballos);
     }
 

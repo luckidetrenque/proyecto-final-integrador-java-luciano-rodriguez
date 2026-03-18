@@ -53,9 +53,12 @@ public class AlumnoController {
             @PageableDefault(size = 20, sort = "apellido") Pageable pageable,
             @RequestParam(name = "activo", required = false) Boolean activo,
             @RequestParam(name = "propietario", required = false) Boolean propietario,
-            @RequestParam(name = "cantidadClases", required = false) Integer cantidadClases) {
-        Page<AlumnoListadoDto> alumnos = alumnoService.listarAlumnosPaginado(pageable, activo, propietario,
-                cantidadClases);
+            @RequestParam(name = "cantidadClases", required = false) Integer cantidadClases,
+            @RequestParam(name = "nombre", required = false) String nombre,
+            @RequestParam(name = "apellido", required = false) String apellido) {
+
+        Page<AlumnoListadoDto> alumnos = alumnoService.listarAlumnosPaginado(
+                pageable, activo, propietario, cantidadClases, nombre, apellido);
         return ResponseEntity.ok(alumnos);
     }
 

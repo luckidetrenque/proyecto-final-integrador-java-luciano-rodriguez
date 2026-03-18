@@ -10,54 +10,40 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-// Interfaz para el servicio de Caballo
 public interface CaballoService {
 
-    // Método para listar todos los caballos
-    public List<Caballo> listarCaballos();
+    List<Caballo> listarCaballos();
 
-    // Métodos para buscar caballos por diferentes criterios
-    public Optional<Caballo> buscarCaballoPorId(Long id);
+    Optional<Caballo> buscarCaballoPorId(Long id);
 
-    public List<Caballo> buscarCaballoPorNombre(String nombre);
+    List<Caballo> buscarCaballoPorNombre(String nombre);
 
-    public List<Caballo> buscarCaballoPorEstado(Boolean disponible);
+    List<Caballo> buscarCaballoPorEstado(Boolean disponible);
 
-    public List<Caballo> buscarCaballoPorTipo(Tipo tipo);
+    List<Caballo> buscarCaballoPorTipo(Tipo tipo);
 
-    // Métodos para verificar la existencia de caballos por diferentes criterios
-    public Boolean existeCaballoPorId(Long id);
+    Boolean existeCaballoPorId(Long id);
 
-    public Boolean existeCaballoPorNombre(String nombre);
+    Boolean existeCaballoPorNombre(String nombre);
 
-    // Método para verificar el estado (disponible/no disponible) de un caballo por
-    // su ID
-    public Boolean estadoCaballo(Long id);
+    Boolean estadoCaballo(Long id);
 
-    // Método para guardar un nuevo caballo
-    public void guardarCaballo(Caballo caballo);
+    void guardarCaballo(Caballo caballo);
 
-    // Método para actualizar un caballo existente
-    public void actualizarCaballo(Long id, Caballo caballo);
+    void actualizarCaballo(Long id, Caballo caballo);
 
-    // Métodos para eliminar un alumno (físicamente o lógicamente)
-    public void eliminarCaballo(Long id);
+    void eliminarCaballo(Long id);
 
-    public void eliminarcaballoTemporalmente(Long id);
+    void eliminarcaballoTemporalmente(Long id);
+
+    Caballo crearCaballoDesdeDto(CaballoDto caballoDto);
+
+    void actualizarCaballoDesdeDto(Long id, CaballoDto caballoDto);
 
     /**
-     * Crea un caballo desde un DTO.
+     * Listado paginado con soporte de búsqueda por nombre (LIKE).
      */
-    public Caballo crearCaballoDesdeDto(CaballoDto caballoDto);
+    Page<Caballo> listarCaballos(Pageable pageable, Boolean disponible, Tipo tipo, String nombre);
 
-    /**
-     * Actualiza un caballo desde un DTO.
-     */
-    public void actualizarCaballoDesdeDto(Long id, CaballoDto caballoDto);
-
-    public Page<Caballo> listarCaballos(Pageable pageable, Boolean disponible, Tipo tipo);
-
-    /// Método para buscar un caballo junto con sus alumnos propietarios
-    public Optional<Caballo> buscarCaballoConAlumnosPorId(Long id);
-
+    Optional<Caballo> buscarCaballoConAlumnosPorId(Long id);
 }

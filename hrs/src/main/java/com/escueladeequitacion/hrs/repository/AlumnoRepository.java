@@ -6,6 +6,7 @@ import com.escueladeequitacion.hrs.model.Alumno;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -14,68 +15,51 @@ import java.util.List;
 import java.util.Optional;
 import java.time.LocalDate;
 
-// Repositorio para la entidad Alumno
 @Repository
-public interface AlumnoRepository extends JpaRepository<Alumno, Long> {
+public interface AlumnoRepository extends JpaRepository<Alumno, Long>,
+        JpaSpecificationExecutor<Alumno> {
 
-        // Métodos para buscar alumnos por diferentes criterios
-        public Optional<Alumno> findByDni(@Param("dni") String dni);
+    Optional<Alumno> findByDni(@Param("dni") String dni);
 
-        public List<Alumno> findByNombreIgnoreCase(@Param("nombre") String nombre);
+    List<Alumno> findByNombreIgnoreCase(@Param("nombre") String nombre);
 
-        public List<Alumno> findByApellidoIgnoreCase(@Param("apellido") String apellido);
+    List<Alumno> findByApellidoIgnoreCase(@Param("apellido") String apellido);
 
-        public List<Alumno> findByNombreAndApellidoIgnoreCase(@Param("nombre") String nombre,
-                        @Param("apellido") String apellido);
+    List<Alumno> findByNombreAndApellidoIgnoreCase(@Param("nombre") String nombre,
+            @Param("apellido") String apellido);
 
-        public List<Alumno> findByActivo(@Param("activo") Boolean activo);
+    List<Alumno> findByActivo(@Param("activo") Boolean activo);
 
-        public List<Alumno> findByPropietario(@Param("propietario") Boolean propietario);
+    List<Alumno> findByPropietario(@Param("propietario") Boolean propietario);
 
-        public List<Alumno> findByFechaInscripcion(LocalDate fechaInscripcion);
+    List<Alumno> findByFechaInscripcion(LocalDate fechaInscripcion);
 
-        public List<Alumno> findByFechaNacimiento(LocalDate fechaNacimiento);
+    List<Alumno> findByFechaNacimiento(LocalDate fechaNacimiento);
 
-        // Métodos para verificar la existencia de un alumno por diferentes criterios
-        public Boolean existsByDni(String dni);
+    Boolean existsByDni(String dni);
 
-        public Boolean existsByNombreAndApellidoIgnoreCase(String nombre, String apellido);
+    Boolean existsByNombreAndApellidoIgnoreCase(String nombre, String apellido);
 
-        // Método para eliminar un alumno por su DNI
-        public void deleteByDni(String dni);
+    void deleteByDni(String dni);
 
-        // Método para contar las clases completadas de un alumno
-        @Query("SELECT COUNT(c) FROM Clase c WHERE c.alumno.id = :alumnoId AND c.estado = :estado")
-        public long contarClasesPorEstado(@Param("alumnoId") Long alumnoId, @Param("estado") Estado estado);
+    @Query("SELECT COUNT(c) FROM Clase c WHERE c.alumno.id = :alumnoId AND c.estado = :estado")
+    long contarClasesPorEstado(@Param("alumnoId") Long alumnoId, @Param("estado") Estado estado);
 
-        // Método para contar las clases a recuperar (canceladas o ausente con aviso) de
-        // un alumno
-        @Query("SELECT COUNT(c) FROM Clase c WHERE c.alumno.id = :alumnoId AND c.estado IN :estados")
-        public long contarClasesPorEstados(
-                        @Param("alumnoId") Long alumnoId,
-                        @Param("estados") List<Estado> estados);
+    @Query("SELECT COUNT(c) FROM Clase c WHERE c.alumno.id = :alumnoId AND c.estado IN :estados")
+    long contarClasesPorEstados(
+            @Param("alumnoId") Long alumnoId,
+            @Param("estados") List<Estado> estados);
 
-        @Query("SELECT a FROM Alumno a LEFT JOIN FETCH a.caballoPropio WHERE a.id = :alumnoId")
-        public Optional<Alumno> findAlumnoConCaballo(@Param("alumnoId") Long alumnoId);
+    @Query("SELECT a FROM Alumno a LEFT JOIN FETCH a.caballoPropio WHERE a.id = :alumnoId")
+    Optional<Alumno> findAlumnoConCaballo(@Param("alumnoId") Long alumnoId);
 
-        // Agregar estos métodos al final de la interfaz, antes del cierre }
-
-        public Page<Alumno> findAll(Pageable pageable);
-
-        public Page<Alumno> findByActivo(Boolean activo, Pageable pageable);
-
-        public Page<Alumno> findByPropietario(Boolean propietario, Pageable pageable);
-
-        public Page<Alumno> findByCantidadClases(Integer cantidadClases, Pageable pageable);
-
-        public Page<Alumno> findByActivoAndPropietario(Boolean activo, Boolean propietario, Pageable pageable);
-
-        public Page<Alumno> findByActivoAndCantidadClases(Boolean activo, Integer cantidadClases, Pageable pageable);
-
-        public Page<Alumno> findByPropietarioAndCantidadClases(Boolean propietario, Integer cantidadClases,
-                        Pageable pageable);
-
-        public Page<Alumno> findByActivoAndPropietarioAndCantidadClases(Boolean activo, Boolean propietario,
-                        Integer cantidadClases, Pageable pageable);
-
+    // Mantenemos estos métodos por compatibilidad con código existente
+    Page<Alumno> findByActivo(Boolean activo, Pageable pageable);
+    Page<Alumno> findByPropietario(Boolean propietario, Pageable pageable);
+    Page<Alumno> findByCantidadClases(Integer cantidadClases, Pageable pageable);
+    Page<Alumno> findByActivoAndPropietario(Boolean activo, Boolean propietario, Pageable pageable);
+    Page<Alumno> findByActivoAndCantidadClases(Boolean activo, Integer cantidadClases, Pageable pageable);
+    Page<Alumno> findByPropietarioAndCantidadClases(Boolean propietario, Integer cantidadClases, Pageable pageable);
+    Page<Alumno> findByActivoAndPropietarioAndCantidadClases(Boolean activo, Boolean propietario,
+            Integer cantidadClases, Pageable pageable);
 }

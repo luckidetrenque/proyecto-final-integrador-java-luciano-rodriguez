@@ -9,59 +9,52 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-// Interfaz para el servicio de Instructor
 public interface InstructorService {
 
-    // Método para listar todos los instructores
-    public List<Instructor> listarInstructores();
+    List<Instructor> listarInstructores();
 
-    // Métodos para buscar instructores por diferentes criterios
-    public Optional<Instructor> buscarInstructorPorId(Long id);
+    Optional<Instructor> buscarInstructorPorId(Long id);
 
-    public Optional<Instructor> buscarInstructorPorDni(String dni);
+    Optional<Instructor> buscarInstructorPorDni(String dni);
 
-    public Optional<Instructor> buscarInstructorPorColor(String color);
+    Optional<Instructor> buscarInstructorPorColor(String color);
 
-    public List<Instructor> buscarInstructorPorNombre(String nombre);
+    List<Instructor> buscarInstructorPorNombre(String nombre);
 
-    public List<Instructor> buscarInstructorPorApellido(String apellido);
+    List<Instructor> buscarInstructorPorApellido(String apellido);
 
-    public List<Instructor> buscarInstructorPorNombreYApellido(String nombre, String apellido);
+    List<Instructor> buscarInstructorPorNombreYApellido(String nombre, String apellido);
 
-    public List<Instructor> buscarInstructorsPorEstado(Boolean activo);
+    List<Instructor> buscarInstructorsPorEstado(Boolean activo);
 
-    public List<Instructor> buscarPorFechaNacimiento(LocalDate fechaNacimiento);
+    List<Instructor> buscarPorFechaNacimiento(LocalDate fechaNacimiento);
 
-    // Métodos para verificar la existencia de instructores por diferentes criterios
-    public Boolean existeInstructorPorId(Long id);
+    Boolean existeInstructorPorId(Long id);
 
-    public Boolean existeInstructorPorDni(String dni);
+    Boolean existeInstructorPorDni(String dni);
 
-    public Boolean existeInstructorPorNombreYApellido(String nombre, String apellido);
+    Boolean existeInstructorPorNombreYApellido(String nombre, String apellido);
 
-    // Método para verificar el estado (activo/inactivo) de un instructor por su ID
-    public Boolean estadoInstructor(Long id);
+    Boolean estadoInstructor(Long id);
 
-    // Método para guardar un nuevo instructor
-    public void guardarInstructor(Instructor instructor);
+    void guardarInstructor(Instructor instructor);
 
-    // Método para actualizar un instructor existente
-    public void actualizarInstructor(Long id, Instructor instructor);
+    void actualizarInstructor(Long id, Instructor instructor);
 
-    // Métodos para eliminar un instructor (físicamente o lógicamente)
-    public void eliminarInstructor(Long id);
+    void eliminarInstructor(Long id);
 
-    public void eliminarInstructorTemporalmente(Long id);
+    void eliminarInstructorTemporalmente(Long id);
+
+    Instructor crearInstructorDesdeDto(InstructorDto instructorDto);
+
+    void actualizarInstructorDesdeDto(Long id, InstructorDto instructorDto);
 
     /**
-     * Crea un instructor desde un DTO.
+     * Listado paginado con soporte de búsqueda por nombre y apellido.
      */
-    public Instructor crearInstructorDesdeDto(InstructorDto instructorDto);
-
-    /**
-     * Actualiza un instructor desde un DTO.
-     */
-    public void actualizarInstructorDesdeDto(Long id, InstructorDto instructorDto);
-
-    public Page<Instructor> listarInstructoresPaginado(Pageable pageable, Boolean activo);
+    Page<Instructor> listarInstructoresPaginado(
+            Pageable pageable,
+            Boolean activo,
+            String nombre,
+            String apellido);
 }

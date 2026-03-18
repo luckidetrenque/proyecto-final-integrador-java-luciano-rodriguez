@@ -6,6 +6,7 @@ import com.escueladeequitacion.hrs.exception.ConflictException;
 import com.escueladeequitacion.hrs.exception.ResourceNotFoundException;
 import com.escueladeequitacion.hrs.model.Instructor;
 import com.escueladeequitacion.hrs.repository.InstructorRepository;
+import com.escueladeequitacion.hrs.repository.specifications.InstructorSpecification;
 
 import jakarta.transaction.Transactional;
 
@@ -206,11 +207,14 @@ public class InstructorServiceImpl implements InstructorService {
     }
 
     @Override
-    public Page<Instructor> listarInstructoresPaginado(Pageable pageable, Boolean activo) {
-        if (activo != null) {
-            return instructorRepository.findByActivo(activo, pageable);
-        }
-        return instructorRepository.findAll(pageable);
+    public Page<Instructor> listarInstructoresPaginado(
+            Pageable pageable,
+            Boolean activo,
+            String nombre,
+            String apellido) {
+
+        var spec = InstructorSpecification.filtrar(activo, nombre, apellido);
+        return instructorRepository.findAll(spec, pageable);
     }
 
     /**

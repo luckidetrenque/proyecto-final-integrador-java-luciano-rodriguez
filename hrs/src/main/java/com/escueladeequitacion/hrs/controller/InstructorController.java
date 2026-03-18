@@ -31,8 +31,12 @@ public class InstructorController {
     @GetMapping()
     public ResponseEntity<Page<Instructor>> listarInstructores(
             @PageableDefault(size = 20, sort = "apellido") Pageable pageable,
-            @RequestParam(name = "activo", required = false) Boolean activo) {
-        Page<Instructor> instructores = instructorService.listarInstructoresPaginado(pageable, activo);
+            @RequestParam(name = "activo", required = false) Boolean activo,
+            @RequestParam(name = "nombre", required = false) String nombre,
+            @RequestParam(name = "apellido", required = false) String apellido) {
+
+        Page<Instructor> instructores = instructorService.listarInstructoresPaginado(
+                pageable, activo, nombre, apellido);
         return ResponseEntity.ok(instructores);
     }
 

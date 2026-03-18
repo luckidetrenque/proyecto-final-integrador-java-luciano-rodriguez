@@ -12,80 +12,69 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-// Interfaz para el servicio de Alumno
 public interface AlumnoService {
 
-    // Método para listar todos los alumnos
-    public List<Alumno> listarAlumnos();
+    List<Alumno> listarAlumnos();
 
-    // Método para listar alumnos sin la información detallada del caballo
-    // (propietarios)
-    public List<AlumnoListadoDto> listarAlumnosListado();
+    List<AlumnoListadoDto> listarAlumnosListado();
 
-    // Métodos para buscar alumnos por diferentes criterios
-    public Optional<Alumno> buscarAlumnoPorId(Long id);
+    Optional<Alumno> buscarAlumnoPorId(Long id);
 
-    public Optional<AlumnoListadoDto> buscarAlumnoPorIdResumido(Long id);
+    Optional<AlumnoListadoDto> buscarAlumnoPorIdResumido(Long id);
 
-    public Optional<Alumno> buscarAlumnoPorDni(String dni);
+    Optional<Alumno> buscarAlumnoPorDni(String dni);
 
-    public List<Alumno> buscarAlumnoPorNombre(String nombre);
+    List<Alumno> buscarAlumnoPorNombre(String nombre);
 
-    public List<Alumno> buscarAlumnoPorApellido(String apellido);
+    List<Alumno> buscarAlumnoPorApellido(String apellido);
 
-    public List<Alumno> buscarAlumnoPorNombreYApellido(String nombre, String apellido);
+    List<Alumno> buscarAlumnoPorNombreYApellido(String nombre, String apellido);
 
-    public List<Alumno> buscarAlumnoPorEstado(Boolean activo);
+    List<Alumno> buscarAlumnoPorEstado(Boolean activo);
 
-    public List<Alumno> buscarAlumnoConCaballo(Boolean propietario);
+    List<Alumno> buscarAlumnoConCaballo(Boolean propietario);
 
-    public List<Alumno> buscarPorFechaInscripcion(LocalDate fechaInscripcion);
+    List<Alumno> buscarPorFechaInscripcion(LocalDate fechaInscripcion);
 
-    public List<Alumno> buscarPorFechaNacimiento(LocalDate fechaNacimiento);
+    List<Alumno> buscarPorFechaNacimiento(LocalDate fechaNacimiento);
 
-    public Optional<Alumno> buscarAlumnoConCaballoPorId(Long id);
+    Optional<Alumno> buscarAlumnoConCaballoPorId(Long id);
 
-    // Métodos para verificar la existencia de alumnos por diferentes criterios
-    public Boolean existeAlumnoPorId(Long id);
+    Boolean existeAlumnoPorId(Long id);
 
-    public Boolean existeAlumnoPorDni(String dni);
+    Boolean existeAlumnoPorDni(String dni);
 
-    public Boolean existeAlumnoPorNombreYApellido(String nombre, String apellido);
+    Boolean existeAlumnoPorNombreYApellido(String nombre, String apellido);
 
-    // Métodos para contar las clases completadas de un alumno
-    public long contarClasesCompletadas(Long alumnoId);
+    long contarClasesCompletadas(Long alumnoId);
 
-    // Métodos para contar las clases a recuperar (canceladas o ausente con aviso)
-    // de un alumno
-    public long contarClasesARecuperar(Long alumnoId, List<Estado> estados);
+    long contarClasesARecuperar(Long alumnoId, List<Estado> estados);
 
-    // Método para verificar el estado (activo/inactivo) de un alumno por su ID
-    public Boolean estadoAlumno(Long id);
+    Boolean estadoAlumno(Long id);
 
-    // Método para guardar un nuevo alumno
-    public void guardarAlumno(Alumno alumno);
+    void guardarAlumno(Alumno alumno);
 
-    // Método para actualizar un alumno existente
-    public void actualizarAlumno(Long id, Alumno alumno);
+    void actualizarAlumno(Long id, Alumno alumno);
 
-    // Métodos para eliminar un alumno (físicamente o lógicamente)
-    public void eliminarAlumno(Long id);
+    void eliminarAlumno(Long id);
 
-    public void eliminarAlumnoTemporalmente(Long id);
+    void eliminarAlumnoTemporalmente(Long id);
+
+    Alumno crearAlumnoDesdeDto(AlumnoDto alumnoDto);
+
+    void actualizarAlumnoDesdeDto(Long id, AlumnoDto alumnoDto);
 
     /**
-     * Crea un alumno desde un DTO con validaciones.
+     * Listado paginado con soporte de búsqueda por nombre y apellido.
+     * Los parámetros nombre y apellido se evalúan con LIKE %valor% (case-insensitive).
      */
-    public Alumno crearAlumnoDesdeDto(AlumnoDto alumnoDto);
+    Page<AlumnoListadoDto> listarAlumnosPaginado(
+            Pageable pageable,
+            Boolean activo,
+            Boolean propietario,
+            Integer cantidadClases,
+            String nombre,
+            String apellido);
 
-    /**
-     * Actualiza un alumno desde un DTO con validaciones.
-     */
-    public void actualizarAlumnoDesdeDto(Long id, AlumnoDto alumnoDto);
-
-    public Page<AlumnoListadoDto> listarAlumnosPaginado(Pageable pageable, Boolean activo, Boolean propietario,
-            Integer cantidadClases);
-
-    public void convertirAlumnoAPlan(Long alumnoId, Integer cantidadClases);
-
+    void convertirAlumnoAPlan(Long alumnoId, Integer cantidadClases);
 }
