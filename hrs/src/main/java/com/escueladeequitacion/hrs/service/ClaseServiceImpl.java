@@ -251,6 +251,9 @@ public class ClaseServiceImpl implements ClaseService {
     @Override
     public Clase crearClase(ClaseDto claseDto) {
 
+        if (claseDto.getInstructorId() == null) {
+            throw new BusinessException("El ID del instructor es obligatorio");
+        }
         Instructor instructor = obtenerInstructorValido(claseDto.getInstructorId());
 
         Alumno alumno = null;
@@ -531,6 +534,9 @@ public class ClaseServiceImpl implements ClaseService {
     }
 
     private Alumno obtenerAlumnoValido(Long id) {
+        if (id == null) {
+            throw new BusinessException("El ID del alumno no puede ser nulo");
+        }
         Alumno alumno = alumnoService.buscarAlumnoPorId(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Alumno", "ID", id));
 
@@ -542,6 +548,9 @@ public class ClaseServiceImpl implements ClaseService {
     }
 
     private Caballo obtenerCaballoValido(Long id) {
+        if (id == null) {
+            throw new BusinessException("El ID del caballo no puede ser nulo");
+        }
         Caballo caballo = caballoService.buscarCaballoPorId(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Caballo", "ID", id));
 
@@ -553,6 +562,9 @@ public class ClaseServiceImpl implements ClaseService {
     }
 
     private Instructor obtenerInstructorValido(Long id) {
+        if (id == null) {
+            throw new BusinessException("El ID del instructor no puede ser nulo");
+        }
         Instructor instructor = instructorService.buscarInstructorPorId(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Instructor", "ID", id));
 

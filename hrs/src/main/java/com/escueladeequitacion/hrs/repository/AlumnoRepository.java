@@ -56,7 +56,7 @@ public interface AlumnoRepository extends JpaRepository<Alumno, Long>,
     // Mantenemos estos métodos por compatibilidad con código existente
     Page<Alumno> findByActivo(Boolean activo, Pageable pageable);
     
-    @Query("SELECT DISTINCT c.alumno FROM Clase c WHERE c.instructor.id = :instructorId")
+    @Query("SELECT DISTINCT a FROM Alumno a JOIN a.clases c WHERE c.instructor.id = :instructorId")
     Page<Alumno> findDistinctByClasesInstructorId(@Param("instructorId") Long instructorId, Pageable pageable);
     Page<Alumno> findByPropietario(Boolean propietario, Pageable pageable);
     Page<Alumno> findByCantidadClases(Integer cantidadClases, Pageable pageable);

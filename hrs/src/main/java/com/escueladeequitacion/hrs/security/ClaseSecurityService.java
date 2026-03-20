@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import com.escueladeequitacion.hrs.model.Clase;
 import com.escueladeequitacion.hrs.model.Instructor;
 import com.escueladeequitacion.hrs.model.Alumno;
 import com.escueladeequitacion.hrs.repository.ClaseRepository;
@@ -27,7 +26,7 @@ public class ClaseSecurityService {
     private UserRepository userRepository;
 
     public boolean puedeModificar(Long claseId, Authentication auth) {
-        if (auth == null || !auth.isAuthenticated()) {
+        if (claseId == null || auth == null || !auth.isAuthenticated()) {
             return false;
         }
 
@@ -37,26 +36,25 @@ public class ClaseSecurityService {
             return true;
         }
 
-        // Obtener el User logueado
-        User user = userRepository.findByUsername(auth.getName()).orElse(null);
-        if (user == null || user.getPersonaDni() == null) {
-            return false;
-        }
-
-        // Buscar el Instructor que tiene ese DNI
-        Instructor instructor = instructorRepository
-                .findByDni(user.getPersonaDni().toString()).orElse(null);
-        if (instructor == null) {
+        Long instructorId = getInstructorId(auth);
+        if (instructorId == null) {
+            System.out.println("DEBUG: No se pudo encontrar el instructorId para el usuario: " + auth.getName());
             return false;
         }
 
         // Verificar que la clase pertenece a ese instructor
-        Clase clase = claseRepository.findById(claseId).orElse(null);
-        if (clase == null) {
-            return false;
-        }
-
-        return clase.getInstructor() != null && clase.getInstructor().getId().equals(instructor.getId());
+        return claseRepository.findById(claseId)
+                .map(clase -> {
+                    Long classInstructorId = (clase.getInstructor() != null) ? clase.getInstructor().getId() : null;
+                    boolean res = instructorId.equals(classInstructorId);
+                    if (!res) {
+                        System.out.println("DEBUG: Acceso denegado. Clase ID: " + claseId + 
+                            ", Instructor de la clase: " + classInstructorId + 
+                            ", Instructor logueado: " + instructorId);
+                    }
+                    return res;
+                })
+                .orElse(false);
     }
 
     public Long getInstructorId(Authentication auth) {
