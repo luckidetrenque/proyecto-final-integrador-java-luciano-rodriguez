@@ -13,13 +13,11 @@ import com.escueladeequitacion.hrs.utility.Mensaje;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-// import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -65,8 +63,7 @@ public class AuthController {
         @NotBlank(message = "El password no puede estar vacío")
         private String password;
 
-        @NotNull(message = "El rol no puede estar vacío")
-        private RolSeguridad rol;
+        private RolSeguridad rol; // Opcional para registro, requerido para actualización
 
         private Integer personaDni; // Opcional: vincular con Alumno/Instructor
 
@@ -123,6 +120,19 @@ public class AuthController {
     }
 
     /**
+     * DTO para que el ADMIN actualice rol y estado sin contraseña
+     */
+    public static class UpdateUserAdminRequest {
+        private RolSeguridad rol;
+        private Boolean activo;
+
+        public RolSeguridad getRol() { return rol; }
+        public void setRol(RolSeguridad rol) { this.rol = rol; }
+        public Boolean getActivo() { return activo; }
+        public void setActivo(Boolean activo) { this.activo = activo; }
+    }
+
+    /**
      * POST /api/v1/auth/login
      * Endpoint de login que retorna los datos del usuario autenticado.
      */
@@ -158,12 +168,12 @@ public class AuthController {
             throw new ConflictException("Usuario", "email", request.getEmail());
         }
 
-        // Crear usuario
+        // Crear usuario SIEMPRE como ALUMNO en registro público
         User user = new User(
                 request.getUsername(),
                 request.getEmail(),
                 passwordEncoder.encode(request.getPassword()),
-                request.getRol());
+                RolSeguridad.ALUMNO);
 
         // Vincular con persona si se proporciona DNI
         if (request.getPersonaDni() != null) {
@@ -199,6 +209,7 @@ public class AuthController {
      * GET /api/v1/auth/users
      * Lista todos los usuarios (solo ADMIN).
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users")
     public ResponseEntity<List<User>> listarUsuarios() {
         List<User> users = userRepository.findAll();
@@ -209,8 +220,9 @@ public class AuthController {
      * GET /api/v1/auth/users/{id}
      * Obtiene un usuario por ID.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users/{id}")
-    public ResponseEntity<?> obtenerUsuario(@PathVariable Long id) {
+    public ResponseEntity<?> obtenerUsuario(@PathVariable("id") Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "ID", id));
         return ResponseEntity.ok(user);
@@ -220,8 +232,9 @@ public class AuthController {
      * DELETE /api/v1/auth/users/{id}
      * Elimina un usuario (solo ADMIN).
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/users/{id}")
-    public ResponseEntity<?> eliminarUsuario(@PathVariable Long id) {
+    public ResponseEntity<?> eliminarUsuario(@PathVariable("id") Long id) {
         // Validar que existe antes de eliminar
         if (!userRepository.existsById(id)) {
             throw new ResourceNotFoundException("Usuario", "ID", id);
@@ -235,6 +248,7 @@ public class AuthController {
      * PUT /api/v1/auth/users/{id}
      * Actualiza un usuario existente.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/users/{id}")
     public ResponseEntity<?> actualizarUsuario(@PathVariable("id") Long id,
             @Valid @RequestBody RegisterRequest request) {
@@ -269,9 +283,33 @@ public class AuthController {
                 .body(new Mensaje("Usuario actualizado correctamente: " + user.getUsername()));
     }
 
+    /**
+     * PATCH /api/v1/auth/users/{id}/admin
+     * Actualiza propiedades administrativas (rol, estado) de un usuario.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/users/{id}/admin")
+    public ResponseEntity<?> adminUpdateUser(@PathVariable("id") Long id, @RequestBody UpdateUserAdminRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "ID", id));
+
+        if (request.getRol() != null) {
+            user.setRol(request.getRol());
+            if (user.getPersonaDni() != null) {
+                user.setPersonaTipo(request.getRol().name());
+            }
+        }
+        if (request.getActivo() != null) {
+            user.setActivo(request.getActivo());
+        }
+
+        userRepository.save(user);
+        return ResponseEntity.ok(new Mensaje("Roles o estado actualizados correctamente para el usuario " + user.getUsername()));
+    }
+
     /* @PreAuthorize("hasRole('ADMIN')") */
     @GetMapping("/check-email/{email}")
-    public ResponseEntity<Void> checkEmailWhitelist(@PathVariable String email) {
+    public ResponseEntity<Void> checkEmailWhitelist(@PathVariable("email") String email) {
         List<String> allowedEmails = Arrays.asList(whitelistEmails.split(","));
 
         boolean isAllowed = allowedEmails.stream()
@@ -285,7 +323,7 @@ public class AuthController {
      * Carga un archivo avatar para un usuario.
      */
     @PostMapping("/users/{id}/avatar")
-    public ResponseEntity<?> uploadAvatar(@PathVariable Long id, @RequestParam("avatar") MultipartFile file) {
+    public ResponseEntity<?> uploadAvatar(@PathVariable("id") Long id, @RequestParam("avatar") MultipartFile file) {
         // 1. Buscar usuario
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario con ID " + id + " no encontrado"));

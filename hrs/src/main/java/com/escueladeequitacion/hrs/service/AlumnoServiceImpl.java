@@ -381,6 +381,35 @@ public class AlumnoServiceImpl implements AlumnoService {
         return new PageImpl<>(dtos, pageable, page.getTotalElements());
     }
 
+    @Override
+    public Page<AlumnoListadoDto> listarAlumnosPorInstructorPaginado(Long instructorId, Pageable pageable) {
+        Page<Alumno> page = alumnoRepository.findDistinctByClasesInstructorId(instructorId, pageable);
+        List<AlumnoListadoDto> dtos = page.getContent().stream().map(alumno -> {
+            AlumnoListadoDto dto = new AlumnoListadoDto();
+            dto.setId(alumno.getId());
+            dto.setNombre(alumno.getNombre());
+            dto.setApellido(alumno.getApellido());
+            dto.setDni(alumno.getDni());
+            dto.setEmail(alumno.getEmail());
+            dto.setCodigoArea(alumno.getCodigoArea());
+            dto.setTelefono(alumno.getTelefono());
+            dto.setFechaNacimiento(alumno.getFechaNacimiento());
+            dto.setFechaInscripcion(alumno.getFechaInscripcion());
+            dto.setActivo(alumno.isActivo());
+            dto.setPropietario(alumno.isPropietario());
+            dto.setCantidadClases(alumno.getCantidadClases());
+            dto.setTipoPension(alumno.getTipoPension() != null ? alumno.getTipoPension().name() : null);
+            dto.setCuotaPension(alumno.getCuotaPension() != null ? alumno.getCuotaPension().name() : null);
+            if (alumno.getCaballoPropio() != null) {
+                dto.setCaballoId(alumno.getCaballoPropio().getId());
+                dto.setCaballoNombre(alumno.getCaballoPropio().getNombre());
+            }
+            return dto;
+        }).collect(Collectors.toList());
+
+        return new PageImpl<>(dtos, pageable, page.getTotalElements());
+    }
+
     /**
      * Convierte un alumno de clase de prueba a alumno regular.
      * Actualiza: activo=true, fechaInscripcion=hoy, cantidadClases según paquete.

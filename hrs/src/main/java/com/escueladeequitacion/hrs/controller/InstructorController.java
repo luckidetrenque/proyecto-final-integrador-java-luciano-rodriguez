@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -24,10 +25,14 @@ public class InstructorController {
     @Autowired
     InstructorService instructorService;
 
+    @Autowired
+    com.escueladeequitacion.hrs.security.ClaseSecurityService claseSecurityService;
+
     // Endpoint GET para listar todos los instructores
     /**
      * GET /api/v1/instructores
      */
+    @PreAuthorize("hasAnyRole('ADMIN','INSTRUCTOR')")
     @GetMapping()
     public ResponseEntity<Page<Instructor>> listarInstructores(
             @PageableDefault(size = 20, sort = "apellido") Pageable pageable,
@@ -40,10 +45,27 @@ public class InstructorController {
         return ResponseEntity.ok(instructores);
     }
 
+    /**
+     * GET /api/v1/instructores/me
+     * Retorna el perfil del instructor logueado (si lo es).
+     */
+    @PreAuthorize("hasRole('INSTRUCTOR')")
+    @GetMapping("/me")
+    public ResponseEntity<?> obtenerMiPerfilInstructor(org.springframework.security.core.Authentication authentication) {
+        Long instructorId = claseSecurityService.getInstructorId(authentication);
+        if (instructorId == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Mensaje("No se encontró el perfil de instructor asociado a tu cuenta."));
+        }
+        Instructor instructor = instructorService.buscarInstructorPorId(instructorId)
+                .orElseThrow(() -> new com.escueladeequitacion.hrs.exception.ResourceNotFoundException("Instructor", "ID", instructorId));
+        return ResponseEntity.ok(instructor);
+    }
+
     // Endpoint GET para buscar un instructor por ID
     /**
      * GET /api/v1/instructores/{id}
      */
+    @PreAuthorize("hasRole('ADMIN') or @claseSecurityService.esElMismoInstructor(#id, authentication)")
     @GetMapping("/{id}")
     public ResponseEntity<?> obtenerInstructorPorId(@PathVariable("id") Long id) {
 
@@ -57,6 +79,7 @@ public class InstructorController {
     /**
      * GET /api/v1/instructores/dni/{dni}
      */
+    @PreAuthorize("hasAnyRole('ADMIN','INSTRUCTOR')")
     @GetMapping("/dni/{dni}")
     public ResponseEntity<?> obtenerInstructorPorDni(@PathVariable("dni") String dni) {
 
@@ -70,6 +93,7 @@ public class InstructorController {
     /**
      * POST /api/v1/instructores
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping()
     public ResponseEntity<?> crearInstructor(@Valid @RequestBody InstructorDto instructorDto) {
 
@@ -83,9 +107,16 @@ public class InstructorController {
     /**
      * PUT /api/v1/instructores/{id}
      */
+    @PreAuthorize("hasRole('ADMIN') or @claseSecurityService.esElMismoInstructor(#id, authentication)")
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizarInstructor(@PathVariable("id") Long id,
-            @Valid @RequestBody InstructorDto instructorDto) {
+            @Valid @RequestBody InstructorDto instructorDto,
+            org.springframework.security.core.Authentication authentication) {
+
+        if (authentication != null && authentication.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+            Instructor original = instructorService.buscarInstructorPorId(id).orElseThrow();
+            instructorDto.setColor(original.getColor());
+        }
 
         instructorService.actualizarInstructorDesdeDto(id, instructorDto);
 
@@ -98,6 +129,7 @@ public class InstructorController {
     /**
      * DELETE /api/v1/instructores/{id}
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarInstructor(@PathVariable("id") Long id) {
 
@@ -111,6 +143,7 @@ public class InstructorController {
     /**
      * DELETE /api/v1/instructores/{id}/inactivar
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}/inactivar")
     public ResponseEntity<?> eliminarInstructorTemporalmente(@PathVariable("id") Long id) {
         instructorService.eliminarInstructorTemporalmente(id);

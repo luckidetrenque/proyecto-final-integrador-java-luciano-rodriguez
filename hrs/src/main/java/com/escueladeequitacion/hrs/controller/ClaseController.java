@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
@@ -48,6 +49,9 @@ public class ClaseController {
     @Autowired
     CaballoService caballoService;
 
+    @Autowired
+    com.escueladeequitacion.hrs.security.ClaseSecurityService claseSecurityService;
+
     // ============================================================
     // ENDPOINTS BÁSICOS (sin detalles)
     // ============================================================
@@ -57,12 +61,20 @@ public class ClaseController {
      * GET /api/v1/clases
      * Lista todas las clases (sin detalles de relaciones).
      */
+    @PreAuthorize("hasAnyRole('ADMIN','INSTRUCTOR')")
     @GetMapping()
     public ResponseEntity<Page<ClaseResponseDto>> listarClases(
             @PageableDefault(size = 20, sort = "dia", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable,
             @RequestParam(name = "estado", required = false) Estado estado,
-            @RequestParam(name = "especialidad", required = false) Especialidad especialidad) {
-        Page<ClaseResponseDto> clases = claseService.listarClasesPaginado(pageable, estado, especialidad);
+            @RequestParam(name = "especialidad", required = false) Especialidad especialidad,
+            org.springframework.security.core.Authentication authentication) {
+
+        Long instructorId = null;
+        if (authentication != null && authentication.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+            instructorId = claseSecurityService.getInstructorId(authentication);
+        }
+
+        Page<ClaseResponseDto> clases = claseService.listarClasesPaginado(pageable, estado, especialidad, instructorId);
         return ResponseEntity.ok(clases);
     }
 
@@ -71,6 +83,7 @@ public class ClaseController {
      * GET /api/v1/clases/{id}
      * Obtiene una clase por ID.
      */
+    @PreAuthorize("hasAnyRole('ADMIN','INSTRUCTOR')")
     @GetMapping("/{id}")
     public ResponseEntity<?> obtenerClasePorId(@PathVariable("id") Long id) {
 
@@ -79,6 +92,7 @@ public class ClaseController {
     }
 
     // Endpoint GET para buscar una clase por fecha
+    @PreAuthorize("hasAnyRole('ADMIN','INSTRUCTOR')")
     @GetMapping("/dia/{dia}")
     public ResponseEntity<?> obtenerClasePorDia(@PathVariable("dia") LocalDate dia) {
         List<Clase> clases = claseService.buscarClasePorDia(dia);
@@ -96,6 +110,7 @@ public class ClaseController {
      * DELETE /api/v1/clases/{id}
      * Elimina una clase (eliminación física).
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarClase(@PathVariable("id") Long id) {
         // El Service valida que existe antes de eliminar
@@ -110,10 +125,16 @@ public class ClaseController {
      * POST /api/v1/clases
      * Crea una nueva clase.
      */
+    @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')")
     @PostMapping()
-    // public ResponseEntity<?> crearClase(@Validated(AlCrear.class) @RequestBody
-    // ClaseDto claseDto) {
-    public ResponseEntity<?> crearClase(@Valid @RequestBody ClaseDto claseDto) {
+    public ResponseEntity<?> crearClase(@Valid @RequestBody ClaseDto claseDto, org.springframework.security.core.Authentication authentication) {
+
+        if (authentication != null && authentication.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+            Long myId = claseSecurityService.getInstructorId(authentication);
+            if (myId != null) {
+                claseDto.setInstructorId(myId);
+            }
+        }
 
         Clase clase = claseService.crearClase(claseDto);
 
@@ -126,9 +147,19 @@ public class ClaseController {
      * PUT /api/v1/clases/{id}
      * Actualiza una clase existente.
      */
+    @PreAuthorize("hasRole('ADMIN') or @claseSecurityService.puedeModificar(#id, authentication)")
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizarClase(@PathVariable("id") Long id,
-            @Validated(AlActualizar.class) @RequestBody ClaseDto claseDto) {
+            @Validated(AlActualizar.class) @RequestBody ClaseDto claseDto,
+            org.springframework.security.core.Authentication authentication) {
+            
+        if (authentication != null && authentication.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+            Long myId = claseSecurityService.getInstructorId(authentication);
+            if (myId != null) {
+                claseDto.setInstructorId(myId);
+            }
+        }
+
         // El Service maneja todas las validaciones
         claseService.actualizarClase(id, claseDto);
 
@@ -140,6 +171,7 @@ public class ClaseController {
      * PATCH /api/v1/clases/{id}/estado
      * Cambia solo el estado de una clase (sin tocar otros campos ni validaciones).
      */
+    @PreAuthorize("hasRole('ADMIN') or @claseSecurityService.puedeModificar(#id, authentication)")
     @PatchMapping("/{id}/estado")
     public ResponseEntity<ClaseResponseDto> cambiarEstadoClase(
             @PathVariable("id") Long id,
@@ -170,6 +202,7 @@ public class ClaseController {
      * GET /api/v1/clases/detalles
      * Lista todas las clases con información de instructor, alumno y caballo.
      */
+    @PreAuthorize("hasAnyRole('ADMIN','INSTRUCTOR')")
     @GetMapping("/detalles")
     public ResponseEntity<List<ClaseResponseDto>> listarClasesConDetalles() {
         List<ClaseResponseDto> clases = claseService.listarClasesConDetalles();
@@ -180,6 +213,7 @@ public class ClaseController {
      * GET /api/v1/clases/{id}/detalles
      * Obtiene una clase específica con todos sus detalles.
      */
+    @PreAuthorize("hasAnyRole('ADMIN','INSTRUCTOR')")
     @GetMapping("/{id}/detalles")
     public ResponseEntity<ClaseResponseDto> obtenerClaseConDetalles(@PathVariable("id") Long id) {
         ClaseResponseDto clase = claseService.buscarClasePorIdConDetalles(id)
@@ -193,6 +227,7 @@ public class ClaseController {
      * GET /api/v1/clases/dia/{dia}/detalles
      * Busca clases por fecha con detalles.
      */
+    @PreAuthorize("hasAnyRole('ADMIN','INSTRUCTOR')")
     @GetMapping("/dia/{dia}/detalles")
     public ResponseEntity<List<ClaseResponseDto>> obtenerClasesPorDiaConDetalles(@PathVariable("dia") LocalDate dia) {
         List<ClaseResponseDto> clases = claseService.buscarClasePorDiaConDetalles(dia);
@@ -203,6 +238,7 @@ public class ClaseController {
      * GET /api/v1/clases/instructor/{instructorId}/detalles
      * Obtiene todas las clases de un instructor específico.
      */
+    @PreAuthorize("hasAnyRole('ADMIN','INSTRUCTOR')")
     @GetMapping("/instructor/{instructorId}/detalles")
     public ResponseEntity<List<ClaseResponseDto>> obtenerClasesPorInstructorConDetalles(
             @PathVariable("instructorId") Long instructorId) {
@@ -214,6 +250,7 @@ public class ClaseController {
      * GET /api/v1/clases/alumno/{alumnoId}/detalles
      * Obtiene todas las clases de un alumno específico.
      */
+    @PreAuthorize("@claseSecurityService.esElMismoAlumno(#alumnoId, authentication)")
     @GetMapping("/alumno/{alumnoId}/detalles")
     public ResponseEntity<List<ClaseResponseDto>> obtenerClasesPorAlumnoConDetalles(
             @PathVariable("alumnoId") Long alumnoId) {
@@ -225,12 +262,14 @@ public class ClaseController {
      * GET /api/v1/clases/alumno/{alumnoId}/detalles
      * Obtiene todas las clases de un alumno específico.
      */
+    @PreAuthorize("hasAnyRole('ADMIN','INSTRUCTOR')")
     @GetMapping("/caballo/{caballoId}/detalles")
     public ResponseEntity<?> obtenerClasesPorCaballoConDetalles(@PathVariable("caballoId") Long caballoId) {
         List<ClaseResponseDto> clases = claseService.buscarClasePorCaballoConDetalles(caballoId);
         return ResponseEntity.status(HttpStatus.OK).body(clases);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','INSTRUCTOR')")
     @GetMapping("/estado/{estado}/detalles")
     public ResponseEntity<?> obtenerClasesPorEstadoConDetalles(@PathVariable("estado") Estado estado) {
         if (!claseService.existeClasePorEstado(estado)) {
@@ -250,6 +289,7 @@ public class ClaseController {
      * GET /api/v1/clases/alumno/{alumnoId}/completadas/count
      * Cuenta las clases completadas de un alumno.
      */
+    @PreAuthorize("@claseSecurityService.esElMismoAlumno(#alumnoId, authentication)")
     @GetMapping("/alumno/{alumnoId}/completadas/count")
     public ResponseEntity<Map<String, Object>> contarClasesCompletadasPorAlumno(
             @PathVariable("alumnoId") Long alumnoId) {
@@ -264,6 +304,7 @@ public class ClaseController {
      * GET /api/v1/clases/instructor/{instructorId}/completadas/count
      * Cuenta las clases completadas de un instructor.
      */
+    @PreAuthorize("hasAnyRole('ADMIN','INSTRUCTOR')")
     @GetMapping("/instructor/{instructorId}/completadas/count")
     public ResponseEntity<Map<String, Object>> contarClasesCompletadasPorInstructor(
             @PathVariable("instructorId") Long instructorId) {
@@ -286,6 +327,7 @@ public class ClaseController {
      * @param claseDto - Debe incluir esPrueba=true
      * @return Clase creada
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/prueba")
     public ResponseEntity<Clase> crearClaseDePrueba(@RequestBody @Valid ClaseDto claseDto) {
         // Forzar que sea clase de prueba
@@ -302,6 +344,7 @@ public class ClaseController {
      * 
      * @return Lista de clases marcadas como prueba
      */
+    @PreAuthorize("hasAnyRole('ADMIN','INSTRUCTOR')")
     @GetMapping("/prueba")
     public ResponseEntity<List<ClaseResponseDto>> listarClasesDePrueba() {
         List<ClaseResponseDto> clases = claseService.listarTodasLasClasesDePrueba();
@@ -316,6 +359,7 @@ public class ClaseController {
      * @param alumnoId - ID del alumno
      * @return Lista de clases de prueba del alumno
      */
+    @PreAuthorize("@claseSecurityService.esElMismoAlumno(#alumnoId, authentication)")
     @GetMapping("/alumno/{alumnoId}/prueba")
     public ResponseEntity<List<ClaseResponseDto>> obtenerClasesDePruebaPorAlumno(
             @PathVariable("alumnoId") Long alumnoId) {
@@ -332,6 +376,7 @@ public class ClaseController {
      * @param alumnoId - ID del alumno
      * @return {alumnoId: N, tienePrueba: true/false, cantidadClasesPrueba: N}
      */
+    @PreAuthorize("@claseSecurityService.esElMismoAlumno(#alumnoId, authentication)")
     @GetMapping("/alumno/{alumnoId}/tiene-prueba")
     public ResponseEntity<Map<String, Object>> verificarClaseDePrueba(@PathVariable("alumnoId") Long alumnoId) {
         Map<String, Object> info = claseService.obtenerInfoClasesDePrueba(alumnoId);

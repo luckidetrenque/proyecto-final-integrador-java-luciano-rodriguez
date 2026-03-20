@@ -20,7 +20,8 @@ public class ClaseSpecification {
             Estado estado,
             Especialidad especialidad,
             String nombreAlumno,
-            String apellidoAlumno) {
+            String apellidoAlumno,
+            Long instructorId) {
 
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -30,6 +31,9 @@ public class ClaseSpecification {
             }
             if (especialidad != null) {
                 predicates.add(cb.equal(root.get("especialidad"), especialidad));
+            }
+            if (instructorId != null) {
+                predicates.add(cb.equal(root.get("instructor").get("id"), instructorId));
             }
 
             // Búsqueda por nombre/apellido del alumno requiere JOIN

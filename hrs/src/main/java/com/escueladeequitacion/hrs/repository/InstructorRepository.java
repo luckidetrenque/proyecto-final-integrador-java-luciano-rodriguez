@@ -20,6 +20,8 @@ public interface InstructorRepository extends JpaRepository<Instructor, Long>,
 
     Optional<Instructor> findByColor(@Param("color") String color);
 
+    Optional<Instructor> findByEmailIgnoreCase(@Param("email") String email);
+
     List<Instructor> findByNombreIgnoreCase(@Param("nombre") String nombre);
 
     List<Instructor> findByApellidoIgnoreCase(@Param("apellido") String apellido);

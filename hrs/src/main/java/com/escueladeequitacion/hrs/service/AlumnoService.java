@@ -76,5 +76,7 @@ public interface AlumnoService {
             String nombre,
             String apellido);
 
+    Page<AlumnoListadoDto> listarAlumnosPorInstructorPaginado(Long instructorId, Pageable pageable);
+
     void convertirAlumnoAPlan(Long alumnoId, Integer cantidadClases);
 }

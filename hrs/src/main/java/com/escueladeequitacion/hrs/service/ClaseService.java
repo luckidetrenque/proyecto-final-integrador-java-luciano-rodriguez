@@ -137,7 +137,7 @@ public interface ClaseService {
 
     public void actualizarEstadosDeClases();
 
-    public Page<ClaseResponseDto> listarClasesPaginado(Pageable pageable, Estado estado, Especialidad especialidad);
+    public Page<ClaseResponseDto> listarClasesPaginado(Pageable pageable, Estado estado, Especialidad especialidad, Long instructorId);
     // ============================================================
     // MÉTODOS PARA CLASES DE PRUEBA
     // ============================================================

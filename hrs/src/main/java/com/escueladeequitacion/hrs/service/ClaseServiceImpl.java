@@ -449,18 +449,11 @@ public class ClaseServiceImpl implements ClaseService {
     }
 
     @Override
-    public Page<ClaseResponseDto> listarClasesPaginado(Pageable pageable, Estado estado, Especialidad especialidad) {
-        Page<Clase> page;
-
-        if (estado != null && especialidad != null) {
-            page = claseRepository.findByEstadoAndEspecialidad(estado, especialidad, pageable);
-        } else if (estado != null) {
-            page = claseRepository.findByEstado(estado, pageable);
-        } else if (especialidad != null) {
-            page = claseRepository.findByEspecialidad(especialidad, pageable);
-        } else {
-            page = claseRepository.findAll(pageable);
-        }
+    public Page<ClaseResponseDto> listarClasesPaginado(Pageable pageable, Estado estado, Especialidad especialidad, Long instructorId) {
+        org.springframework.data.jpa.domain.Specification<Clase> spec = 
+            com.escueladeequitacion.hrs.repository.specifications.ClaseSpecification.filtrar(estado, especialidad, null, null, instructorId);
+        
+        Page<Clase> page = claseRepository.findAll(spec, pageable);
 
         List<ClaseResponseDto> dtos = page.getContent().stream()
                 .map(ClaseResponseDto::new)

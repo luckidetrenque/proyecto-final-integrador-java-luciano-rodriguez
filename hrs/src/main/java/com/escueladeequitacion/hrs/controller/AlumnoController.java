@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -29,6 +30,9 @@ public class AlumnoController {
 
     @Autowired
     AlumnoService alumnoService;
+
+    @Autowired
+    com.escueladeequitacion.hrs.security.ClaseSecurityService claseSecurityService;
 
     // Endpoint GET para listar todos los alumnos
     /**
@@ -48,6 +52,7 @@ public class AlumnoController {
      * GET /api/v1/alumnos/listado
      * Lista todos los alumnos con información resumida (DTO).
      */
+    @PreAuthorize("hasAnyRole('ADMIN','INSTRUCTOR')")
     @GetMapping()
     public ResponseEntity<Page<AlumnoListadoDto>> listarAlumnos(
             @PageableDefault(size = 20, sort = "apellido") Pageable pageable,
@@ -55,7 +60,16 @@ public class AlumnoController {
             @RequestParam(name = "propietario", required = false) Boolean propietario,
             @RequestParam(name = "cantidadClases", required = false) Integer cantidadClases,
             @RequestParam(name = "nombre", required = false) String nombre,
-            @RequestParam(name = "apellido", required = false) String apellido) {
+            @RequestParam(name = "apellido", required = false) String apellido,
+            org.springframework.security.core.Authentication authentication) {
+
+        if (authentication != null && authentication.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+            Long instructorId = claseSecurityService.getInstructorId(authentication);
+            if (instructorId != null) {
+                Page<AlumnoListadoDto> alumnos = alumnoService.listarAlumnosPorInstructorPaginado(instructorId, pageable);
+                return ResponseEntity.ok(alumnos);
+            }
+        }
 
         Page<AlumnoListadoDto> alumnos = alumnoService.listarAlumnosPaginado(
                 pageable, activo, propietario, cantidadClases, nombre, apellido);
@@ -79,6 +93,7 @@ public class AlumnoController {
      * return ResponseEntity.status(HttpStatus.OK).body(alumno);
      * }
      */
+    @PreAuthorize("@claseSecurityService.esElMismoAlumno(#id, authentication)")
     @GetMapping("/{id}")
     public ResponseEntity<?> obtenerAlumnoPorId(@PathVariable("id") Long id) {
         Optional<AlumnoListadoDto> alumno = alumnoService.buscarAlumnoPorIdResumido(id);
@@ -96,6 +111,7 @@ public class AlumnoController {
      * GET /api/v1/alumnos/dni/{dni}
      * Obtiene un alumno por DNI.
      */
+    @PreAuthorize("@claseSecurityService.esElMismoAlumnoPorDni(#dni, authentication)")
     @GetMapping("/dni/{dni}")
     public ResponseEntity<?> obtenerAlumnoPorDni(@PathVariable("dni") String dni) {
 
@@ -110,6 +126,7 @@ public class AlumnoController {
      * POST /api/v1/alumnos
      * Crea un nuevo alumno.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping()
     public ResponseEntity<?> crearAlumno(@Valid @RequestBody AlumnoDto alumnoDto) {
         // El Service valida:
@@ -126,6 +143,7 @@ public class AlumnoController {
      * PUT /api/v1/alumnos/{id}
      * Actualiza un alumno existente.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizarAlumno(@PathVariable("id") Long id, @Valid @RequestBody AlumnoDto alumnoDto) {
         // El Service valida:
@@ -143,6 +161,7 @@ public class AlumnoController {
      * DELETE /api/v1/alumnos/{id}
      * Elimina un alumno (eliminación física).
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarAlumno(@PathVariable("id") Long id) {
         // El Service valida que existe antes de eliminar
@@ -157,6 +176,7 @@ public class AlumnoController {
      * DELETE /api/v1/alumnos/{id}/inactivar
      * Inactiva un alumno (eliminación lógica).
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}/inactivar")
     public ResponseEntity<?> eliminarAlumnoTemporalmente(@PathVariable("id") Long id) {
         // El Service valida:
@@ -169,6 +189,7 @@ public class AlumnoController {
     }
 
     // Endpoint GET para contar las clases completadas de un alumno
+    @PreAuthorize("@claseSecurityService.esElMismoAlumno(#id, authentication)")
     @GetMapping("/{id}/clases/completadas/count")
     public ResponseEntity<?> contarClasesCompletadas(@PathVariable("id") Long id) {
 
@@ -190,6 +211,7 @@ public class AlumnoController {
      * @param request - Contiene cantidadClases (4, 8, 12 o 16)
      * @return ResponseEntity con mensaje de éxito
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}/convertir-a-plan")
     public ResponseEntity<?> convertirAlumnoAPlan(
             @PathVariable("id") Long id,
@@ -210,6 +232,7 @@ public class AlumnoController {
      * 
      * @return Lista de alumnos inactivos (potenciales clases de prueba)
      */
+    @PreAuthorize("hasAnyRole('ADMIN','INSTRUCTOR')")
     @GetMapping("/prueba")
     public ResponseEntity<List<Alumno>> listarAlumnosDePrueba() {
         List<Alumno> alumnosPrueba = alumnoService.buscarAlumnoPorEstado(false);
