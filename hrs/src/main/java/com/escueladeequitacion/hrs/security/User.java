@@ -44,6 +44,12 @@ public class User {
     @Column(name = "avatar_url", length = 255)
     private String avatarUrl; // URL del avatar del usuario
 
+    @Column(name = "instructor_id")
+    private Long instructorId; // FK hacia instructores.id (nullable)
+
+    @Column(name = "alumno_id")
+    private Long alumnoId; // FK hacia alumnos.id (nullable)
+
     // Constructores
     public User() {
         this.fechaCreacion = LocalDateTime.now();
@@ -137,5 +143,21 @@ public class User {
 
     public void setAvatarUrl(String avatarUrl) {
         this.avatarUrl = avatarUrl;
+    }
+
+    public Long getInstructorId() {
+        return instructorId;
+    }
+
+    public void setInstructorId(Long instructorId) {
+        this.instructorId = instructorId;
+    }
+
+    public Long getAlumnoId() {
+        return alumnoId;
+    }
+
+    public void setAlumnoId(Long alumnoId) {
+        this.alumnoId = alumnoId;
     }
 }

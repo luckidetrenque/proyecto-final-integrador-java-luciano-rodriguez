@@ -32,7 +32,7 @@ public class InstructorController {
     /**
      * GET /api/v1/instructores
      */
-    @PreAuthorize("hasAnyRole('ADMIN','INSTRUCTOR')")
+    @PreAuthorize("hasRole('ADMIN') or @claseSecurityService.esElMismoInstructor(#id, authentication)")
     @GetMapping()
     public ResponseEntity<Page<Instructor>> listarInstructores(
             @PageableDefault(size = 20, sort = "apellido") Pageable pageable,
@@ -51,13 +51,16 @@ public class InstructorController {
      */
     @PreAuthorize("hasRole('INSTRUCTOR')")
     @GetMapping("/me")
-    public ResponseEntity<?> obtenerMiPerfilInstructor(org.springframework.security.core.Authentication authentication) {
+    public ResponseEntity<?> obtenerMiPerfilInstructor(
+            org.springframework.security.core.Authentication authentication) {
         Long instructorId = claseSecurityService.getInstructorId(authentication);
         if (instructorId == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Mensaje("No se encontró el perfil de instructor asociado a tu cuenta."));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new Mensaje("No se encontró el perfil de instructor asociado a tu cuenta."));
         }
         Instructor instructor = instructorService.buscarInstructorPorId(instructorId)
-                .orElseThrow(() -> new com.escueladeequitacion.hrs.exception.ResourceNotFoundException("Instructor", "ID", instructorId));
+                .orElseThrow(() -> new com.escueladeequitacion.hrs.exception.ResourceNotFoundException("Instructor",
+                        "ID", instructorId));
         return ResponseEntity.ok(instructor);
     }
 
@@ -113,7 +116,8 @@ public class InstructorController {
             @Valid @RequestBody InstructorDto instructorDto,
             org.springframework.security.core.Authentication authentication) {
 
-        if (authentication != null && authentication.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+        if (authentication != null
+                && authentication.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
             Instructor original = instructorService.buscarInstructorPorId(id).orElseThrow();
             instructorDto.setColor(original.getColor());
         }

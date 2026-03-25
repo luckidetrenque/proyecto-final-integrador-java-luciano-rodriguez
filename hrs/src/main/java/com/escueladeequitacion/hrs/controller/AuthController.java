@@ -125,11 +125,40 @@ public class AuthController {
     public static class UpdateUserAdminRequest {
         private RolSeguridad rol;
         private Boolean activo;
+        private Long instructorId;
+        private Long alumnoId;
 
-        public RolSeguridad getRol() { return rol; }
-        public void setRol(RolSeguridad rol) { this.rol = rol; }
-        public Boolean getActivo() { return activo; }
-        public void setActivo(Boolean activo) { this.activo = activo; }
+        public RolSeguridad getRol() {
+            return rol;
+        }
+
+        public void setRol(RolSeguridad rol) {
+            this.rol = rol;
+        }
+
+        public Boolean getActivo() {
+            return activo;
+        }
+
+        public void setActivo(Boolean activo) {
+            this.activo = activo;
+        }
+
+        public Long getInstructorId() {
+            return instructorId;
+        }
+
+        public void setInstructorId(Long instructorId) {
+            this.instructorId = instructorId;
+        }
+
+        public Long getAlumnoId() {
+            return alumnoId;
+        }
+
+        public void setAlumnoId(Long alumnoId) {
+            this.alumnoId = alumnoId;
+        }
     }
 
     /**
@@ -303,8 +332,18 @@ public class AuthController {
             user.setActivo(request.getActivo());
         }
 
+        if (request.getInstructorId() != null) {
+            user.setInstructorId(request.getInstructorId());
+            user.setPersonaTipo("INSTRUCTOR");
+        }
+        if (request.getAlumnoId() != null) {
+            user.setAlumnoId(request.getAlumnoId());
+            user.setPersonaTipo("ALUMNO");
+        }
+
         userRepository.save(user);
-        return ResponseEntity.ok(new Mensaje("Roles o estado actualizados correctamente para el usuario " + user.getUsername()));
+        return ResponseEntity
+                .ok(new Mensaje("Roles o estado actualizados correctamente para el usuario " + user.getUsername()));
     }
 
     /* @PreAuthorize("hasRole('ADMIN')") */
