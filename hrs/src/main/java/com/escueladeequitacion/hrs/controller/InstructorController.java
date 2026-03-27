@@ -32,7 +32,7 @@ public class InstructorController {
     /**
      * GET /api/v1/instructores
      */
-    @PreAuthorize("hasRole('ADMIN') or @claseSecurityService.esElMismoInstructor(#id, authentication)")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')")
     @GetMapping()
     public ResponseEntity<Page<Instructor>> listarInstructores(
             @PageableDefault(size = 20, sort = "apellido") Pageable pageable,
