@@ -60,12 +60,13 @@ public class ClaseController {
      * - INSTRUCTOR: ve solo sus clases (filtrado por instructorId automáticamente)
      * - ALUMNO: no tiene acceso (usar /alumno/{id}/detalles)
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR', 'ALUMNO')")
     @GetMapping()
     public ResponseEntity<Page<ClaseResponseDto>> listarClases(
             @PageableDefault(size = 20, sort = "dia", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable,
             @RequestParam(name = "estado", required = false) Estado estado,
             @RequestParam(name = "especialidad", required = false) Especialidad especialidad,
+            @RequestParam(name = "alumnoId", required = false) Long alumnoId,
             Authentication authentication) {
 
         // Si es INSTRUCTOR, filtrar automáticamente por su ID
@@ -76,7 +77,7 @@ public class ClaseController {
         }
 
         Page<ClaseResponseDto> clases = claseService.listarClasesPaginado(
-                pageable, estado, especialidad, instructorId);
+                pageable, estado, especialidad, instructorId, alumnoId);
         return ResponseEntity.ok(clases);
     }
 
@@ -114,7 +115,7 @@ public class ClaseController {
      * DELETE /api/v1/clases/{id}
      * Solo ADMIN puede eliminar clases físicamente.
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or @claseSecurityService.puedeModificar(#id, authentication)")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarClase(@PathVariable("id") Long id) {
         claseService.eliminarClase(id);
@@ -353,5 +354,17 @@ public class ClaseController {
             @PathVariable("alumnoId") Long alumnoId) {
         Map<String, Object> info = claseService.obtenerInfoClasesDePrueba(alumnoId);
         return ResponseEntity.ok(info);
+    }
+
+    /**
+     * POST /api/v1/clases/reservar
+     * Un alumno puede reservar una clase para sí mismo.
+     */
+    @PreAuthorize("hasRole('ALUMNO') and @claseSecurityService.esElMismoAlumno(#claseDto.alumnoId, authentication)")
+    @PostMapping("/reservar")
+    public ResponseEntity<?> reservarClase(@Valid @RequestBody com.escueladeequitacion.hrs.dto.ClaseDto claseDto) {
+        Clase clase = claseService.reservarClase(claseDto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new Mensaje("Reserva realizada con éxito (ID: " + clase.getId() + "). Pendiente de confirmación."));
     }
 }

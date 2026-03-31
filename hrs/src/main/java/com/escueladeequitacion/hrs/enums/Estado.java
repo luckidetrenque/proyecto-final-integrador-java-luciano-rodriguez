@@ -8,5 +8,6 @@ public enum Estado {
     COMPLETADA,
     CANCELADA,
     ACA,
-    ASA
+    ASA,
+    RESERVADA
 }

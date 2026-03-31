@@ -4,13 +4,13 @@ import com.escueladeequitacion.hrs.dto.*;
 import java.time.LocalDate;
 
 public interface FinanzasService {
-    ResumenFinancieroDto calcularResumen(LocalDate inicio, LocalDate fin);
+    ResumenFinancieroDto calcularResumen(LocalDate inicio, LocalDate fin, Long instructorId);
 
-    CuotasAlumnosDto calcularCuotasAlumnos(LocalDate inicio, LocalDate fin);
+    CuotasAlumnosDto calcularCuotasAlumnos(LocalDate inicio, LocalDate fin, Long instructorId);
 
     PensionesDto calcularPensiones();
 
-    HonorariosDto calcularHonorarios(LocalDate inicio, LocalDate fin);
+    HonorariosDto calcularHonorarios(LocalDate inicio, LocalDate fin, Long instructorId);
 
     ConfiguracionPreciosDto getConfiguracion();
 

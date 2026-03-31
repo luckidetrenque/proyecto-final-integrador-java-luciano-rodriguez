@@ -137,7 +137,7 @@ public interface ClaseService {
 
     public void actualizarEstadosDeClases();
 
-    public Page<ClaseResponseDto> listarClasesPaginado(Pageable pageable, Estado estado, Especialidad especialidad, Long instructorId);
+    public Page<ClaseResponseDto> listarClasesPaginado(Pageable pageable, Estado estado, Especialidad especialidad, Long instructorId, Long alumnoId);
     // ============================================================
     // MÉTODOS PARA CLASES DE PRUEBA
     // ============================================================
@@ -188,4 +188,9 @@ public interface ClaseService {
 
     // Método para cambiar el estado de una clase
     ClaseResponseDto cambiarEstado(Long id, Estado nuevoEstado, String observaciones);
+
+    /**
+     * Permite a un alumno reservar una clase (estado RESERVADA).
+     */
+    Clase reservarClase(ClaseDto claseDto);
 }

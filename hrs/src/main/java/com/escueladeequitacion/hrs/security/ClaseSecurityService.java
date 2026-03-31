@@ -41,23 +41,38 @@ public class ClaseSecurityService {
         if (esAdmin(auth))
             return true;
 
-        Long instructorId = getInstructorId(auth);
-        if (instructorId == null) {
-            // BUG FIX: antes retornaba false y dejaba pasar al listado completo.
-            // Ahora lanzamos 403 explícito si el usuario es INSTRUCTOR sin perfil
-            // vinculado.
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "Tu cuenta de instructor no está vinculada a un perfil. Contactá al administrador.");
+        if (esInstructor(auth)) {
+            Long instructorId = getInstructorId(auth);
+            if (instructorId == null) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "Tu cuenta de instructor no está vinculada a un perfil. Contactá al administrador.");
+            }
+            return claseRepository.findById(claseId)
+                    .map(clase -> {
+                        Long classInstructorId = (clase.getInstructor() != null)
+                                ? clase.getInstructor().getId()
+                                : null;
+                        return instructorId.equals(classInstructorId);
+                    })
+                    .orElse(false);
         }
 
-        return claseRepository.findById(claseId)
-                .map(clase -> {
-                    Long classInstructorId = (clase.getInstructor() != null)
-                            ? clase.getInstructor().getId()
-                            : null;
-                    return instructorId.equals(classInstructorId);
-                })
-                .orElse(false);
+        if (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ALUMNO"))) {
+            Long alumnoId = getAlumnoId(auth);
+            if (alumnoId == null) {
+                return false;
+            }
+            return claseRepository.findById(claseId)
+                    .map(clase -> {
+                        Long classAlumnoId = (clase.getAlumno() != null)
+                                ? clase.getAlumno().getId()
+                                : null;
+                        return alumnoId.equals(classAlumnoId);
+                    })
+                    .orElse(false);
+        }
+
+        return false;
     }
 
     /**
@@ -187,13 +202,17 @@ public class ClaseSecurityService {
 
     // ── Helpers privados ─────────────────────────────────────────
 
-    private boolean esAdmin(Authentication auth) {
+    public boolean esAdmin(Authentication auth) {
         return auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
     }
 
-    private boolean esInstructor(Authentication auth) {
+    public boolean esInstructor(Authentication auth) {
         return auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_INSTRUCTOR"));
+    }
+
+    public boolean esAdminOrInstructor(Authentication auth) {
+        return esAdmin(auth) || esInstructor(auth);
     }
 }

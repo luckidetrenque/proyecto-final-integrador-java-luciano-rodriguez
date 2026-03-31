@@ -36,6 +36,8 @@ public class FinanzasServiceImpl implements FinanzasService {
     private ClaseRepository claseRepository;
     @Autowired
     private ConfiguracionPreciosRepository configRepo;
+    @Autowired
+    private InstructorService instructorService;
 
     // ── Singleton de configuración ────────────────────────────────────────────
 
@@ -68,10 +70,26 @@ public class FinanzasServiceImpl implements FinanzasService {
     // ── calcularResumen ──────────────────────────────────────────────────────
 
     @Override
-    public ResumenFinancieroDto calcularResumen(LocalDate inicio, LocalDate fin) {
+    public ResumenFinancieroDto calcularResumen(LocalDate inicio, LocalDate fin, Long instructorId) {
         ConfiguracionPrecios cfg = getOrCreateConfig();
-        List<Alumno> alumnos = alumnoRepository.findByActivo(true);
-        List<Instructor> instructores = instructorRepository.findByActivo(true);
+        
+        List<Alumno> alumnos;
+        List<Instructor> instructores;
+        
+        if (instructorId != null) {
+            instructores = List.of(instructorService.buscarInstructorPorId(instructorId)
+                    .orElseThrow(() -> new com.escueladeequitacion.hrs.exception.ResourceNotFoundException("Instructor", "ID", instructorId)));
+            
+            // Alumnos que tuvieron clases con este instructor en el periodo
+            // ✅ Query dedicada — filtra en BD con índices, sin cargar toda la tabla
+            List<Long> alumnoIds = claseRepository.findAlumnoIdsByInstructorAndPeriodo(
+                    instructorId, inicio, fin);
+            alumnos = alumnoRepository.findAllById(alumnoIds).stream()
+                    .filter(Alumno::isActivo).collect(java.util.stream.Collectors.toList());
+        } else {
+            alumnos = alumnoRepository.findByActivo(true);
+            instructores = instructorRepository.findByActivo(true);
+        }
 
         // ── Ingresos cuotas ────────────────────────────────────────────────
         double cuotas = 0;
@@ -140,9 +158,19 @@ public class FinanzasServiceImpl implements FinanzasService {
     // ── calcularCuotasAlumnos ────────────────────────────────────────────────
 
     @Override
-    public CuotasAlumnosDto calcularCuotasAlumnos(LocalDate inicio, LocalDate fin) {
+    public CuotasAlumnosDto calcularCuotasAlumnos(LocalDate inicio, LocalDate fin, Long instructorId) {
         ConfiguracionPrecios cfg = getOrCreateConfig();
-        List<Alumno> alumnos = alumnoRepository.findByActivo(true);
+        
+        List<Alumno> alumnos;
+        if (instructorId != null) {
+            // ✅ Query dedicada — filtra en BD con índices, sin cargar toda la tabla
+            List<Long> alumnoIds = claseRepository.findAlumnoIdsByInstructorAndPeriodo(
+                    instructorId, inicio, fin);
+            alumnos = alumnoRepository.findAllById(alumnoIds).stream()
+                    .filter(Alumno::isActivo).collect(java.util.stream.Collectors.toList());
+        } else {
+            alumnos = alumnoRepository.findByActivo(true);
+        }
 
         List<CuotasAlumnosDto.FilaAlumnoDto> filas = new ArrayList<>();
         double total = 0;
@@ -224,9 +252,16 @@ public class FinanzasServiceImpl implements FinanzasService {
     // ── calcularHonorarios ───────────────────────────────────────────────────
 
     @Override
-    public HonorariosDto calcularHonorarios(LocalDate inicio, LocalDate fin) {
+    public HonorariosDto calcularHonorarios(LocalDate inicio, LocalDate fin, Long instructorId) {
         ConfiguracionPrecios cfg = getOrCreateConfig();
-        List<Instructor> instructores = instructorRepository.findByActivo(true);
+        
+        List<Instructor> instructores;
+        if (instructorId != null) {
+            instructores = List.of(instructorService.buscarInstructorPorId(instructorId)
+                    .orElseThrow(() -> new com.escueladeequitacion.hrs.exception.ResourceNotFoundException("Instructor", "ID", instructorId)));
+        } else {
+            instructores = instructorRepository.findByActivo(true);
+        }
 
         List<HonorariosDto.FilaInstructorDto> filas = new ArrayList<>();
         double total = 0;

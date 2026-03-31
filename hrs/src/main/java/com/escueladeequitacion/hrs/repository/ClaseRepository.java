@@ -264,6 +264,22 @@ public interface ClaseRepository extends JpaRepository<Clase, Long>, JpaSpecific
       @Param("instructorId") Long instructorId,
       @Param("estado") Estado estado);
 
+  /**
+   * Obtiene los IDs DISTINTOS de alumnos que tuvieron clases con un instructor
+   * en un período dado. Reemplaza al patrón findAllWithDetails().stream().filter()
+   * que cargaba toda la tabla en memoria.
+   */
+  @Query("""
+          SELECT DISTINCT c.alumno.id FROM Clase c
+          WHERE c.instructor.id = :instructorId
+            AND c.dia BETWEEN :inicio AND :fin
+            AND c.alumno IS NOT NULL
+      """)
+  List<Long> findAlumnoIdsByInstructorAndPeriodo(
+      @Param("instructorId") Long instructorId,
+      @Param("inicio") LocalDate inicio,
+      @Param("fin") LocalDate fin);
+
   // ── Finanzas: conteo dentro de un rango de fechas ─────────────────────
   @Query("""
           SELECT COUNT(c) FROM Clase c

@@ -23,8 +23,9 @@ public class FinanzasController {
     @GetMapping("/resumen")
     public ResponseEntity<ResumenFinancieroDto> getResumen(
             @RequestParam("inicio") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
-            @RequestParam("fin") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fin) {
-        return ResponseEntity.ok(finanzasService.calcularResumen(inicio, fin));
+            @RequestParam("fin") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fin,
+            @RequestParam(value = "instructorId", required = false) Long instructorId) {
+        return ResponseEntity.ok(finanzasService.calcularResumen(inicio, fin, instructorId));
     }
 
     /**
@@ -34,8 +35,9 @@ public class FinanzasController {
     @GetMapping("/alumnos")
     public ResponseEntity<CuotasAlumnosDto> getCuotasAlumnos(
             @RequestParam("inicio") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
-            @RequestParam("fin") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fin) {
-        return ResponseEntity.ok(finanzasService.calcularCuotasAlumnos(inicio, fin));
+            @RequestParam("fin") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fin,
+            @RequestParam(value = "instructorId", required = false) Long instructorId) {
+        return ResponseEntity.ok(finanzasService.calcularCuotasAlumnos(inicio, fin, instructorId));
     }
 
     /**
@@ -54,8 +56,9 @@ public class FinanzasController {
     @GetMapping("/honorarios")
     public ResponseEntity<HonorariosDto> getHonorarios(
             @RequestParam("inicio") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
-            @RequestParam("fin") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fin) {
-        return ResponseEntity.ok(finanzasService.calcularHonorarios(inicio, fin));
+            @RequestParam("fin") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fin,
+            @RequestParam(value = "instructorId", required = false) Long instructorId) {
+        return ResponseEntity.ok(finanzasService.calcularHonorarios(inicio, fin, instructorId));
     }
 
     /**

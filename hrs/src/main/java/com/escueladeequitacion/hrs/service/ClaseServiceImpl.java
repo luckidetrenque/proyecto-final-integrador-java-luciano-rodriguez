@@ -452,9 +452,9 @@ public class ClaseServiceImpl implements ClaseService {
     }
 
     @Override
-    public Page<ClaseResponseDto> listarClasesPaginado(Pageable pageable, Estado estado, Especialidad especialidad, Long instructorId) {
+    public Page<ClaseResponseDto> listarClasesPaginado(Pageable pageable, Estado estado, Especialidad especialidad, Long instructorId, Long alumnoId) {
         org.springframework.data.jpa.domain.Specification<Clase> spec = 
-            com.escueladeequitacion.hrs.repository.specifications.ClaseSpecification.filtrar(estado, especialidad, null, null, instructorId);
+            com.escueladeequitacion.hrs.repository.specifications.ClaseSpecification.filtrar(estado, especialidad, null, null, instructorId, alumnoId);
         
         Page<Clase> page = claseRepository.findAll(spec, pageable);
 
@@ -691,6 +691,16 @@ public class ClaseServiceImpl implements ClaseService {
                     .ifPresent(abono -> abonoService.descontarClase(abono.getId()));
         }
         return new ClaseResponseDto(clase);
+    }
+
+    /**
+     * Implementación de reserva de clase para alumnos.
+     * Setea el estado forzosamente a RESERVADA.
+     */
+    @Override
+    public Clase reservarClase(ClaseDto claseDto) {
+        claseDto.setEstado(Estado.RESERVADA);
+        return crearClase(claseDto);
     }
 
     private void validarDuracion(Integer duracion) {
