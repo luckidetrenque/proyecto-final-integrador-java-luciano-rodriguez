@@ -3,32 +3,33 @@ package com.escueladeequitacion.hrs.controller;
 import com.escueladeequitacion.hrs.exception.ConflictException;
 import com.escueladeequitacion.hrs.exception.ResourceNotFoundException;
 import com.escueladeequitacion.hrs.exception.UnauthorizedException;
+import com.escueladeequitacion.hrs.model.Alumno;
+import com.escueladeequitacion.hrs.repository.AlumnoRepository;
 import com.escueladeequitacion.hrs.security.RolSeguridad;
 import com.escueladeequitacion.hrs.security.StorageService;
 import com.escueladeequitacion.hrs.security.User;
 import com.escueladeequitacion.hrs.security.UserRepository;
-import com.escueladeequitacion.hrs.security.WhitelistService;
 import com.escueladeequitacion.hrs.utility.Mensaje;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.util.Arrays;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Controlador para gestión de usuarios (registro, listar).
+ * Controlador para gestión de usuarios (registro, listar, invitación por código).
  */
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -38,7 +39,7 @@ public class AuthController {
     private UserRepository userRepository;
 
     @Autowired
-    WhitelistService whitelistService;
+    private AlumnoRepository alumnoRepository;
 
     @Autowired
     private StorageService storageService;
@@ -46,16 +47,12 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Value("${app.whitelist.emails:claumarnavarro@gmail.com,luckidetrenque@gmail.com,santiagomatheu@gmail.com}")
-    private String whitelistEmails;
+    // ── DTOs ──────────────────────────────────────────────────────────────────
 
     /**
-     * DTO para registro de usuarios.
+     * DTO para registro de usuarios (con o sin código de invitación).
      */
     public static class RegisterRequest {
-        @NotBlank(message = "El username no puede estar vacío")
-        private String username;
-
         @NotBlank(message = "El email no puede estar vacío")
         @Email(message = "El email debe ser válido")
         private String email;
@@ -63,64 +60,23 @@ public class AuthController {
         @NotBlank(message = "El password no puede estar vacío")
         private String password;
 
-        private RolSeguridad rol; // Opcional para registro, requerido para actualización
+        private String username;
 
-        private Integer personaDni; // Opcional: vincular con Alumno/Instructor
+        /** Código UUID de invitación (opcional — registro abierto si no se provee). */
+        private String codigoInvitacion;
 
-        private String avatarUrl; // Opcional: URL del avatar del usuario
-
-        // Getters y Setters
-        public String getUsername() {
-            return username;
-        }
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
-
-        public RolSeguridad getRol() {
-            return rol;
-        }
-
-        public void setRol(RolSeguridad rol) {
-            this.rol = rol;
-        }
-
-        public Integer getPersonaDni() {
-            return personaDni;
-        }
-
-        public void setPersonaDni(Integer personaDni) {
-            this.personaDni = personaDni;
-        }
-
-        public String getAvatarUrl() {
-            return avatarUrl;
-        }
-
-        public void setAvatarUrl(String avatarUrl) {
-            this.avatarUrl = avatarUrl;
-        }
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
+        public String getPassword() { return password; }
+        public void setPassword(String password) { this.password = password; }
+        public String getUsername() { return username; }
+        public void setUsername(String username) { this.username = username; }
+        public String getCodigoInvitacion() { return codigoInvitacion; }
+        public void setCodigoInvitacion(String codigoInvitacion) { this.codigoInvitacion = codigoInvitacion; }
     }
 
     /**
-     * DTO para que el ADMIN actualice rol y estado sin contraseña
+     * DTO para que el COORDINADOR/SUPERADMIN actualice rol y estado sin contraseña.
      */
     public static class UpdateUserAdminRequest {
         private RolSeguridad rol;
@@ -128,42 +84,22 @@ public class AuthController {
         private Long instructorId;
         private Long alumnoId;
 
-        public RolSeguridad getRol() {
-            return rol;
-        }
-
-        public void setRol(RolSeguridad rol) {
-            this.rol = rol;
-        }
-
-        public Boolean getActivo() {
-            return activo;
-        }
-
-        public void setActivo(Boolean activo) {
-            this.activo = activo;
-        }
-
-        public Long getInstructorId() {
-            return instructorId;
-        }
-
-        public void setInstructorId(Long instructorId) {
-            this.instructorId = instructorId;
-        }
-
-        public Long getAlumnoId() {
-            return alumnoId;
-        }
-
-        public void setAlumnoId(Long alumnoId) {
-            this.alumnoId = alumnoId;
-        }
+        public RolSeguridad getRol() { return rol; }
+        public void setRol(RolSeguridad rol) { this.rol = rol; }
+        public Boolean getActivo() { return activo; }
+        public void setActivo(Boolean activo) { this.activo = activo; }
+        public Long getInstructorId() { return instructorId; }
+        public void setInstructorId(Long instructorId) { this.instructorId = instructorId; }
+        public Long getAlumnoId() { return alumnoId; }
+        public void setAlumnoId(Long alumnoId) { this.alumnoId = alumnoId; }
     }
+
+    // ── Endpoints de autenticación ─────────────────────────────────────────────
 
     /**
      * POST /api/v1/auth/login
-     * Endpoint de login que retorna los datos del usuario autenticado.
+     * El login utiliza el email como identificador (Spring Security llama
+     * loadUserByUsername con lo que venga en el header Basic Auth).
      */
     @PostMapping("/login")
     public ResponseEntity<?> login(java.security.Principal principal) {
@@ -171,85 +107,141 @@ public class AuthController {
             throw new UnauthorizedException("Credenciales inválidas");
         }
 
-        // Buscamos al usuario por el nombre que viene en el Header de Basic Auth
-        User user = userRepository.findByUsername(principal.getName())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "username", principal.getName()));
+        // Buscamos al usuario por email (el "username" en Basic Auth ahora es el email)
+        User user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "email", principal.getName()));
 
         return ResponseEntity.ok(user);
     }
 
     /**
      * POST /api/v1/auth/register
-     * Registra un nuevo usuario.
+     * Flujo 1: con código de invitación → vincula al alumno.
+     * Flujo 2: sin código → registro abierto como ALUMNO.
      */
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest request) {
-        if (!whitelistService.isEmailAllowed(request.getEmail())) {
-            throw new ConflictException("Email no autorizado para registro");
-        }
-        // Validar username duplicado
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new ConflictException("Usuario", "username", request.getUsername());
-        }
+        String email = request.getEmail().trim();
 
         // Validar email duplicado
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ConflictException("Usuario", "email", request.getEmail());
+        if (userRepository.existsByEmail(email)) {
+            throw new ConflictException("Usuario", "email", email);
         }
 
-        // Crear usuario SIEMPRE como ALUMNO en registro público
-        User user = new User(
-                request.getUsername(),
-                request.getEmail(),
-                passwordEncoder.encode(request.getPassword()),
-                RolSeguridad.ALUMNO);
+        String username = request.getUsername() != null ? request.getUsername().trim() : null;
+        if (username != null && !username.isEmpty() && userRepository.existsByUsername(username)) {
+            throw new ConflictException("Usuario", "username", username);
+        }
 
-        // Vincular con persona si se proporciona DNI
-        if (request.getPersonaDni() != null) {
-            user.setPersonaDni(request.getPersonaDni());
-            user.setPersonaTipo(request.getRol().name());
+        RolSeguridad rolFinal = RolSeguridad.ALUMNO;
+        Long alumnoIdVinculado = null;
+
+        // ── Flujo con código de invitación ──────────────────────
+        if (request.getCodigoInvitacion() != null && !request.getCodigoInvitacion().isBlank()) {
+            String codigo = request.getCodigoInvitacion().trim();
+
+            Alumno alumno = alumnoRepository.findByCodigoInvitacion(codigo)
+                    .orElseThrow(() -> new ConflictException("El código de invitación no es válido o no existe"));
+
+            if (Boolean.TRUE.equals(alumno.getCodigoUsado())) {
+                throw new ConflictException("El código de invitación ya fue utilizado");
+            }
+
+            if (alumno.getFechaExpiracionCodigo() != null
+                    && alumno.getFechaExpiracionCodigo().isBefore(LocalDateTime.now())) {
+                throw new ConflictException("El código de invitación ha expirado");
+            }
+
+            // El email del registro debe coincidir con el email del alumno
+            if (!alumno.getEmail().equalsIgnoreCase(email)) {
+                throw new ConflictException("El email no coincide con el del alumno invitado");
+            }
+
+            // Marcar código como usado
+            alumno.setCodigoUsado(true);
+            alumnoRepository.save(alumno);
+
+            rolFinal = RolSeguridad.ALUMNO;
+            alumnoIdVinculado = alumno.getId();
+        }
+
+        // ── Crear usuario ──────────────────────────────────────
+        User user = new User();
+        user.setEmail(email);
+        user.setUsername(username != null && !username.isEmpty() ? username : email);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRol(rolFinal);
+
+        if (alumnoIdVinculado != null) {
+            user.setAlumnoId(alumnoIdVinculado);
+            user.setPersonaTipo("ALUMNO");
         }
 
         userRepository.save(user);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new Mensaje("Usuario registrado correctamente: " + user.getUsername()));
+                .body(new Mensaje("Usuario registrado correctamente: " + email));
     }
 
     /**
      * POST /api/v1/auth/logout
-     * Endpoint de logout (en Basic Auth no hay sesión real).
      */
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
-        // No hay sesión que cerrar en el servidor (Basic Auth),
-        // pero respondemos 200 OK para que el frontend confirme la acción.
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/validate")
     public ResponseEntity<Void> validate() {
-        // No hace nada. Spring Security ya validó las credenciales
-        // antes de llegar acá. Si llegamos aquí, son válidas.
         return ResponseEntity.ok().build();
     }
 
+    // ── Verificación de código de invitación (público) ─────────────────────────
+
+    /**
+     * GET /api/v1/auth/verify-code/{codigo}
+     * Retorna los datos del alumno asociado al código (nombre, email)
+     * para pre-llenar el formulario de registro. Endpoint público.
+     */
+    @GetMapping("/verify-code/{codigo}")
+    public ResponseEntity<?> verificarCodigo(@PathVariable("codigo") String codigo) {
+        Alumno alumno = alumnoRepository.findByCodigoInvitacion(codigo)
+                .orElseThrow(() -> new ResourceNotFoundException("Código", "codigo", codigo));
+
+        if (Boolean.TRUE.equals(alumno.getCodigoUsado())) {
+            return ResponseEntity.status(HttpStatus.GONE)
+                    .body(new Mensaje("El código ya fue utilizado"));
+        }
+
+        if (alumno.getFechaExpiracionCodigo() != null
+                && alumno.getFechaExpiracionCodigo().isBefore(LocalDateTime.now())) {
+            return ResponseEntity.status(HttpStatus.GONE)
+                    .body(new Mensaje("El código ha expirado"));
+        }
+
+        return ResponseEntity.ok(Map.of(
+                "nombre", alumno.getNombre(),
+                "apellido", alumno.getApellido(),
+                "email", alumno.getEmail() != null ? alumno.getEmail() : ""
+        ));
+    }
+
+    // ── Administración de usuarios ─────────────────────────────────────────────
+
     /**
      * GET /api/v1/auth/users
-     * Lista todos los usuarios (solo ADMIN).
+     * Lista todos los usuarios (COORDINADOR y SUPERADMIN).
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
     @GetMapping("/users")
     public ResponseEntity<List<User>> listarUsuarios() {
-        List<User> users = userRepository.findAll();
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(userRepository.findAll());
     }
 
     /**
      * GET /api/v1/auth/users/{id}
-     * Obtiene un usuario por ID.
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
     @GetMapping("/users/{id}")
     public ResponseEntity<?> obtenerUsuario(@PathVariable("id") Long id) {
         User user = userRepository.findById(id)
@@ -259,75 +251,77 @@ public class AuthController {
 
     /**
      * DELETE /api/v1/auth/users/{id}
-     * Elimina un usuario (solo ADMIN).
+     * Solo SUPERADMIN puede eliminar usuarios.
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
     @DeleteMapping("/users/{id}")
     public ResponseEntity<?> eliminarUsuario(@PathVariable("id") Long id) {
-        // Validar que existe antes de eliminar
         if (!userRepository.existsById(id)) {
             throw new ResourceNotFoundException("Usuario", "ID", id);
         }
-
         userRepository.deleteById(id);
         return ResponseEntity.ok(new Mensaje("Usuario eliminado correctamente"));
     }
 
     /**
      * PUT /api/v1/auth/users/{id}
-     * Actualiza un usuario existente.
+     * Actualiza email y rol de un usuario (COORDINADOR/SUPERADMIN).
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
     @PutMapping("/users/{id}")
-    public ResponseEntity<?> actualizarUsuario(@PathVariable("id") Long id,
+    public ResponseEntity<?> actualizarUsuario(
+            @PathVariable("id") Long id,
             @Valid @RequestBody RegisterRequest request) {
-        // 1. Validar que el usuario existe
+
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "ID", id));
 
-        // 2. Validar username duplicado solo si cambió
-        if (!user.getUsername().equals(request.getUsername())) {
-            if (userRepository.existsByUsername(request.getUsername())) {
-                throw new ConflictException("Usuario", "username", request.getUsername());
-            }
+        String email = request.getEmail().trim();
+
+        if (!user.getEmail().equals(email) && userRepository.existsByEmail(email)) {
+            throw new ConflictException("Usuario", "email", email);
         }
 
-        // 3. Validar email duplicado solo si cambió
-        if (!user.getEmail().equals(request.getEmail())) {
-            if (userRepository.existsByEmail(request.getEmail())) {
-                throw new ConflictException("Usuario", "email", request.getEmail());
-            }
-        }
-
-        // 4. Actualizar campos
-        user.setUsername(request.getUsername());
-        user.setEmail(request.getEmail());
-        // user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRol(request.getRol());
-        user.setPersonaDni(request.getPersonaDni());
-
+        user.setEmail(email);
         userRepository.save(user);
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new Mensaje("Usuario actualizado correctamente: " + user.getUsername()));
+        return ResponseEntity.ok(new Mensaje("Usuario actualizado correctamente: " + email));
     }
 
     /**
      * PATCH /api/v1/auth/users/{id}/admin
-     * Actualiza propiedades administrativas (rol, estado) de un usuario.
+     * Actualiza rol y estado. El COORDINADOR no puede asignar COORDINADOR ni SUPERADMIN.
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
     @PatchMapping("/users/{id}/admin")
-    public ResponseEntity<?> adminUpdateUser(@PathVariable("id") Long id, @RequestBody UpdateUserAdminRequest request) {
+    public ResponseEntity<?> adminUpdateUser(
+            @PathVariable("id") Long id,
+            @RequestBody UpdateUserAdminRequest request,
+            Authentication authentication) {
+
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", "ID", id));
 
+        // Verificar permisos de asignación de rol
         if (request.getRol() != null) {
+            boolean esSuperAdmin = authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_SUPERADMIN"));
+
+            if (!esSuperAdmin) {
+                // COORDINADOR solo puede asignar INSTRUCTOR o ALUMNO
+                if (request.getRol() == RolSeguridad.COORDINADOR
+                        || request.getRol() == RolSeguridad.SUPERADMIN) {
+                    throw new UnauthorizedException(
+                            "No tenés permisos para asignar el rol " + request.getRol().name());
+                }
+            }
+
             user.setRol(request.getRol());
-            if (user.getPersonaDni() != null) {
+            if (user.getPersonaTipo() != null) {
                 user.setPersonaTipo(request.getRol().name());
             }
         }
+
         if (request.getActivo() != null) {
             user.setActivo(request.getActivo());
         }
@@ -336,48 +330,35 @@ public class AuthController {
             user.setInstructorId(request.getInstructorId());
             user.setPersonaTipo("INSTRUCTOR");
         }
+
         if (request.getAlumnoId() != null) {
             user.setAlumnoId(request.getAlumnoId());
             user.setPersonaTipo("ALUMNO");
         }
 
         userRepository.save(user);
-        return ResponseEntity
-                .ok(new Mensaje("Roles o estado actualizados correctamente para el usuario " + user.getUsername()));
-    }
-
-    /* @PreAuthorize("hasRole('ADMIN')") */
-    @GetMapping("/check-email/{email}")
-    public ResponseEntity<Void> checkEmailWhitelist(@PathVariable("email") String email) {
-        List<String> allowedEmails = Arrays.asList(whitelistEmails.split(","));
-
-        boolean isAllowed = allowedEmails.stream()
-                .anyMatch(allowedEmail -> allowedEmail.trim().equalsIgnoreCase(email.trim()));
-
-        return isAllowed ? ResponseEntity.ok().build() : ResponseEntity.status(403).build();
+        return ResponseEntity.ok(new Mensaje("Usuario actualizado correctamente"));
     }
 
     /**
      * POST /api/v1/auth/users/{id}/avatar
-     * Carga un archivo avatar para un usuario.
      */
     @PostMapping("/users/{id}/avatar")
-    public ResponseEntity<?> uploadAvatar(@PathVariable("id") Long id, @RequestParam("avatar") MultipartFile file) {
-        // 1. Buscar usuario
+    public ResponseEntity<?> uploadAvatar(
+            @PathVariable("id") Long id,
+            @RequestParam("avatar") MultipartFile file) {
+
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario con ID " + id + " no encontrado"));
 
-        // 2. Definir nombre de archivo y guardar físicamente
         String fileName = "avatar_" + id + "_" + System.currentTimeMillis() + ".jpg";
         storageService.store(file, fileName);
 
-        // 3. GENERACIÓN DINÁMICA DE LA URL (localhost:8080 o dominio real)
         String avatarUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/uploads/")
                 .path(fileName)
                 .toUriString();
 
-        // 4. Persistir en Base de Datos
         user.setAvatarUrl(avatarUrl);
         userRepository.save(user);
 

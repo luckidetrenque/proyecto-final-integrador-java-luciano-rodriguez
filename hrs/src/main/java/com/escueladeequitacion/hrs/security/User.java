@@ -15,11 +15,11 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 50)
-    private String username;
-
     @Column(nullable = false, unique = true, length = 100)
     private String email;
+
+    @Column(unique = true, length = 50)
+    private String username;
 
     @Column(nullable = false)
     private String password; // BCrypt
@@ -50,15 +50,13 @@ public class User {
     @Column(name = "alumno_id")
     private Long alumnoId; // FK hacia alumnos.id (nullable)
 
-    // Constructores
     public User() {
         this.fechaCreacion = LocalDateTime.now();
         this.activo = true;
     }
 
-    public User(String username, String email, String password, RolSeguridad rol) {
+    public User(String email, String password, RolSeguridad rol) {
         this();
-        this.username = username;
         this.email = email;
         this.password = password;
         this.rol = rol;
@@ -73,20 +71,20 @@ public class User {
         this.id = id;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
     public String getEmail() {
         return email;
     }
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getPassword() {

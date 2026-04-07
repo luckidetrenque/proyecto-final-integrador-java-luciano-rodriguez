@@ -32,7 +32,7 @@ public class InstructorController {
     /**
      * GET /api/v1/instructores
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR', 'ALUMNO')")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN','INSTRUCTOR','ALUMNO')")
     @GetMapping()
     public ResponseEntity<Page<Instructor>> listarInstructores(
             @PageableDefault(size = 20, sort = "apellido") Pageable pageable,
@@ -68,7 +68,7 @@ public class InstructorController {
     /**
      * GET /api/v1/instructores/{id}
      */
-    @PreAuthorize("hasRole('ADMIN') or @claseSecurityService.esElMismoInstructor(#id, authentication)")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN') or @claseSecurityService.esElMismoInstructor(#id, authentication)")
     @GetMapping("/{id}")
     public ResponseEntity<?> obtenerInstructorPorId(@PathVariable("id") Long id) {
 
@@ -82,7 +82,7 @@ public class InstructorController {
     /**
      * GET /api/v1/instructores/dni/{dni}
      */
-    @PreAuthorize("hasAnyRole('ADMIN','INSTRUCTOR')")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN','INSTRUCTOR')")
     @GetMapping("/dni/{dni}")
     public ResponseEntity<?> obtenerInstructorPorDni(@PathVariable("dni") String dni) {
 
@@ -96,7 +96,7 @@ public class InstructorController {
     /**
      * POST /api/v1/instructores
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
     @PostMapping()
     public ResponseEntity<?> crearInstructor(@Valid @RequestBody InstructorDto instructorDto) {
 
@@ -110,14 +110,16 @@ public class InstructorController {
     /**
      * PUT /api/v1/instructores/{id}
      */
-    @PreAuthorize("hasRole('ADMIN') or @claseSecurityService.esElMismoInstructor(#id, authentication)")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN') or @claseSecurityService.esElMismoInstructor(#id, authentication)")
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizarInstructor(@PathVariable("id") Long id,
             @Valid @RequestBody InstructorDto instructorDto,
             org.springframework.security.core.Authentication authentication) {
 
         if (authentication != null
-                && authentication.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+                && authentication.getAuthorities().stream().noneMatch(a ->
+                        a.getAuthority().equals("ROLE_COORDINADOR")
+                        || a.getAuthority().equals("ROLE_SUPERADMIN"))) {
             Instructor original = instructorService.buscarInstructorPorId(id).orElseThrow();
             instructorDto.setColor(original.getColor());
         }
@@ -133,7 +135,7 @@ public class InstructorController {
     /**
      * DELETE /api/v1/instructores/{id}
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarInstructor(@PathVariable("id") Long id) {
 
@@ -147,7 +149,7 @@ public class InstructorController {
     /**
      * DELETE /api/v1/instructores/{id}/inactivar
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
     @DeleteMapping("/{id}/inactivar")
     public ResponseEntity<?> eliminarInstructorTemporalmente(@PathVariable("id") Long id) {
         instructorService.eliminarInstructorTemporalmente(id);

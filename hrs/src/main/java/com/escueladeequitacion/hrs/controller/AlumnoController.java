@@ -42,7 +42,7 @@ public class AlumnoController {
      * BUG FIX: si el usuario es INSTRUCTOR pero no tiene perfil vinculado,
      * se retorna 403 en lugar de devolver todos los alumnos sin filtro.
      */
-    @PreAuthorize("hasAnyRole('ADMIN','INSTRUCTOR')")
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'COORDINADOR','INSTRUCTOR')")
     @GetMapping()
     public ResponseEntity<Page<AlumnoListadoDto>> listarAlumnos(
             @PageableDefault(size = 20, sort = "apellido") Pageable pageable,
@@ -54,7 +54,8 @@ public class AlumnoController {
             Authentication authentication) {
 
         boolean isAdmin = authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                .anyMatch(a -> a.getAuthority().equals("ROLE_COORDINADOR")
+                        || a.getAuthority().equals("ROLE_SUPERADMIN"));
 
         if (!isAdmin) {
             Long instructorId = claseSecurityService.getInstructorId(authentication);
@@ -62,7 +63,7 @@ public class AlumnoController {
             // BUG FIX: antes si instructorId era null retornaba todos los alumnos
             if (instructorId == null) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                        "Tu cuenta de instructor no está vinculada a un perfil. Contactá al administrador.");
+                        "Tu cuenta de instructor no está vinculada a un perfil. Contactá al coordinador.");
             }
 
             Page<AlumnoListadoDto> alumnos = alumnoService
@@ -110,7 +111,7 @@ public class AlumnoController {
      * POST /api/v1/alumnos
      * Solo ADMIN puede crear alumnos.
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
     @PostMapping()
     public ResponseEntity<?> crearAlumno(@Valid @RequestBody AlumnoDto alumnoDto) {
         Alumno alumno = alumnoService.crearAlumnoDesdeDto(alumnoDto);
@@ -122,7 +123,7 @@ public class AlumnoController {
      * PUT /api/v1/alumnos/{id}
      * Solo ADMIN puede actualizar alumnos.
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizarAlumno(
             @PathVariable("id") Long id,
@@ -136,7 +137,7 @@ public class AlumnoController {
      * DELETE /api/v1/alumnos/{id}
      * Solo ADMIN — eliminación física.
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarAlumno(@PathVariable("id") Long id) {
         alumnoService.eliminarAlumno(id);
@@ -148,7 +149,7 @@ public class AlumnoController {
      * DELETE /api/v1/alumnos/{id}/inactivar
      * Solo ADMIN — eliminación lógica.
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
     @DeleteMapping("/{id}/inactivar")
     public ResponseEntity<?> eliminarAlumnoTemporalmente(@PathVariable("id") Long id) {
         alumnoService.eliminarAlumnoTemporalmente(id);
@@ -176,7 +177,7 @@ public class AlumnoController {
      * PUT /api/v1/alumnos/{id}/convertir-a-plan
      * Solo ADMIN.
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
     @PutMapping("/{id}/convertir-a-plan")
     public ResponseEntity<?> convertirAlumnoAPlan(
             @PathVariable("id") Long id,
@@ -194,7 +195,7 @@ public class AlumnoController {
      * GET /api/v1/alumnos/prueba
      * ADMIN e INSTRUCTOR.
      */
-    @PreAuthorize("hasAnyRole('ADMIN','INSTRUCTOR')")
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'COORDINADOR','INSTRUCTOR')")
     @GetMapping("/prueba")
     public ResponseEntity<List<Alumno>> listarAlumnosDePrueba() {
         List<Alumno> alumnosPrueba = alumnoService.buscarAlumnoPorEstado(false);

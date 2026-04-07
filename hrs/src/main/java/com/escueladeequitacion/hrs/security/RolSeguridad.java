@@ -5,7 +5,8 @@ package com.escueladeequitacion.hrs.security;
  * negocio).
  */
 public enum RolSeguridad {
-    ADMIN, // Gestiona todo el sistema
-    INSTRUCTOR, // Gestiona sus clases
-    ALUMNO // Ve sus propias clases
+    SUPERADMIN,    // Gestiona todo el sistema: coordinadores, cupos y configuración global
+    COORDINADOR,   // Antes ADMIN: gestiona instructores y alumnos (no puede crear otros coordinadores)
+    INSTRUCTOR,    // Gestiona sus propias clases
+    ALUMNO         // Ve sus propias clases
 }

@@ -65,4 +65,7 @@ public interface AlumnoRepository extends JpaRepository<Alumno, Long>,
     Page<Alumno> findByPropietarioAndCantidadClases(Boolean propietario, Integer cantidadClases, Pageable pageable);
     Page<Alumno> findByActivoAndPropietarioAndCantidadClases(Boolean activo, Boolean propietario,
             Integer cantidadClases, Pageable pageable);
+
+    // Invitación por código UUID
+    Optional<Alumno> findByCodigoInvitacion(String codigoInvitacion);
 }

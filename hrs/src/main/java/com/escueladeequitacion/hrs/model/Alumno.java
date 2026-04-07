@@ -1,6 +1,7 @@
 package com.escueladeequitacion.hrs.model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,6 +66,16 @@ public class Alumno extends Persona {
     @OneToMany(mappedBy = "alumno", cascade = CascadeType.ALL, orphanRemoval = false)
     @JsonIgnore
     private List<Clase> clases = new ArrayList<>();
+
+    // ── Campos de invitación para registro de usuario ─────────────────────────
+    @Column(name = "codigo_invitacion", length = 36, unique = true)
+    private String codigoInvitacion; // UUID generado al invitar al alumno
+
+    @Column(name = "codigo_usado")
+    private Boolean codigoUsado = false;
+
+    @Column(name = "fecha_expiracion_codigo")
+    private LocalDateTime fechaExpiracionCodigo; // null = no expira / fecha = vence ese día
 
     // Constructor vacío
     public Alumno() {
@@ -162,6 +173,16 @@ public class Alumno extends Persona {
         clases.remove(clase);
         clase.setAlumno(null);
     }
+
+    // Campos de invitación - Getters & Setters
+    public String getCodigoInvitacion() { return codigoInvitacion; }
+    public void setCodigoInvitacion(String codigoInvitacion) { this.codigoInvitacion = codigoInvitacion; }
+
+    public Boolean getCodigoUsado() { return codigoUsado; }
+    public void setCodigoUsado(Boolean codigoUsado) { this.codigoUsado = codigoUsado; }
+
+    public LocalDateTime getFechaExpiracionCodigo() { return fechaExpiracionCodigo; }
+    public void setFechaExpiracionCodigo(LocalDateTime fechaExpiracionCodigo) { this.fechaExpiracionCodigo = fechaExpiracionCodigo; }
 
     // Métodos sobrescritos de Persona
     @Override

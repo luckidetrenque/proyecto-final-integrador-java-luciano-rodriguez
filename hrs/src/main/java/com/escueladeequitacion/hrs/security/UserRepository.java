@@ -5,18 +5,18 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-// Repositorio para la entidad User
+// Repositorio para la entidad User — el login ahora usa email como identificador.
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    public Optional<User> findByUsername(String username);
-
     public Optional<User> findByEmail(String email);
 
-    public Boolean existsByUsername(String username);
+    public Optional<User> findByUsername(String username);
 
     public Boolean existsByEmail(String email);
 
-    // Buscar usuario por DNI de persona
+    public Boolean existsByUsername(String username);
+
+    // Buscar usuario por DNI de persona (compatibilidad)
     Optional<User> findByPersonaDni(Integer personaDni);
 }

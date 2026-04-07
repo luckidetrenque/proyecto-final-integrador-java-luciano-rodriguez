@@ -60,7 +60,7 @@ public class ClaseController {
      * - INSTRUCTOR: ve solo sus clases (filtrado por instructorId automáticamente)
      * - ALUMNO: no tiene acceso (usar /alumno/{id}/detalles)
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR', 'ALUMNO')")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN','INSTRUCTOR','ALUMNO')")
     @GetMapping()
     public ResponseEntity<Page<ClaseResponseDto>> listarClases(
             @PageableDefault(size = 20, sort = "dia", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable,
@@ -72,7 +72,8 @@ public class ClaseController {
         // Si es INSTRUCTOR, filtrar automáticamente por su ID
         Long instructorId = null;
         if (authentication != null && authentication.getAuthorities().stream()
-                .noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+                .noneMatch(a -> a.getAuthority().equals("ROLE_COORDINADOR")
+                        || a.getAuthority().equals("ROLE_SUPERADMIN"))) {
             instructorId = claseSecurityService.getInstructorId(authentication);
         }
 
@@ -86,7 +87,7 @@ public class ClaseController {
      * ADMIN e INSTRUCTOR pueden ver cualquier clase.
      * ALUMNO no tiene acceso directo.
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN','INSTRUCTOR')")
     @GetMapping("/{id}")
     public ResponseEntity<?> obtenerClasePorId(@PathVariable("id") Long id) {
         Clase clase = claseService.buscarClasePorId(id)
@@ -98,7 +99,7 @@ public class ClaseController {
     /**
      * GET /api/v1/clases/dia/{dia}
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN','INSTRUCTOR')")
     @GetMapping("/dia/{dia}")
     public ResponseEntity<?> obtenerClasePorDia(@PathVariable("dia") LocalDate dia) {
         List<Clase> clases = claseService.buscarClasePorDia(dia);
@@ -115,7 +116,7 @@ public class ClaseController {
      * DELETE /api/v1/clases/{id}
      * Solo ADMIN puede eliminar clases físicamente.
      */
-    @PreAuthorize("hasRole('ADMIN') or @claseSecurityService.puedeModificar(#id, authentication)")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN') or @claseSecurityService.puedeModificar(#id, authentication)")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarClase(@PathVariable("id") Long id) {
         claseService.eliminarClase(id);
@@ -127,7 +128,7 @@ public class ClaseController {
      * POST /api/v1/clases
      * ADMIN e INSTRUCTOR pueden crear clases.
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN','INSTRUCTOR')")
     @PostMapping()
     public ResponseEntity<?> crearClase(@Valid @RequestBody ClaseDto claseDto) {
         Clase clase = claseService.crearClase(claseDto);
@@ -140,7 +141,7 @@ public class ClaseController {
      * ADMIN puede editar cualquier clase.
      * INSTRUCTOR puede editar solo sus propias clases.
      */
-    @PreAuthorize("hasRole('ADMIN') or @claseSecurityService.puedeModificar(#id, authentication)")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN') or @claseSecurityService.puedeModificar(#id, authentication)")
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizarClase(
             @PathVariable("id") Long id,
@@ -155,7 +156,7 @@ public class ClaseController {
      * ADMIN puede cambiar el estado de cualquier clase.
      * INSTRUCTOR puede cambiar el estado solo de sus propias clases.
      */
-    @PreAuthorize("hasRole('ADMIN') or @claseSecurityService.puedeModificar(#id, authentication)")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN') or @claseSecurityService.puedeModificar(#id, authentication)")
     @PatchMapping("/{id}/estado")
     public ResponseEntity<ClaseResponseDto> cambiarEstadoClase(
             @PathVariable("id") Long id,
@@ -187,7 +188,7 @@ public class ClaseController {
      * GET /api/v1/clases/detalles
      * Solo ADMIN.
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
     @GetMapping("/detalles")
     public ResponseEntity<List<ClaseResponseDto>> listarClasesConDetalles() {
         List<ClaseResponseDto> clases = claseService.listarClasesConDetalles();
@@ -198,7 +199,7 @@ public class ClaseController {
      * GET /api/v1/clases/{id}/detalles
      * ADMIN e INSTRUCTOR (solo si es su clase).
      */
-    @PreAuthorize("hasRole('ADMIN') or @claseSecurityService.puedeModificar(#id, authentication)")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN') or @claseSecurityService.puedeModificar(#id, authentication)")
     @GetMapping("/{id}/detalles")
     public ResponseEntity<ClaseResponseDto> obtenerClaseConDetalles(@PathVariable("id") Long id) {
         ClaseResponseDto clase = claseService.buscarClasePorIdConDetalles(id)
@@ -211,7 +212,7 @@ public class ClaseController {
      * GET /api/v1/clases/dia/{dia}/detalles
      * ADMIN e INSTRUCTOR.
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN','INSTRUCTOR')")
     @GetMapping("/dia/{dia}/detalles")
     public ResponseEntity<List<ClaseResponseDto>> obtenerClasesPorDiaConDetalles(
             @PathVariable("dia") LocalDate dia) {
@@ -224,7 +225,7 @@ public class ClaseController {
      * ADMIN puede ver cualquier instructor.
      * INSTRUCTOR solo puede ver sus propias clases.
      */
-    @PreAuthorize("hasRole('ADMIN') or @claseSecurityService.esElMismoInstructor(#instructorId, authentication)")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN') or @claseSecurityService.esElMismoInstructor(#instructorId, authentication)")
     @GetMapping("/instructor/{instructorId}/detalles")
     public ResponseEntity<List<ClaseResponseDto>> obtenerClasesPorInstructorConDetalles(
             @PathVariable("instructorId") Long instructorId) {
@@ -248,7 +249,7 @@ public class ClaseController {
      * GET /api/v1/clases/caballo/{caballoId}/detalles
      * ADMIN e INSTRUCTOR.
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN','INSTRUCTOR')")
     @GetMapping("/caballo/{caballoId}/detalles")
     public ResponseEntity<?> obtenerClasesPorCaballoConDetalles(
             @PathVariable("caballoId") Long caballoId) {
@@ -260,7 +261,7 @@ public class ClaseController {
      * GET /api/v1/clases/estado/{estado}/detalles
      * Solo ADMIN.
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
     @GetMapping("/estado/{estado}/detalles")
     public ResponseEntity<?> obtenerClasesPorEstadoConDetalles(@PathVariable("estado") Estado estado) {
         if (!claseService.existeClasePorEstado(estado)) {
@@ -294,7 +295,7 @@ public class ClaseController {
      * GET /api/v1/clases/instructor/{instructorId}/completadas/count
      * ADMIN o el propio INSTRUCTOR.
      */
-    @PreAuthorize("hasRole('ADMIN') or @claseSecurityService.esElMismoInstructor(#instructorId, authentication)")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN') or @claseSecurityService.esElMismoInstructor(#instructorId, authentication)")
     @GetMapping("/instructor/{instructorId}/completadas/count")
     public ResponseEntity<Map<String, Object>> contarClasesCompletadasPorInstructor(
             @PathVariable("instructorId") Long instructorId) {
@@ -313,7 +314,7 @@ public class ClaseController {
      * POST /api/v1/clases/prueba
      * ADMIN e INSTRUCTOR pueden crear clases de prueba.
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN','INSTRUCTOR')")
     @PostMapping("/prueba")
     public ResponseEntity<Clase> crearClaseDePrueba(@RequestBody @Valid ClaseDto claseDto) {
         claseDto.setEsPrueba(true);
@@ -325,7 +326,7 @@ public class ClaseController {
      * GET /api/v1/clases/prueba
      * ADMIN e INSTRUCTOR.
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')")
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN','INSTRUCTOR')")
     @GetMapping("/prueba")
     public ResponseEntity<List<ClaseResponseDto>> listarClasesDePrueba() {
         List<ClaseResponseDto> clases = claseService.listarTodasLasClasesDePrueba();
@@ -365,6 +366,7 @@ public class ClaseController {
     public ResponseEntity<?> reservarClase(@Valid @RequestBody com.escueladeequitacion.hrs.dto.ClaseDto claseDto) {
         Clase clase = claseService.reservarClase(claseDto);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new Mensaje("Reserva realizada con éxito (ID: " + clase.getId() + "). Pendiente de confirmación."));
+                .body(new Mensaje(
+                        "Reserva realizada con éxito (ID: " + clase.getId() + "). Pendiente de confirmación."));
     }
 }

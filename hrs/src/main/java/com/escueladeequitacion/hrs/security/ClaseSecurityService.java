@@ -83,16 +83,16 @@ public class ClaseSecurityService {
         if (auth == null || !auth.isAuthenticated())
             return null;
 
-        String username = auth.getName();
-        User user = userRepository.findByUsername(username).orElse(null);
+        String email = auth.getName(); // auth.getName() ahora retorna el email
+        User user = userRepository.findByEmail(email).orElse(null);
 
         // NUEVO: campo directo — estrategia 0
         if (user != null && user.getInstructorId() != null) {
             return user.getInstructorId();
         }
 
-        // Fallback 1: username == email del instructor
-        Instructor byUsername = instructorRepository.findByEmailIgnoreCase(username).orElse(null);
+        // Fallback 1: email del auth == email del instructor
+        Instructor byUsername = instructorRepository.findByEmailIgnoreCase(email).orElse(null);
         if (byUsername != null)
             return byUsername.getId();
 
@@ -145,7 +145,7 @@ public class ClaseSecurityService {
             return true;
 
         // ALUMNO: verificar que el alumnoId corresponde a su perfil
-        User user = userRepository.findByUsername(auth.getName()).orElse(null);
+        User user = userRepository.findByEmail(auth.getName()).orElse(null);
         if (user == null || user.getPersonaDni() == null)
             return false;
 
@@ -165,7 +165,7 @@ public class ClaseSecurityService {
         if (esAdmin(auth) || esInstructor(auth))
             return true;
 
-        User user = userRepository.findByUsername(auth.getName()).orElse(null);
+        User user = userRepository.findByEmail(auth.getName()).orElse(null);
         if (user == null || user.getPersonaDni() == null)
             return false;
 
@@ -181,7 +181,7 @@ public class ClaseSecurityService {
         if (auth == null || !auth.isAuthenticated())
             return null;
 
-        User user = userRepository.findByUsername(auth.getName()).orElse(null);
+        User user = userRepository.findByEmail(auth.getName()).orElse(null);
         if (user == null)
             return null;
 
@@ -204,7 +204,8 @@ public class ClaseSecurityService {
 
     public boolean esAdmin(Authentication auth) {
         return auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                .anyMatch(a -> a.getAuthority().equals("ROLE_COORDINADOR")
+                        || a.getAuthority().equals("ROLE_SUPERADMIN"));
     }
 
     public boolean esInstructor(Authentication auth) {

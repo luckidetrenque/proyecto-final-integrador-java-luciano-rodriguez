@@ -12,9 +12,8 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -39,29 +38,28 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/logout").permitAll()
                         .requestMatchers("/api/v1/auth/check-email/**").permitAll()
                         .requestMatchers("/uploads/**", "/error").permitAll()
-                        .requestMatchers("/").hasRole("ADMIN")
+                        .requestMatchers("/").hasRole("SUPERADMIN")
                         .anyRequest().authenticated())
-                .httpBasic(basic -> {
-                })
+                .httpBasic(basic -> basic.authenticationEntryPoint(authenticationEntryPoint()))
                 .exceptionHandling(exceptions -> exceptions
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                            response.setContentType("application/json");
-                            response.setCharacterEncoding("UTF-8");
-                            response.getWriter().write(
-                                    "{\"timestamp\":\"" + LocalDateTime.now() + "\"," +
-                                            "\"status\":401," +
-                                            "\"error\":\"Unauthorized\"," +
-                                            "\"mensaje\":\"" + authException.getMessage() + "\"," +
-                                            "\"path\":\"" + request.getRequestURI() + "\"}");
-                        }));
+                        .authenticationEntryPoint(authenticationEntryPoint()));
 
         return http.build();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return (request, response, authException) -> {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(
+                    "{\"timestamp\":\"" + LocalDateTime.now() + "\"," +
+                            "\"status\":401," +
+                            "\"error\":\"Unauthorized\"," +
+                            "\"message\":\"" + authException.getMessage() + "\"," +
+                            "\"path\":\"" + request.getRequestURI() + "\"}");
+        };
     }
 
     @Bean

@@ -5,13 +5,15 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import com.escueladeequitacion.hrs.exception.UnauthorizedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 
 /**
- * Servicio para cargar usuarios desde la base de datos.
+ * Spring Security llama loadUserByUsername(String) pasando lo que venga en el
+ * campo "usuario" del header Basic Auth. A partir de ahora ese campo es el
+ * EMAIL.
  */
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -21,32 +23,20 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        // Busca primero por username, luego por email como fallback
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UnauthorizedException("Credenciales inválidas"));
+                .or(() -> userRepository.findByEmail(username))
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
         if (!user.getActivo()) {
-            throw new UnauthorizedException("Credenciales inválidas");
+            throw new BadCredentialsException("La cuenta de usuario está desactivada");
         }
 
         return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getUsername())
+                .username(user.getEmail())
                 .password(user.getPassword())
                 .authorities(Collections.singletonList(
                         new SimpleGrantedAuthority("ROLE_" + user.getRol().name())))
                 .build();
     }
 }
-
-// @Override
-// public UserDetails loadUserByUsername(String email) throws
-// UsernameNotFoundException {
-
-// Usuario user = usuarioRepository.findByEmail(email)
-// .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
-
-// return new org.springframework.security.core.userdetails.User(
-// user.getEmail(),
-// user.getPassword(),
-// List.of(new SimpleGrantedAuthority(user.getRol().name()))
-// );
-// }
