@@ -19,4 +19,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // Buscar usuario por DNI de persona (compatibilidad)
     Optional<User> findByPersonaDni(Integer personaDni);
+
+    // Buscar por rol
+    java.util.List<User> findByRol(RolSeguridad rol);
 }

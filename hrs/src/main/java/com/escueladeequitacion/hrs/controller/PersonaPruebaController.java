@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +21,7 @@ import com.escueladeequitacion.hrs.repository.PersonaPruebaRepository;
 
 import jakarta.validation.Valid;
 
+@PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
 @RestController
 @RequestMapping("/api/v1/personas-prueba")
 public class PersonaPruebaController {

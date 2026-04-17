@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -16,8 +17,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+@PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
 @RestController
-@RequestMapping("/api/v1/finanzas/pagos")
+@RequestMapping("/api/v1/pagos")
 public class PagoController {
 
     @Autowired
@@ -27,6 +29,7 @@ public class PagoController {
      * POST /api/v1/finanzas/pagos
      * Registra un nuevo pago.
      */
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
     @PostMapping
     public ResponseEntity<?> registrarPago(
             @Valid @RequestBody RegistrarPagoRequestDto request,
@@ -43,6 +46,7 @@ public class PagoController {
      * GET /api/v1/finanzas/pagos/factura/{facturaId}
      * Lista pagos de una factura.
      */
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
     @GetMapping("/factura/{facturaId}")
     public ResponseEntity<List<Pago>> listarPagosPorFactura(@PathVariable Long facturaId) {
         List<Pago> pagos = cobranzaService.listarPagosPorFactura(facturaId);
@@ -53,6 +57,7 @@ public class PagoController {
      * GET /api/v1/finanzas/pagos/alumno/{alumnoId}
      * Lista pagos de un alumno.
      */
+    @PreAuthorize("@claseSecurityService.esElMismoAlumno(#alumnoId, authentication)")
     @GetMapping("/alumno/{alumnoId}")
     public ResponseEntity<List<Pago>> listarPagosPorAlumno(@PathVariable Long alumnoId) {
         List<Pago> pagos = cobranzaService.listarPagosPorAlumno(alumnoId);
@@ -63,6 +68,7 @@ public class PagoController {
      * GET /api/v1/finanzas/pagos/periodo
      * Calcula total cobrado en un período.
      */
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
     @GetMapping("/periodo")
     public ResponseEntity<Map<String, Object>> calcularTotalCobrado(
             @RequestParam("desde") LocalDate desde,
@@ -78,4 +84,17 @@ public class PagoController {
                 "cantidadPagos", pagos.size(),
                 "pagos", pagos));
     }
-}
+
+    /**
+     * GET /api/v1/pagos
+     * Lista todos los pagos del sistema (global).
+     */
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
+    @GetMapping
+    public ResponseEntity<List<Pago>> listarPagos() {
+        // Por defecto, traemos los pagos del último mes o todos si no hay muchos.
+        // Para simplificar, listamos los de los últimos 30 días.
+        List<Pago> pagos = cobranzaService.listarPagosEnPeriodo(LocalDate.now().minusDays(30), LocalDate.now());
+        return ResponseEntity.ok(pagos);
+    }
+}

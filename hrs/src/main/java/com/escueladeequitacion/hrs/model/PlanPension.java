@@ -1,5 +1,6 @@
 package com.escueladeequitacion.hrs.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -10,6 +11,7 @@ import java.time.LocalDate;
         @Index(name = "idx_plan_pension_vigencia", columnList = "fecha_vigencia_desde, fecha_vigencia_hasta"),
         @Index(name = "idx_plan_pension_activo", columnList = "activo")
 })
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "periodoVigencia"})
 public class PlanPension {
 
     @Id

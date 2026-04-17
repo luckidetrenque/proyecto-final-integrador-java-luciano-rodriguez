@@ -42,7 +42,7 @@ public class AlumnoController {
      * BUG FIX: si el usuario es INSTRUCTOR pero no tiene perfil vinculado,
      * se retorna 403 en lugar de devolver todos los alumnos sin filtro.
      */
-    @PreAuthorize("hasAnyRole('SUPERADMIN', 'COORDINADOR','INSTRUCTOR')")
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'COORDINADOR','INSTRUCTOR','ALUMNO')")
     @GetMapping()
     public ResponseEntity<Page<AlumnoListadoDto>> listarAlumnos(
             @PageableDefault(size = 20, sort = "apellido") Pageable pageable,
@@ -58,6 +58,22 @@ public class AlumnoController {
                         || a.getAuthority().equals("ROLE_SUPERADMIN"));
 
         if (!isAdmin) {
+            // Caso ALUMNO: solo puede verse a sí mismo
+            if (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ALUMNO"))) {
+                Long alumnoId = claseSecurityService.getAlumnoId(authentication);
+                if (alumnoId == null) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Perfil de alumno no encontrado.");
+                }
+                Optional<AlumnoListadoDto> dtoOpt = alumnoService.buscarAlumnoPorIdResumido(alumnoId);
+                if (dtoOpt.isPresent()) {
+                    List<AlumnoListadoDto> list = List.of(dtoOpt.get());
+                    return ResponseEntity.ok(new org.springframework.data.domain.PageImpl<>(list, pageable, 1));
+                } else {
+                    return ResponseEntity.ok(Page.empty(pageable));
+                }
+            }
+
+            // Caso INSTRUCTOR: ve solo sus alumnos
             Long instructorId = claseSecurityService.getInstructorId(authentication);
 
             // BUG FIX: antes si instructorId era null retornaba todos los alumnos

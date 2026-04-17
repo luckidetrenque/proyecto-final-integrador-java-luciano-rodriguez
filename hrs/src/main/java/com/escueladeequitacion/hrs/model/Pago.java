@@ -1,6 +1,7 @@
 package com.escueladeequitacion.hrs.model;
 
 import com.escueladeequitacion.hrs.enums.FormaPago;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
         @Index(name = "idx_pago_alumno", columnList = "alumno_id"),
         @Index(name = "idx_pago_fecha", columnList = "fecha_pago")
 })
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Pago {
 
     @Id

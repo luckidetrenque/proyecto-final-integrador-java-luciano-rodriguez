@@ -4,6 +4,7 @@ import com.escueladeequitacion.hrs.exception.ConflictException;
 import com.escueladeequitacion.hrs.exception.ResourceNotFoundException;
 import com.escueladeequitacion.hrs.model.Alumno;
 import com.escueladeequitacion.hrs.repository.AlumnoRepository;
+import com.escueladeequitacion.hrs.service.EmailService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,12 @@ public class InvitacionController {
 
     @Autowired
     private AlumnoRepository alumnoRepository;
+
+    @Autowired
+    private EmailService emailService;
+
+    // TODO: En producción, obtener esto de una variable de entorno o la configuración de la app
+    private final String frontendUrl = "http://localhost:5173"; 
 
     /**
      * POST /api/v1/alumnos/{id}/invitar
@@ -59,7 +66,24 @@ public class InvitacionController {
                 "codigo", codigo,
                 "email", alumno.getEmail(),
                 "nombre", alumno.getNombre() + " " + alumno.getApellido(),
-                "expiracion", alumno.getFechaExpiracionCodigo().toString()
+                "expiracion", alumno.getFechaExpiracionCodigo().toString(),
+                "urlInvitacion", String.format("%s/register?code=%s", frontendUrl, codigo)
         ));
+    }
+
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
+    @PostMapping("/{id}/invitar/enviar-email")
+    public ResponseEntity<?> enviarInvitacionEmail(@PathVariable("id") Long id) {
+        Alumno alumno = alumnoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Alumno", "ID", id));
+
+        if (alumno.getCodigoInvitacion() == null) {
+            throw new ConflictException("Primero tenés que generar un código de invitación.");
+        }
+
+        String link = String.format("%s/register?code=%s", frontendUrl, alumno.getCodigoInvitacion());
+        emailService.enviarInvitacion(alumno.getEmail(), alumno.getNombre(), link);
+
+        return ResponseEntity.ok(Map.of("mensaje", "Correo enviado correctamente a " + alumno.getEmail()));
     }
 }

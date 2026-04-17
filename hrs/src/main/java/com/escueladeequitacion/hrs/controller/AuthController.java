@@ -340,16 +340,26 @@ public class AuthController {
         return ResponseEntity.ok(new Mensaje("Usuario actualizado correctamente"));
     }
 
-    /**
-     * POST /api/v1/auth/users/{id}/avatar
-     */
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/users/{id}/avatar")
     public ResponseEntity<?> uploadAvatar(
             @PathVariable("id") Long id,
-            @RequestParam("avatar") MultipartFile file) {
+            @RequestParam("avatar") MultipartFile file,
+            java.security.Principal principal,
+            Authentication auth) {
 
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario con ID " + id + " no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "ID", id));
+
+        // Verificación de seguridad: El usuario debe ser el mismo que el 'id'
+        // O debe ser COORDINADOR/SUPERADMIN.
+        boolean esAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_COORDINADOR") ||
+                        a.getAuthority().equals("ROLE_SUPERADMIN"));
+
+        if (!esAdmin && !user.getEmail().equalsIgnoreCase(principal.getName())) {
+            throw new UnauthorizedException("No tenés permisos para modificar el avatar de otro usuario");
+        }
 
         String fileName = "avatar_" + id + "_" + System.currentTimeMillis() + ".jpg";
         storageService.store(file, fileName);

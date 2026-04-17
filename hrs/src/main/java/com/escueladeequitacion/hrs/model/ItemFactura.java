@@ -1,6 +1,7 @@
 package com.escueladeequitacion.hrs.model;
 
 import com.escueladeequitacion.hrs.enums.TipoItem;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 
@@ -8,6 +9,7 @@ import java.math.BigDecimal;
 @Table(name = "items_factura", indexes = {
         @Index(name = "idx_item_factura", columnList = "factura_id")
 })
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ItemFactura {
 
     @Id

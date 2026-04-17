@@ -167,6 +167,15 @@ public class FacturacionServiceImpl implements FacturacionService {
     }
 
     /**
+     * Lista todas las facturas pendientes o parciales del sistema.
+     * Solo para administradores.
+     */
+    public List<Factura> listarTodasLasPendientes() {
+        return facturaRepository.findByEstadoIn(
+                List.of(EstadoFactura.PENDIENTE, EstadoFactura.PARCIALMENTE_PAGADA, EstadoFactura.VENCIDA));
+    }
+
+    /**
      * Cancela una factura.
      */
     @Transactional

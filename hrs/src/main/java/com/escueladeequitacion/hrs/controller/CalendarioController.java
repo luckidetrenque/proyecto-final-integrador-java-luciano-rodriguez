@@ -2,6 +2,7 @@ package com.escueladeequitacion.hrs.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,6 +24,7 @@ public class CalendarioController {
         @Autowired
         private CalendarioService calendarioService;
 
+        @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
         @PostMapping("/copiar-clases")
         public ResponseEntity<Mensaje> copiar(@Valid @RequestBody CalendarioDto request) {
                 calendarioService.copiarClases(request.getDiaInicioOrigen(), request.getDiaInicioDestino(),
@@ -32,6 +34,7 @@ public class CalendarioController {
                                                 + request.getDiaInicioDestino()));
         }
 
+        @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
         @DeleteMapping("/eliminar-clases")
         public ResponseEntity<Mensaje> eliminarPeriodo(@Valid @RequestBody CalendarioDto request) {
                 calendarioService.eliminarClases(

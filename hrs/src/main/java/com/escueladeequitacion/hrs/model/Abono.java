@@ -1,6 +1,7 @@
 package com.escueladeequitacion.hrs.model;
 
 import com.escueladeequitacion.hrs.enums.EstadoAbono;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -11,6 +12,7 @@ import java.time.LocalDate;
         @Index(name = "idx_abono_estado", columnList = "estado"),
         @Index(name = "idx_abono_vigencia", columnList = "fecha_vencimiento")
 })
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Abono {
 
     @Id

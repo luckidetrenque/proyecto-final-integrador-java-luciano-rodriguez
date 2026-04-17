@@ -3,6 +3,7 @@ package com.escueladeequitacion.hrs.model;
 import com.escueladeequitacion.hrs.enums.EstadoFactura;
 import com.escueladeequitacion.hrs.enums.FormaPago;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -17,6 +18,7 @@ import java.util.List;
         @Index(name = "idx_factura_estado", columnList = "estado"),
         @Index(name = "idx_factura_vencimiento", columnList = "fecha_vencimiento")
 })
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Factura {
 
     @Id

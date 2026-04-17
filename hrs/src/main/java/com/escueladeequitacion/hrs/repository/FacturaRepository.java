@@ -31,6 +31,11 @@ public interface FacturaRepository extends JpaRepository<Factura, Long> {
     List<Factura> findByAbonoId(Long abonoId);
 
     /**
+     * Lista facturas por varios estados.
+     */
+    List<Factura> findByEstadoIn(List<EstadoFactura> estados);
+
+    /**
      * Lista facturas por estado.
      */
     List<Factura> findByEstado(EstadoFactura estado);

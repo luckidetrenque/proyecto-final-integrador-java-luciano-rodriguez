@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,6 +31,7 @@ public class CaballoController {
     /**
      * GET /api/v1/caballos
      */
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN','INSTRUCTOR','ALUMNO')")
     @GetMapping()
     public ResponseEntity<Page<Caballo>> listarCaballos(
             @PageableDefault(size = 20, sort = "nombre") Pageable pageable,
@@ -45,6 +47,7 @@ public class CaballoController {
     /**
      * GET /api/v1/caballos/{id}
      */
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN','INSTRUCTOR','ALUMNO')")
     @GetMapping("/{id}")
     public ResponseEntity<?> obtenerCaballoPorId(@PathVariable("id") Long id) {
 
@@ -58,6 +61,7 @@ public class CaballoController {
     /**
      * POST /api/v1/caballos
      */
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
     @PostMapping()
     public ResponseEntity<?> crearCaballo(@Valid @RequestBody CaballoDto caballoDto) {
 
@@ -71,6 +75,7 @@ public class CaballoController {
     /**
      * PUT /api/v1/caballos/{id}
      */
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizarCaballo(@PathVariable("id") Long id,
             @Valid @RequestBody CaballoDto caballoDto) {
@@ -85,6 +90,7 @@ public class CaballoController {
     /**
      * DELETE /api/v1/caballos/{id}
      */
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarCaballo(@PathVariable("id") Long id) {
 
@@ -98,6 +104,7 @@ public class CaballoController {
     /**
      * DELETE /api/v1/caballos/{id}/inactivar
      */
+    @PreAuthorize("hasAnyRole('COORDINADOR','SUPERADMIN')")
     @DeleteMapping("/{id}/inactivar")
     public ResponseEntity<?> eliminarCaballoTemporalmente(@PathVariable("id") Long id) {
         // El Service maneja todas las validaciones

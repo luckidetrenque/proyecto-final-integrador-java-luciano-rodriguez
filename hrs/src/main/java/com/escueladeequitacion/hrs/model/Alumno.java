@@ -10,6 +10,7 @@ import com.escueladeequitacion.hrs.enums.Rol;
 import com.escueladeequitacion.hrs.enums.TipoPension;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import jakarta.persistence.CascadeType;
@@ -39,6 +40,7 @@ import jakarta.persistence.Index;
         @Index(name = "idx_alumno_fecha_inscripcion", columnList = "fecha_inscripcion")
 })
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Alumno extends Persona {
     // Atributos específicos de Alumno
     @Id

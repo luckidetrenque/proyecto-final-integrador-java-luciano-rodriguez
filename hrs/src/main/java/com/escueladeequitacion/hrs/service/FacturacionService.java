@@ -45,6 +45,12 @@ public interface FacturacionService {
     public void actualizarFacturasVencidas();
 
     /**
+     * Lista todas las facturas pendientes o parciales del sistema.
+     * Solo para administradores.
+     */
+    public List<Factura> listarTodasLasPendientes();
+
+    /**
      * Cancela una factura.
      */
     @Transactional
